@@ -1,0 +1,41 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "name": "miniapp",
+      "path": "miniapp"
+    },
+    {
+      "name": "backend",
+      "path": "backend"
+    },
+    {
+      "name": "trellis",
+      "path": ".trellis"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/*.pyc": true,
+      "**/.pytest_cache": true,
+      "**/.mypy_cache": true,
+      "**/.ruff_cache": true,
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/unpackage": true,
+      "**/.DS_Store": true
+    },
+    "search.exclude": {
+      "**/__pycache__": true,
+      "**/.venv": true,
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/unpackage": true,
+      "**/.trellis/workspace": true
+    }
+  }
+}

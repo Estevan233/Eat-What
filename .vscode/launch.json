@@ -1,0 +1,60 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FastAPI: uvicorn (debug)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"],
+      "cwd": "${workspaceFolder:/backend}",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder:/backend}",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "envFile": "${workspaceFolder:/backend}/.env",
+      "justMyCode": true,
+      "console": "integratedTerminal",
+      "preLaunchTask": "backend: ensure venv"
+    },
+    {
+      "name": "FastAPI: current test file",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["${relativeFile}", "-v", "-s"],
+      "cwd": "${workspaceFolder:/backend}",
+      "env": { "PYTHONPATH": "${workspaceFolder:/backend}" },
+      "envFile": "${workspaceFolder:/backend}/.env",
+      "console": "integratedTerminal",
+      "preLaunchTask": "backend: ensure venv"
+    },
+    {
+      "name": "FastAPI: all tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["tests/", "-v"],
+      "cwd": "${workspaceFolder:/backend}",
+      "env": { "PYTHONPATH": "${workspaceFolder:/backend}" },
+      "envFile": "${workspaceFolder:/backend}/.env",
+      "console": "integratedTerminal",
+      "preLaunchTask": "backend: ensure venv"
+    },
+    {
+      "name": "Vitest: current file",
+      "type": "extension",
+      "request": "launch",
+      "runtimeArgs": ["--inspect-brk", "vitest", "run", "${relativeFile}"],
+      "cwd": "${workspaceFolder:/miniapp}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "uni-app: mp-weixin (dev)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev:mp-weixin",
+      "cwd": "${workspaceFolder:/miniapp}"
+    }
+  ]
+}
