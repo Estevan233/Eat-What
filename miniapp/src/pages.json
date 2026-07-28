@@ -1,0 +1,53 @@
+{
+  "pages": [
+    {
+      "path": "pages/today/today",
+      "style": { "navigationBarTitleText": "今天吃啥" }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": { "navigationBarTitleText": "档案" }
+    },
+    {
+      "path": "pages/constitution/constitution",
+      "style": { "navigationBarTitleText": "体质测试" }
+    },
+    {
+      "path": "pages/history/history",
+      "style": { "navigationBarTitleText": "历史" }
+    },
+    {
+      "path": "pages/mine/mine",
+      "style": { "navigationBarTitleText": "我的" }
+    },
+    {
+      "path": "pages/auth/auth",
+      "style": { "navigationBarTitleText": "登录" }
+    }
+  ],
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#2563eb",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/today/today", "text": "今天" },
+      { "pagePath": "pages/profile/profile", "text": "档案" },
+      { "pagePath": "pages/constitution/constitution", "text": "体质" },
+      { "pagePath": "pages/history/history", "text": "历史" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "今天吃啥",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f8f8f8"
+  },
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+    }
+  }
+}
