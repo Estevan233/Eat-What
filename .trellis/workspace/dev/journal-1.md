@@ -150,3 +150,39 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: T05: 用户档案模型与编辑页
+
+**Date**: 2026-07-28
+**Task**: T05: 用户档案模型与编辑页
+**Package**: miniapp
+**Branch**: `main`
+
+### Summary
+
+完成 T05 用户档案全链路：后端 UserProfile 表（1:1 with User via user_id 双主键）+ JSON 列存 forbidden_tags + ISO 字符串存 birthday；ProfileUpsert/ProfileRead/UserRead schema（auth.py 旧 UserRead 改名 AuthUserRead 避免冲突）；profile_service upsert + forbidden_tags 集合校验；GET/PUT /profile 路由；7 个新 pytest 全过。前端 utils/case.ts 实现 snakeToCamel/camelToSnake 递归转换，在 request.ts 拦截层双向转；新增 forbidden-tags 常量、api/profile.ts、user store 加 userProfile/fetchUserProfile/saveUserProfile；重写 profile.vue 编辑页（生日 picker/性别 radio/身高/体重/忌口 chip 多选）。后端 ruff/mypy strict/pytest 17/17 全过，前端 type-check/lint/build 全过，E2E 真实 uvicorn+SQLite 全链路 10 个场景全过（含 1:1 约束 DB 验证 + 3 个 422 边界场景）。关键决策：1:1 用 user_id 既外键又主键；forbidden_tags JSON 列不做关联表；birthday 字符串避时区；前端 camelCase 后端 snake_case request 层转换；zodiac_sign 占位 null 留给 T08。
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8a6512b` | (see git log) |
+| `cd5effc` | (see git log) |
+| `cd95a01` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
