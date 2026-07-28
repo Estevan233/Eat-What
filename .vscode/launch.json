@@ -7,12 +7,12 @@
       "request": "launch",
       "module": "uvicorn",
       "args": ["app.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"],
-      "cwd": "${workspaceFolder:/backend}",
+      "cwd": "${workspaceFolder}/backend",
       "env": {
-        "PYTHONPATH": "${workspaceFolder:/backend}",
+        "PYTHONPATH": "${workspaceFolder}/backend",
         "PYTHONDONTWRITEBYTECODE": "1"
       },
-      "envFile": "${workspaceFolder:/backend}/.env",
+      "envFile": "${workspaceFolder}/backend/.env",
       "justMyCode": true,
       "console": "integratedTerminal",
       "preLaunchTask": "backend: ensure venv"
@@ -23,9 +23,9 @@
       "request": "launch",
       "module": "pytest",
       "args": ["${relativeFile}", "-v", "-s"],
-      "cwd": "${workspaceFolder:/backend}",
-      "env": { "PYTHONPATH": "${workspaceFolder:/backend}" },
-      "envFile": "${workspaceFolder:/backend}/.env",
+      "cwd": "${workspaceFolder}/backend",
+      "env": { "PYTHONPATH": "${workspaceFolder}/backend" },
+      "envFile": "${workspaceFolder}/backend/.env",
       "console": "integratedTerminal",
       "preLaunchTask": "backend: ensure venv"
     },
@@ -35,9 +35,9 @@
       "request": "launch",
       "module": "pytest",
       "args": ["tests/", "-v"],
-      "cwd": "${workspaceFolder:/backend}",
-      "env": { "PYTHONPATH": "${workspaceFolder:/backend}" },
-      "envFile": "${workspaceFolder:/backend}/.env",
+      "cwd": "${workspaceFolder}/backend",
+      "env": { "PYTHONPATH": "${workspaceFolder}/backend" },
+      "envFile": "${workspaceFolder}/backend/.env",
       "console": "integratedTerminal",
       "preLaunchTask": "backend: ensure venv"
     },
@@ -46,7 +46,7 @@
       "type": "extension",
       "request": "launch",
       "runtimeArgs": ["--inspect-brk", "vitest", "run", "${relativeFile}"],
-      "cwd": "${workspaceFolder:/miniapp}",
+      "cwd": "${workspaceFolder}/miniapp",
       "console": "integratedTerminal"
     },
     {
@@ -54,7 +54,7 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "npm run dev:mp-weixin",
-      "cwd": "${workspaceFolder:/miniapp}"
+      "cwd": "${workspaceFolder}/miniapp"
     }
   ]
 }

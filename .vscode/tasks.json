@@ -4,11 +4,8 @@
     {
       "label": "backend: ensure venv",
       "type": "shell",
-      "command": "${input:venvActivate}",
-      "args": [],
-      "options": {
-        "cwd": "${workspaceFolder:/backend}"
-      },
+      "command": "test -d .venv || python3 -m venv .venv; echo 'venv ready at .venv/'",
+      "options": { "cwd": "${workspaceFolder}/backend" },
       "isBackground": false,
       "problemMatcher": []
     },
@@ -16,42 +13,42 @@
       "label": "backend: install (pip install -e .[dev])",
       "type": "shell",
       "command": "source .venv/bin/activate && pip install -e '.[dev]'",
-      "options": { "cwd": "${workspaceFolder:/backend}" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
       "problemMatcher": []
     },
     {
       "label": "backend: lint (ruff)",
       "type": "shell",
       "command": "source .venv/bin/activate && ruff check app/ --fix",
-      "options": { "cwd": "${workspaceFolder:/backend}" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
       "problemMatcher": ["$tsc"]
     },
     {
       "label": "backend: typecheck (mypy)",
       "type": "shell",
       "command": "source .venv/bin/activate && mypy app/",
-      "options": { "cwd": "${workspaceFolder:/backend}" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
       "problemMatcher": ["$tsc"]
     },
     {
       "label": "backend: test (pytest)",
       "type": "shell",
       "command": "source .venv/bin/activate && pytest tests/ -v",
-      "options": { "cwd": "${workspaceFolder:/backend}" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
       "problemMatcher": []
     },
     {
       "label": "backend: seed food",
       "type": "shell",
       "command": "source .venv/bin/activate && python -m app.cli seed-food",
-      "options": { "cwd": "${workspaceFolder:/backend}" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
       "problemMatcher": []
     },
     {
       "label": "backend: all checks",
       "type": "shell",
       "command": "source .venv/bin/activate && ruff check app/ && mypy app/ && pytest tests/ -v",
-      "options": { "cwd": "${workspaceFolder:/backend}" },
+      "options": { "cwd": "${workspaceFolder}/backend" },
       "dependsOrder": "sequence",
       "problemMatcher": []
     },
@@ -59,14 +56,14 @@
       "label": "miniapp: install",
       "type": "shell",
       "command": "npm install",
-      "options": { "cwd": "${workspaceFolder:/miniapp}" },
+      "options": { "cwd": "${workspaceFolder}/miniapp" },
       "problemMatcher": []
     },
     {
       "label": "miniapp: dev (mp-weixin)",
       "type": "shell",
       "command": "npm run dev:mp-weixin",
-      "options": { "cwd": "${workspaceFolder:/miniapp}" },
+      "options": { "cwd": "${workspaceFolder}/miniapp" },
       "isBackground": true,
       "problemMatcher": []
     },
@@ -74,35 +71,35 @@
       "label": "miniapp: lint",
       "type": "shell",
       "command": "npm run lint",
-      "options": { "cwd": "${workspaceFolder:/miniapp}" },
+      "options": { "cwd": "${workspaceFolder}/miniapp" },
       "problemMatcher": ["$eslint-stylish"]
     },
     {
       "label": "miniapp: type-check",
       "type": "shell",
       "command": "npm run type-check",
-      "options": { "cwd": "${workspaceFolder:/miniapp}" },
+      "options": { "cwd": "${workspaceFolder}/miniapp" },
       "problemMatcher": ["$tsc"]
     },
     {
       "label": "miniapp: build",
       "type": "shell",
       "command": "npm run build:mp-weixin",
-      "options": { "cwd": "${workspaceFolder:/miniapp}" },
+      "options": { "cwd": "${workspaceFolder}/miniapp" },
       "problemMatcher": []
     },
     {
       "label": "miniapp: gen api types",
       "type": "shell",
       "command": "npm run gen:api",
-      "options": { "cwd": "${workspaceFolder:/miniapp}" },
+      "options": { "cwd": "${workspaceFolder}/miniapp" },
       "problemMatcher": []
     },
     {
       "label": "miniapp: all checks",
       "type": "shell",
       "command": "npm run lint && npm run type-check",
-      "options": { "cwd": "${workspaceFolder:/miniapp}" },
+      "options": { "cwd": "${workspaceFolder}/miniapp" },
       "dependsOrder": "sequence",
       "problemMatcher": []
     },
@@ -119,14 +116,6 @@
       "command": "python3 ./.trellis/scripts/task.py current --source",
       "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": []
-    }
-  ],
-  "inputs": [
-    {
-      "id": "venvActivate",
-      "type": "shell",
-      "command": "test -d .venv || python3 -m venv .venv; echo 'venv ready at .venv/'",
-      "options": { "cwd": "${workspaceFolder:/backend}" }
     }
   ]
 }
