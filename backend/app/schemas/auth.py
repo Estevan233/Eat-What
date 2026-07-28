@@ -17,8 +17,12 @@ class WxLoginRequest(BaseModel):
     avatarUrl: str | None = None  # camelCase 与微信小程序 wx.getUserProfile 返回一致
 
 
-class UserRead(BaseModel):
-    """对外暴露的用户字段 - 不含 openid/unionid/secret。"""
+class AuthUserRead(BaseModel):
+    """登录响应里对外暴露的用户字段 - 不含 openid/unionid/secret。
+
+    命名 AuthUserRead 表明它专用于「认证响应」场景，
+    与 schemas/profile.py 的 UserRead（含 profile 字段）区分开。
+    """
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -29,4 +33,4 @@ class UserRead(BaseModel):
 class LoginResponse(BaseModel):
     """登录成功响应。"""
     token: str
-    user: UserRead
+    user: AuthUserRead

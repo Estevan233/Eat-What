@@ -13,7 +13,7 @@ from sqlmodel import Session
 
 from app.core.deps import get_db
 from app.core.security import create_access_token
-from app.schemas.auth import UserRead, WxLoginRequest
+from app.schemas.auth import AuthUserRead, WxLoginRequest
 from app.services.user_service import upsert_by_openid
 from app.services.wx_client import wx_client
 from app.utils.response import success
@@ -50,6 +50,6 @@ async def wx_login(req: WxLoginRequest, request: Request, session: Session = Dep
     return success(
         data={
             "token": token,
-            "user": UserRead.model_validate(user).model_dump(),
+            "user": AuthUserRead.model_validate(user).model_dump(),
         }
     )
