@@ -429,3 +429,87 @@ T07 第2步完成。food_seed.json 从 63 道扩至 204 道，覆盖鱼虾海鲜
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: T08 节气与星座服务完成
+
+**Date**: 2026-07-30
+**Task**: T08 节气与星座服务完成
+**Package**: miniapp
+**Branch**: `main`
+
+### Summary
+
+T08 完成：lunar_python 集成节气/星座/生肖/农历，GET /context/today 公开 API + lru_cache 缓存，12 星座边界单测 + service 单测 + 4 API 测试，前端 WeatherBadge 组件 + today 页嵌入。112 pytest 全过，前端 type-check/lint/build 全过，E2E 验证 leo/马/立秋还有8天 + 缓存一致。
+
+### Main Changes
+
+# Session 7: T08 节气与星座服务完成
+
+**Date**: 2026-07-30
+**Task**: T08 节气与星座服务（已完成）
+**Branch**: `main`
+
+## Summary
+
+T08 完成。后端用 lunar_python 集成节气/星座/生肖/农历计算，GET /context/today 公开 API + 进程内 lru_cache 缓存（按 ISO 日期 key）。前端加 TodayContext 类型 + WeatherBadge 组件嵌入 today 页。
+
+## Detailed Changes
+
+### 后端
+- `services/solar_terms.py`：compute_zodiac 12 星座 mmdd 边界表（含跨年 capricorn 处理）+ get_today_context 集成 lunar_python（getJieQi/getNextJieQi/getYearShengXiao/getMonth 闰月判定）+ get_today_context_cached lru_cache
+- `schemas/today_context.py`：TodayContext pydantic（date/solar_term_current/next_name/next_date/zodiac_sign/animal/lunar_month/day/is_leap_month）
+- `api/v1/context.py`：GET /context/today 公开无需登录，用 mode=json 序列化 date 字段
+- 注册 context_router
+
+### 测试（共 +44 pytest，全套 112 passed）
+- `tests/services/test_solar_terms.py`：
+  - 32 个 compute_zodiac 边界参数化测试（12 星座 + 跨年 capricorn）
+  - get_today_context 固定日期：大暑当天/立春当天/星座 leo/生肖 马/农历 6/10/缓存命中一致
+- `tests/test_api_v1/test_context.py`：4 个 API 集成测（公开访问/字段完整/重复一致/zodiac 在 12 星座内）
+
+### 前端
+- `types/api.ts`：ZodiacSign type + TodayContext interface
+- `constants/zodiac.ts`：ZODIAC_NAMES_ZH 中文映射 + daysUntilSolarTerm 工具
+- `api/context.ts`：getToday()
+- `components/WeatherBadge.vue`：星座·生肖·节气 chip 展示，节气当天显示名，非节气日「距<next>还有 X 天」
+- `pages/today/today.vue`：嵌入 WeatherBadge
+
+### E2E 验证（真实 uvicorn + curl）
+- GET /context/today 返回：date=2026-07-30, zodiac=leo, animal=马, solar_term_current='', next=立秋(2026-08-07), 农历 6 月 17 日, 闰月 False
+- 缓存一致性：两次调用 md5 完全一致
+
+## Git Commits
+
+| Hash | Message |
+|------|---------|
+| `78a6f8e` | feat(context): 节气+星座+生肖服务（T08） |
+
+## Testing
+- ruff: All checks passed
+- mypy strict: no issues in 37 source files
+- pytest: 112 passed (T08 新增 44)
+- 前端 type-check/lint:build 全过
+- E2E: leo/马/立秋 md5 一致
+
+## Status
+[OK] **Completed - 准备 archive**
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `78a6f8e` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
