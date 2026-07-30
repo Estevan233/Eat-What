@@ -58,6 +58,10 @@ select = [
 ]
 ignore = ["E501", "RUF001", "RUF002", "RUF003", "B008"]  # 中文全角标点不算 ambiguous；FastAPI Depends() 在默认值是官方写法
 
+# 数据校验脚本分支多，复杂度放宽（C90 默认阈值 10）
+[tool.ruff.lint.per-file-ignores]
+"scripts/validate_food_seed.py" = ["C901"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
