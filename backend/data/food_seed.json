@@ -3062,5 +3062,6567 @@
       "lidong"
     ],
     "description": "板栗补肾强筋，鸡肉温补。"
+  },
+  {
+    "name": "红烧带鱼",
+    "category": "stew",
+    "ingredients": [
+      "带鱼",
+      "葱",
+      "姜",
+      "蒜",
+      "酱油",
+      "糖",
+      "醋"
+    ],
+    "calories_kcal_per_100g": 155,
+    "nutrition": {
+      "protein_g": 17.5,
+      "fat_g": 8.5,
+      "carb_g": 3.5,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [
+      "qiufen",
+      "hanlu",
+      "shuangjiang"
+    ],
+    "description": "带鱼刺少肉嫩，红烧最经典。"
+  },
+  {
+    "name": "糖醋鲤鱼",
+    "category": "stir_fry",
+    "ingredients": [
+      "鲤鱼",
+      "面粉",
+      "淀粉",
+      "醋",
+      "糖",
+      "番茄酱"
+    ],
+    "calories_kcal_per_100g": 145,
+    "nutrition": {
+      "protein_g": 12.0,
+      "fat_g": 5.5,
+      "carb_g": 12.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [],
+    "description": "外酥里嫩，酸甜适口。"
+  },
+  {
+    "name": "水煮鱼",
+    "category": "stir_fry",
+    "ingredients": [
+      "草鱼",
+      "豆芽",
+      "干辣椒",
+      "花椒",
+      "蒜",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 174,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 11.5,
+      "carb_g": 3.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "numbing"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing",
+      "yinxu"
+    ],
+    "tags": [
+      "fish"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [
+      "lidong",
+      "xiaoxue",
+      "dongzhi"
+    ],
+    "description": "川菜水煮鱼，麻辣鲜香暖身。"
+  },
+  {
+    "name": "酸菜鱼",
+    "category": "soup",
+    "ingredients": [
+      "草鱼",
+      "酸菜",
+      "干辣椒",
+      "花椒",
+      "姜",
+      "蒜"
+    ],
+    "calories_kcal_per_100g": 125,
+    "nutrition": {
+      "protein_g": 13.5,
+      "fat_g": 6.0,
+      "carb_g": 4.0,
+      "fiber_g": 0.8
+    },
+    "nature": "cool",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "humid"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "fish",
+      "soup",
+      "pork"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 35,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman",
+      "mangzhong",
+      "xiazhi"
+    ],
+    "description": "酸汤开胃，鱼肉嫩滑。"
+  },
+  {
+    "name": "清蒸虾",
+    "category": "steam",
+    "ingredients": [
+      "鲜虾",
+      "姜",
+      "葱",
+      "料酒"
+    ],
+    "calories_kcal_per_100g": 85,
+    "nutrition": {
+      "protein_g": 18.5,
+      "fat_g": 0.8,
+      "carb_g": 0,
+      "fiber_g": 0
+    },
+    "nature": "warm",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "kidney",
+      "spleen"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "seafood",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "高蛋白低脂，补阳益肾。"
+  },
+  {
+    "name": "油焖大虾",
+    "category": "stir_fry",
+    "ingredients": [
+      "大虾",
+      "姜",
+      "葱",
+      "番茄酱",
+      "糖",
+      "料酒"
+    ],
+    "calories_kcal_per_100g": 142,
+    "nutrition": {
+      "protein_g": 15.0,
+      "fat_g": 7.5,
+      "carb_g": 3.5,
+      "fiber_g": 0
+    },
+    "nature": "warm",
+    "flavor": [
+      "sweet",
+      "salty"
+    ],
+    "organ_meridians": [
+      "kidney",
+      "spleen"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "seafood"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "虾肉鲜嫩弹牙，油焖最香。"
+  },
+  {
+    "name": "葱姜炒蟹",
+    "category": "stir_fry",
+    "ingredients": [
+      "花蟹",
+      "葱",
+      "姜",
+      "料酒",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 128,
+    "nutrition": {
+      "protein_g": 14.5,
+      "fat_g": 6.0,
+      "carb_g": 2.0,
+      "fiber_g": 0
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "forbidden_for": [
+      "tebing",
+      "yangxu"
+    ],
+    "tags": [
+      "seafood"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "qiufen",
+      "hanlu",
+      "shuangjiang"
+    ],
+    "description": "秋蟹肥美，姜葱炒去寒性。"
+  },
+  {
+    "name": "蒜蓉粉丝蒸扇贝",
+    "category": "steam",
+    "ingredients": [
+      "扇贝",
+      "粉丝",
+      "蒜",
+      "葱",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 88,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 3.5,
+      "carb_g": 6.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "kidney",
+      "spleen"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "seafood",
+      "easy"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "蒜香扑鼻，扇贝鲜嫩。"
+  },
+  {
+    "name": "红烧鱼块",
+    "category": "stew",
+    "ingredients": [
+      "草鱼块",
+      "葱",
+      "姜",
+      "蒜",
+      "酱油",
+      "糖"
+    ],
+    "calories_kcal_per_100g": 132,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 6.5,
+      "carb_g": 4.0,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "鱼块入味，家常下饭菜。"
+  },
+  {
+    "name": "剁椒鱼头",
+    "category": "steam",
+    "ingredients": [
+      "鱼头",
+      "剁椒",
+      "姜",
+      "葱",
+      "蒜",
+      "料酒"
+    ],
+    "calories_kcal_per_100g": 115,
+    "nutrition": {
+      "protein_g": 13.5,
+      "fat_g": 5.5,
+      "carb_g": 3.0,
+      "fiber_g": 0.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "rainy"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "fish"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "湘菜经典，鲜辣开胃。"
+  },
+  {
+    "name": "干煎带鱼",
+    "category": "stir_fry",
+    "ingredients": [
+      "带鱼",
+      "盐",
+      "姜",
+      "面粉"
+    ],
+    "calories_kcal_per_100g": 185,
+    "nutrition": {
+      "protein_g": 17.0,
+      "fat_g": 12.0,
+      "carb_g": 3.0,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "外焦里嫩，咸香可口。"
+  },
+  {
+    "name": "清炒虾仁",
+    "category": "stir_fry",
+    "ingredients": [
+      "虾仁",
+      "黄瓜",
+      "胡萝卜",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 92,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 2.5,
+      "carb_g": 3.5,
+      "fiber_g": 0.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "kidney",
+      "spleen"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "seafood",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "清淡鲜美，高蛋白低脂。"
+  },
+  {
+    "name": "清蒸鳗鱼",
+    "category": "steam",
+    "ingredients": [
+      "鳗鱼",
+      "姜",
+      "葱",
+      "蒸鱼豉油"
+    ],
+    "calories_kcal_per_100g": 175,
+    "nutrition": {
+      "protein_g": 18.0,
+      "fat_g": 10.5,
+      "carb_g": 0.5,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "kidney",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "鳗鱼滋补养阴。"
+  },
+  {
+    "name": "回锅肉",
+    "category": "stir_fry",
+    "ingredients": [
+      "五花肉",
+      "青蒜",
+      "豆瓣酱",
+      "甜面酱",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 312,
+    "nutrition": {
+      "protein_g": 12.0,
+      "fat_g": 27.0,
+      "carb_g": 4.5,
+      "fiber_g": 0.8
+    },
+    "nature": "neutral",
+    "flavor": [
+      "spicy",
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi",
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [
+      "lichun",
+      "yushui"
+    ],
+    "description": "川菜之首，蒜苗回锅最香。"
+  },
+  {
+    "name": "鱼香肉丝",
+    "category": "stir_fry",
+    "ingredients": [
+      "猪里脊",
+      "木耳",
+      "胡萝卜",
+      "笋",
+      "泡椒",
+      "姜",
+      "蒜",
+      "醋",
+      "糖"
+    ],
+    "calories_kcal_per_100g": 152,
+    "nutrition": {
+      "protein_g": 10.5,
+      "fat_g": 8.5,
+      "carb_g": 7.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "spicy",
+      "sour",
+      "sweet",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "鱼香口味不仅鱼，酸甜微辣。"
+  },
+  {
+    "name": "糖醋排骨",
+    "category": "stew",
+    "ingredients": [
+      "猪小排",
+      "醋",
+      "糖",
+      "酱油",
+      "料酒",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 258,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 17.5,
+      "carb_g": 10.0,
+      "fiber_g": 0.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "sweet",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 45,
+    "seasonal_solar_terms": [],
+    "description": "酸甜可口，孩子最爱。"
+  },
+  {
+    "name": "红烧排骨",
+    "category": "stew",
+    "ingredients": [
+      "猪排骨",
+      "冰糖",
+      "酱油",
+      "姜",
+      "八角",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 245,
+    "nutrition": {
+      "protein_g": 15.0,
+      "fat_g": 18.0,
+      "carb_g": 5.5,
+      "fiber_g": 0.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [
+      "lidong",
+      "dongzhi"
+    ],
+    "description": "排骨酥烂入味，冬令滋补。"
+  },
+  {
+    "name": "京酱肉丝",
+    "category": "stir_fry",
+    "ingredients": [
+      "猪里脊",
+      "甜面酱",
+      "葱白",
+      "豆皮"
+    ],
+    "calories_kcal_per_100g": 168,
+    "nutrition": {
+      "protein_g": 12.5,
+      "fat_g": 9.0,
+      "carb_g": 8.0,
+      "fiber_g": 1.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "酱香浓郁，豆皮卷葱最经典。"
+  },
+  {
+    "name": "青椒炒肉",
+    "category": "stir_fry",
+    "ingredients": [
+      "猪里脊",
+      "青椒",
+      "蒜",
+      "酱油",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 148,
+    "nutrition": {
+      "protein_g": 10.0,
+      "fat_g": 8.5,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "spicy"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "最日常的家常菜。"
+  },
+  {
+    "name": "鱼香茄子煲",
+    "category": "stew",
+    "ingredients": [
+      "茄子",
+      "猪肉末",
+      "泡椒",
+      "姜",
+      "蒜",
+      "葱",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 128,
+    "nutrition": {
+      "protein_g": 6.0,
+      "fat_g": 8.5,
+      "carb_g": 8.0,
+      "fiber_g": 2.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "spicy",
+      "sour",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "茄子吸汁入味，微辣下饭。"
+  },
+  {
+    "name": "梅菜扣肉",
+    "category": "steam",
+    "ingredients": [
+      "五花肉",
+      "梅干菜",
+      "酱油",
+      "糖",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 345,
+    "nutrition": {
+      "protein_g": 12.0,
+      "fat_g": 30.0,
+      "carb_g": 6.5,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "tanshi",
+      "shire"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 90,
+    "seasonal_solar_terms": [
+      "lidong",
+      "dongzhi",
+      "dahan"
+    ],
+    "description": "客家经典，五花肉入口即化。"
+  },
+  {
+    "name": "蒜苔炒肉",
+    "category": "stir_fry",
+    "ingredients": [
+      "猪里脊",
+      "蒜苔",
+      "姜",
+      "盐",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 132,
+    "nutrition": {
+      "protein_g": 9.5,
+      "fat_g": 7.0,
+      "carb_g": 6.5,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 12,
+    "seasonal_solar_terms": [
+      "qingming",
+      "guyu",
+      "lixia"
+    ],
+    "description": "春季蒜苔鲜嫩，与肉绝配。"
+  },
+  {
+    "name": "猪肝炒菜椒",
+    "category": "stir_fry",
+    "ingredients": [
+      "猪肝",
+      "青椒",
+      "红椒",
+      "姜",
+      "蒜",
+      "料酒"
+    ],
+    "calories_kcal_per_100g": 135,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 5.5,
+      "carb_g": 5.0,
+      "fiber_g": 0.8
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "liver",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 12,
+    "seasonal_solar_terms": [],
+    "description": "猪肝补血明目，快炒保嫩。"
+  },
+  {
+    "name": "莲藕炖排骨",
+    "category": "soup",
+    "ingredients": [
+      "排骨",
+      "莲藕",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 115,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 5.5,
+      "carb_g": 9.0,
+      "fiber_g": 1.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "dry",
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 90,
+    "seasonal_solar_terms": [
+      "qiufen",
+      "hanlu",
+      "shuangjiang"
+    ],
+    "description": "莲藕润肺清热，秋季煲汤佳品。"
+  },
+  {
+    "name": "土豆烧排骨",
+    "category": "stew",
+    "ingredients": [
+      "排骨",
+      "土豆",
+      "姜",
+      "酱油",
+      "糖"
+    ],
+    "calories_kcal_per_100g": 178,
+    "nutrition": {
+      "protein_g": 11.0,
+      "fat_g": 10.5,
+      "carb_g": 10.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 45,
+    "seasonal_solar_terms": [],
+    "description": "土豆酥软排骨香，大人小孩都爱。"
+  },
+  {
+    "name": "红油耳丝",
+    "category": "cold_dish",
+    "ingredients": [
+      "猪耳",
+      "辣椒油",
+      "花椒",
+      "蒜",
+      "酱油",
+      "醋"
+    ],
+    "calories_kcal_per_100g": 235,
+    "nutrition": {
+      "protein_g": 15.0,
+      "fat_g": 18.0,
+      "carb_g": 2.0,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "spicy",
+      "numbing",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi"
+    ],
+    "tags": [
+      "pork",
+      "cold_dish"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [],
+    "description": "脆爽筋道，麻辣鲜香凉菜。"
+  },
+  {
+    "name": "猪血豆腐汤",
+    "category": "soup",
+    "ingredients": [
+      "猪血",
+      "嫩豆腐",
+      "葱",
+      "姜",
+      "胡椒粉",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 58,
+    "nutrition": {
+      "protein_g": 5.5,
+      "fat_g": 2.5,
+      "carb_g": 2.0,
+      "fiber_g": 0.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "猪血清肺解毒，豆腐清热。"
+  },
+  {
+    "name": "马蹄蒸肉饼",
+    "category": "steam",
+    "ingredients": [
+      "猪肉",
+      "马蹄",
+      "葱",
+      "姜",
+      "盐",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 128,
+    "nutrition": {
+      "protein_g": 10.0,
+      "fat_g": 7.5,
+      "carb_g": 5.0,
+      "fiber_g": 0.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [
+      "guyu",
+      "lixia"
+    ],
+    "description": "马蹄清脆，肉饼鲜嫩。"
+  },
+  {
+    "name": "葱爆羊肉",
+    "category": "stir_fry",
+    "ingredients": [
+      "羊肉",
+      "大葱",
+      "姜",
+      "酱油",
+      "料酒"
+    ],
+    "calories_kcal_per_100g": 195,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 13.5,
+      "carb_g": 3.5,
+      "fiber_g": 0.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "spicy"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yangxu",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "yinxu",
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "beef",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "dongzhi",
+      "xiaohan",
+      "dahan"
+    ],
+    "description": "葱爆羊肉温补肾阳，冬令佳肴。"
+  },
+  {
+    "name": "牛肉炖萝卜",
+    "category": "stew",
+    "ingredients": [
+      "牛腩",
+      "白萝卜",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 118,
+    "nutrition": {
+      "protein_g": 11.0,
+      "fat_g": 5.5,
+      "carb_g": 5.0,
+      "fiber_g": 1.2
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "dry",
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 90,
+    "seasonal_solar_terms": [
+      "dongzhi",
+      "xiaohan",
+      "dahan"
+    ],
+    "description": "萝卜顺气化痰，牛肉温补，冬季绝配。"
+  },
+  {
+    "name": "红烧牛肉",
+    "category": "stew",
+    "ingredients": [
+      "牛腩",
+      "土豆",
+      "胡萝卜",
+      "姜",
+      "酱油",
+      "八角"
+    ],
+    "calories_kcal_per_100g": 162,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 8.5,
+      "carb_g": 7.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "beef"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 90,
+    "seasonal_solar_terms": [
+      "lidong",
+      "xiaoxue"
+    ],
+    "description": "牛肉酥烂汤汁浓，配饭绝佳。"
+  },
+  {
+    "name": "水煮牛肉",
+    "category": "stir_fry",
+    "ingredients": [
+      "牛肉",
+      "豆芽",
+      "干辣椒",
+      "花椒",
+      "蒜"
+    ],
+    "calories_kcal_per_100g": 178,
+    "nutrition": {
+      "protein_g": 15.0,
+      "fat_g": 11.0,
+      "carb_g": 4.0,
+      "fiber_g": 1.2
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "numbing"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "rainy"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing",
+      "yinxu"
+    ],
+    "tags": [
+      "beef"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [
+      "lidong",
+      "xiaoxue",
+      "daxue"
+    ],
+    "description": "川菜经典，牛肉嫩滑麻辣鲜香。"
+  },
+  {
+    "name": "凉拌牛肉",
+    "category": "cold_dish",
+    "ingredients": [
+      "牛肉",
+      "辣椒油",
+      "花椒",
+      "蒜",
+      "酱油",
+      "醋",
+      "香菜"
+    ],
+    "calories_kcal_per_100g": 175,
+    "nutrition": {
+      "protein_g": 17.0,
+      "fat_g": 10.5,
+      "carb_g": 3.0,
+      "fiber_g": 0.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "spicy",
+      "sour",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "cold_dish"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman",
+      "xiazhi"
+    ],
+    "description": "夏日凉菜，牛肉筋道入味。"
+  },
+  {
+    "name": "土豆烧牛肉",
+    "category": "stew",
+    "ingredients": [
+      "牛肉",
+      "土豆",
+      "胡萝卜",
+      "姜",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 152,
+    "nutrition": {
+      "protein_g": 12.5,
+      "fat_g": 7.0,
+      "carb_g": 9.0,
+      "fiber_g": 1.2
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 75,
+    "seasonal_solar_terms": [],
+    "description": "经典家常炖菜，营养均衡。"
+  },
+  {
+    "name": "羊肉汤",
+    "category": "soup",
+    "ingredients": [
+      "羊肉",
+      "白芷",
+      "姜",
+      "葱",
+      "盐",
+      "白萝卜"
+    ],
+    "calories_kcal_per_100g": 105,
+    "nutrition": {
+      "protein_g": 10.0,
+      "fat_g": 6.5,
+      "carb_g": 2.5,
+      "fiber_g": 0.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yangxu",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "yinxu",
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "beef",
+      "soup"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 120,
+    "seasonal_solar_terms": [
+      "dongzhi",
+      "xiaohan",
+      "dahan"
+    ],
+    "description": "羊肉汤暖身驱寒，冬季最补。"
+  },
+  {
+    "name": "咖喱牛肉",
+    "category": "stew",
+    "ingredients": [
+      "牛腩",
+      "咖喱块",
+      "土豆",
+      "胡萝卜",
+      "洋葱"
+    ],
+    "calories_kcal_per_100g": 158,
+    "nutrition": {
+      "protein_g": 12.0,
+      "fat_g": 8.5,
+      "carb_g": 8.0,
+      "fiber_g": 1.2
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "beef"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [],
+    "description": "咖喱温中散寒，牛肉酥软。"
+  },
+  {
+    "name": "孜然羊肉",
+    "category": "stir_fry",
+    "ingredients": [
+      "羊肉",
+      "孜然",
+      "洋葱",
+      "辣椒",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 205,
+    "nutrition": {
+      "protein_g": 14.5,
+      "fat_g": 14.0,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yangxu",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "yinxu",
+      "shire"
+    ],
+    "tags": [
+      "beef",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "dongzhi",
+      "xiaohan"
+    ],
+    "description": "孜然与羊肉绝配，冬日暖身。"
+  },
+  {
+    "name": "牛腩煲",
+    "category": "stew",
+    "ingredients": [
+      "牛腩",
+      "白萝卜",
+      "葱",
+      "姜",
+      "八角",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 145,
+    "nutrition": {
+      "protein_g": 13.5,
+      "fat_g": 7.5,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "soup"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 120,
+    "seasonal_solar_terms": [
+      "lidong",
+      "xiaoxue",
+      "dongzhi"
+    ],
+    "description": "牛腩煲汤浓味香，滋补暖身。"
+  },
+  {
+    "name": "香煎豆腐",
+    "category": "stir_fry",
+    "ingredients": [
+      "老豆腐",
+      "酱油",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 98,
+    "nutrition": {
+      "protein_g": 8.5,
+      "fat_g": 6.0,
+      "carb_g": 3.0,
+      "fiber_g": 0.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "外焦里嫩，简单快手。"
+  },
+  {
+    "name": "西施豆腐",
+    "category": "soup",
+    "ingredients": [
+      "嫩豆腐",
+      "鸡蛋",
+      "香菇",
+      "火腿",
+      "葱",
+      "淀粉"
+    ],
+    "calories_kcal_per_100g": 68,
+    "nutrition": {
+      "protein_g": 5.5,
+      "fat_g": 3.0,
+      "carb_g": 4.5,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "羹滑豆腐嫩，老少皆宜。"
+  },
+  {
+    "name": "干锅千叶豆腐",
+    "category": "stir_fry",
+    "ingredients": [
+      "千叶豆腐",
+      "五花肉",
+      "青椒",
+      "红椒",
+      "蒜",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 152,
+    "nutrition": {
+      "protein_g": 9.5,
+      "fat_g": 10.0,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "spicy"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "pork"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "千叶豆腐有嚼劲，干锅风味浓郁。"
+  },
+  {
+    "name": "铁板豆腐",
+    "category": "stir_fry",
+    "ingredients": [
+      "老豆腐",
+      "辣椒粉",
+      "孜然",
+      "酱油",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 108,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 6.5,
+      "carb_g": 4.0,
+      "fiber_g": 0.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "街边小吃零失败家常版。"
+  },
+  {
+    "name": "豆腐鱼汤",
+    "category": "soup",
+    "ingredients": [
+      "豆腐",
+      "草鱼头",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 68,
+    "nutrition": {
+      "protein_g": 7.5,
+      "fat_g": 2.8,
+      "carb_g": 2.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "鱼汤奶白豆腐嫩，补钙佳品。"
+  },
+  {
+    "name": "红烧素鸡",
+    "category": "stir_fry",
+    "ingredients": [
+      "素鸡",
+      "酱油",
+      "糖",
+      "葱",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 135,
+    "nutrition": {
+      "protein_g": 7.5,
+      "fat_g": 7.0,
+      "carb_g": 10.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "素鸡非鸡，豆制品入味鲜香。"
+  },
+  {
+    "name": "豆腐皮卷",
+    "category": "cold_dish",
+    "ingredients": [
+      "豆腐皮",
+      "黄瓜",
+      "胡萝卜",
+      "芝麻酱",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 112,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 6.0,
+      "carb_g": 6.0,
+      "fiber_g": 1.2
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish",
+      "easy"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "清凉爽口，夏季凉菜。"
+  },
+  {
+    "name": "麻酱拌豆腐",
+    "category": "cold_dish",
+    "ingredients": [
+      "嫩豆腐",
+      "芝麻酱",
+      "酱油",
+      "蒜",
+      "葱花"
+    ],
+    "calories_kcal_per_100g": 85,
+    "nutrition": {
+      "protein_g": 6.5,
+      "fat_g": 5.5,
+      "carb_g": 3.0,
+      "fiber_g": 0.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [
+      "xiaoshu",
+      "dachu"
+    ],
+    "description": "芝麻酱香浓，豆腐清凉。"
+  },
+  {
+    "name": "豆泡烧肉",
+    "category": "stew",
+    "ingredients": [
+      "豆腐泡",
+      "五花肉",
+      "酱油",
+      "糖",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 225,
+    "nutrition": {
+      "protein_g": 10.0,
+      "fat_g": 16.0,
+      "carb_g": 7.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi",
+      "shire"
+    ],
+    "tags": [
+      "pork",
+      "vegetarian"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [],
+    "description": "豆泡吸满肉汁，比肉更好吃。"
+  },
+  {
+    "name": "凉拌豆腐丝",
+    "category": "cold_dish",
+    "ingredients": [
+      "豆腐丝",
+      "辣椒油",
+      "醋",
+      "蒜",
+      "黄瓜丝",
+      "香菜"
+    ],
+    "calories_kcal_per_100g": 95,
+    "nutrition": {
+      "protein_g": 7.5,
+      "fat_g": 5.5,
+      "carb_g": 4.0,
+      "fiber_g": 0.8
+    },
+    "nature": "cool",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish",
+      "quick"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman",
+      "xiazhi"
+    ],
+    "description": "酸辣开胃，夏季凉拌首选。"
+  },
+  {
+    "name": "油焖春笋",
+    "category": "stir_fry",
+    "ingredients": [
+      "春笋",
+      "酱油",
+      "糖",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 63,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 3.0,
+      "carb_g": 7.0,
+      "fiber_g": 1.8
+    },
+    "nature": "cool",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "seasonal"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "jingzhe",
+      "chunfen",
+      "qingming",
+      "guyu"
+    ],
+    "description": "春笋鲜嫩，油焖最入味。"
+  },
+  {
+    "name": "糖藕",
+    "category": "cold_dish",
+    "ingredients": [
+      "莲藕",
+      "糯米",
+      "红糖",
+      "桂花"
+    ],
+    "calories_kcal_per_100g": 145,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 0.5,
+      "carb_g": 32.0,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "dry"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish"
+    ],
+    "cooking_method": "boil",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [
+      "hanlu",
+      "shuangjiang"
+    ],
+    "description": "桂花糖藕，江南秋令甜品。"
+  },
+  {
+    "name": "酸辣土豆丝",
+    "category": "stir_fry",
+    "ingredients": [
+      "土豆",
+      "干辣椒",
+      "醋",
+      "姜",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 82,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 3.5,
+      "carb_g": 12.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "最普遍的国民菜，酸辣脆爽。"
+  },
+  {
+    "name": "炝炒圆白菜",
+    "category": "stir_fry",
+    "ingredients": [
+      "圆白菜",
+      "干辣椒",
+      "花椒",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 42,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 2.0,
+      "carb_g": 5.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "手撕包菜，麻辣脆爽。"
+  },
+  {
+    "name": "清炒豆苗",
+    "category": "stir_fry",
+    "ingredients": [
+      "豆苗",
+      "蒜",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 35,
+    "nutrition": {
+      "protein_g": 2.8,
+      "fat_g": 1.5,
+      "carb_g": 3.5,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [],
+    "description": "嫩豆苗清炒，清香爽口。"
+  },
+  {
+    "name": "素炒合子",
+    "category": "stir_fry",
+    "ingredients": [
+      "青椒",
+      "茄子",
+      "土豆",
+      "番茄",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 62,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 2.5,
+      "carb_g": 8.5,
+      "fiber_g": 2.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "sweet",
+      "sour"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "xiaoshu",
+      "dachu"
+    ],
+    "description": "时蔬乱炖，鲜甜下饭。"
+  },
+  {
+    "name": "蒜蓉生菜",
+    "category": "stir_fry",
+    "ingredients": [
+      "生菜",
+      "蒜",
+      "蚝油",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 32,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 1.8,
+      "carb_g": 3.0,
+      "fiber_g": 1.2
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "salty"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "dry",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [],
+    "description": "快手青菜，蒜香翠绿。"
+  },
+  {
+    "name": "清蒸茄子",
+    "category": "steam",
+    "ingredients": [
+      "茄子",
+      "蒜",
+      "酱油",
+      "香油"
+    ],
+    "calories_kcal_per_100g": 38,
+    "nutrition": {
+      "protein_g": 1.0,
+      "fat_g": 1.5,
+      "carb_g": 5.5,
+      "fiber_g": 2.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "xiaoshu",
+      "dachu"
+    ],
+    "description": "蒜泥茄子，少油健康。"
+  },
+  {
+    "name": "干煸花菜",
+    "category": "stir_fry",
+    "ingredients": [
+      "花菜",
+      "五花肉",
+      "蒜",
+      "酱油",
+      "干辣椒"
+    ],
+    "calories_kcal_per_100g": 95,
+    "nutrition": {
+      "protein_g": 5.0,
+      "fat_g": 5.5,
+      "carb_g": 7.0,
+      "fiber_g": 2.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "spicy"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "花菜焦香，肉香四溢。"
+  },
+  {
+    "name": "酸辣大白菜",
+    "category": "stir_fry",
+    "ingredients": [
+      "大白菜",
+      "干辣椒",
+      "醋",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 35,
+    "nutrition": {
+      "protein_g": 1.3,
+      "fat_g": 1.8,
+      "carb_g": 4.5,
+      "fiber_g": 1.2
+    },
+    "nature": "cool",
+    "flavor": [
+      "sour",
+      "spicy"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [
+      "lidong",
+      "xiaoxue"
+    ],
+    "description": "冬储白菜经典，酸辣开胃。"
+  },
+  {
+    "name": "素炒芥兰",
+    "category": "stir_fry",
+    "ingredients": [
+      "芥兰",
+      "姜",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 30,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 1.5,
+      "carb_g": 3.5,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [],
+    "description": "芥兰脆嫩，清炒的原味。"
+  },
+  {
+    "name": "糖醋藕丁",
+    "category": "stir_fry",
+    "ingredients": [
+      "莲藕",
+      "醋",
+      "糖",
+      "盐",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 68,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 2.0,
+      "carb_g": 12.0,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "sour",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "dry"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "藕丁脆甜，酸甜开胃。"
+  },
+  {
+    "name": "清炒菠菜",
+    "category": "stir_fry",
+    "ingredients": [
+      "菠菜",
+      "蒜",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 28,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 1.2,
+      "carb_g": 3.5,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [],
+    "description": "菠菜补铁通便，清炒最速。"
+  },
+  {
+    "name": "虾皮炒丝瓜",
+    "category": "stir_fry",
+    "ingredients": [
+      "丝瓜",
+      "虾皮",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 38,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 1.5,
+      "carb_g": 4.5,
+      "fiber_g": 1.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "humid"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "seafood",
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman",
+      "mangzhong",
+      "xiazhi",
+      "xiaoshu"
+    ],
+    "description": "丝瓜清凉解毒，夏日时蔬。"
+  },
+  {
+    "name": "苦瓜炒蛋",
+    "category": "stir_fry",
+    "ingredients": [
+      "苦瓜",
+      "鸡蛋",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 78,
+    "nutrition": {
+      "protein_g": 5.0,
+      "fat_g": 5.5,
+      "carb_g": 3.5,
+      "fiber_g": 1.2
+    },
+    "nature": "cool",
+    "flavor": [
+      "bitter",
+      "salty"
+    ],
+    "organ_meridians": [
+      "heart",
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "humid"
+    ],
+    "forbidden_for": [
+      "yangxu",
+      "qixu"
+    ],
+    "tags": [
+      "egg",
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "xiazhi",
+      "xiaoshu",
+      "dachu"
+    ],
+    "description": "苦瓜清热去火，夏日消暑。"
+  },
+  {
+    "name": "双菇炒青菜",
+    "category": "stir_fry",
+    "ingredients": [
+      "上海青",
+      "金针菇",
+      "香菇",
+      "蒜",
+      "盐",
+      "蚝油"
+    ],
+    "calories_kcal_per_100g": 42,
+    "nutrition": {
+      "protein_g": 3.0,
+      "fat_g": 1.8,
+      "carb_g": 5.0,
+      "fiber_g": 2.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "菌菇增鲜，青菜清爽。"
+  },
+  {
+    "name": "鱼香烘蛋",
+    "category": "stir_fry",
+    "ingredients": [
+      "鸡蛋",
+      "泡椒",
+      "姜",
+      "蒜",
+      "葱",
+      "醋",
+      "糖"
+    ],
+    "calories_kcal_per_100g": 115,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 8.5,
+      "carb_g": 3.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "spicy",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "egg",
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "鸡蛋的鱼香做法，酸甜微辣。"
+  },
+  {
+    "name": "荷塘小炒",
+    "category": "stir_fry",
+    "ingredients": [
+      "莲藕",
+      "荷兰豆",
+      "黑木耳",
+      "胡萝卜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 52,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 1.5,
+      "carb_g": 8.5,
+      "fiber_g": 2.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire",
+      "xueyu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [
+      "hanlu",
+      "shuangjiang",
+      "liqiu"
+    ],
+    "description": "荷塘四宝清鲜脆嫩。"
+  },
+  {
+    "name": "蒜苗回锅肉",
+    "category": "stir_fry",
+    "ingredients": [
+      "五花肉",
+      "蒜苗",
+      "豆瓣酱",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 295,
+    "nutrition": {
+      "protein_g": 11.5,
+      "fat_g": 25.0,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi",
+      "shire"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [],
+    "description": "回锅肉加蒜苗最搭配。"
+  },
+  {
+    "name": "素炒豌豆苗",
+    "category": "stir_fry",
+    "ingredients": [
+      "豌豆苗",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 32,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 1.2,
+      "carb_g": 4.0,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 3,
+    "seasonal_solar_terms": [],
+    "description": "豌豆苗鲜嫩，清炒清香。"
+  },
+  {
+    "name": "葱花土豆泥",
+    "category": "stir_fry",
+    "ingredients": [
+      "土豆",
+      "葱",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 88,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 3.0,
+      "carb_g": 14.0,
+      "fiber_g": 1.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "other",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "土豆泥绵软，葱香满满。"
+  },
+  {
+    "name": "清炒空心菜",
+    "category": "stir_fry",
+    "ingredients": [
+      "空心菜",
+      "蒜",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 28,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 1.2,
+      "carb_g": 4.0,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "yinxu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman",
+      "xiazhi",
+      "xiaoshu"
+    ],
+    "description": "空心菜脆嫩，夏季时蔬。"
+  },
+  {
+    "name": "蒜蓉秋葵",
+    "category": "stir_fry",
+    "ingredients": [
+      "秋葵",
+      "蒜",
+      "酱油",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 44,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 2.0,
+      "carb_g": 4.5,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "salty"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "秋葵滑嫩低脂，营养丰富。"
+  },
+  {
+    "name": "萝卜炖排骨",
+    "category": "soup",
+    "ingredients": [
+      "排骨",
+      "白萝卜",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 102,
+    "nutrition": {
+      "protein_g": 7.5,
+      "fat_g": 5.0,
+      "carb_g": 6.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "tanshi",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "dry",
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 75,
+    "seasonal_solar_terms": [
+      "dongzhi",
+      "xiaohan",
+      "dahan"
+    ],
+    "description": "白萝卜顺气化痰，冬日炖汤经典。"
+  },
+  {
+    "name": "木耳炒山药",
+    "category": "stir_fry",
+    "ingredients": [
+      "山药",
+      "黑木耳",
+      "青椒",
+      "胡萝卜",
+      "蒜"
+    ],
+    "calories_kcal_per_100g": 68,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 2.5,
+      "carb_g": 11.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "lung",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "山药健脾木耳清肠，养生素菜。"
+  },
+  {
+    "name": "素炒三丝",
+    "category": "stir_fry",
+    "ingredients": [
+      "胡萝卜",
+      "青椒",
+      "豆芽",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 38,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 1.8,
+      "carb_g": 5.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "色彩鲜艳，维生素丰富。"
+  },
+  {
+    "name": "番茄蛋花汤",
+    "category": "soup",
+    "ingredients": [
+      "番茄",
+      "鸡蛋",
+      "葱",
+      "盐",
+      "香油"
+    ],
+    "calories_kcal_per_100g": 28,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 1.5,
+      "carb_g": 2.5,
+      "fiber_g": 0.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "sour",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "spleen"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "egg",
+      "vegetarian",
+      "soup",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "最家常的汤，酸甜开胃。"
+  },
+  {
+    "name": "豆腐青菜汤",
+    "category": "soup",
+    "ingredients": [
+      "嫩豆腐",
+      "青菜",
+      "盐",
+      "香油"
+    ],
+    "calories_kcal_per_100g": 22,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 1.0,
+      "carb_g": 1.5,
+      "fiber_g": 0.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "soup",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "清淡鲜美，减脂期首选。"
+  },
+  {
+    "name": "玉米排骨汤",
+    "category": "soup",
+    "ingredients": [
+      "排骨",
+      "玉米",
+      "胡萝卜",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 95,
+    "nutrition": {
+      "protein_g": 6.5,
+      "fat_g": 4.0,
+      "carb_g": 8.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 75,
+    "seasonal_solar_terms": [],
+    "description": "玉米清甜，排骨肉烂。"
+  },
+  {
+    "name": "西红柿牛肉汤",
+    "category": "soup",
+    "ingredients": [
+      "牛腩",
+      "番茄",
+      "胡萝卜",
+      "洋葱",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 82,
+    "nutrition": {
+      "protein_g": 7.0,
+      "fat_g": 3.5,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "sour",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "soup"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 90,
+    "seasonal_solar_terms": [],
+    "description": "酸甜香浓，暖身开胃。"
+  },
+  {
+    "name": "西湖牛肉羹",
+    "category": "soup",
+    "ingredients": [
+      "牛肉末",
+      "豆腐",
+      "蛋清",
+      "葱",
+      "姜",
+      "淀粉"
+    ],
+    "calories_kcal_per_100g": 58,
+    "nutrition": {
+      "protein_g": 5.5,
+      "fat_g": 2.5,
+      "carb_g": 3.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "羹滑肉嫩，经典宴客汤。"
+  },
+  {
+    "name": "山药排骨汤",
+    "category": "soup",
+    "ingredients": [
+      "排骨",
+      "山药",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 98,
+    "nutrition": {
+      "protein_g": 7.0,
+      "fat_g": 4.5,
+      "carb_g": 7.0,
+      "fiber_g": 0.8
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "lung",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 75,
+    "seasonal_solar_terms": [
+      "bailu",
+      "qiufen",
+      "hanlu"
+    ],
+    "description": "山药补脾益肺，秋季养生汤。"
+  },
+  {
+    "name": "海带排骨汤",
+    "category": "soup",
+    "ingredients": [
+      "排骨",
+      "海带",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 72,
+    "nutrition": {
+      "protein_g": 5.5,
+      "fat_g": 3.5,
+      "carb_g": 4.0,
+      "fiber_g": 1.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "lung",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [],
+    "description": "海带降脂补碘，排骨肉香。"
+  },
+  {
+    "name": "疙瘩汤",
+    "category": "soup",
+    "ingredients": [
+      "面粉",
+      "番茄",
+      "鸡蛋",
+      "葱",
+      "盐",
+      "香菜"
+    ],
+    "calories_kcal_per_100g": 52,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 1.2,
+      "carb_g": 8.5,
+      "fiber_g": 0.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "soup",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "北方面疙瘩汤，汤菜饭一体。"
+  },
+  {
+    "name": "鲫鱼豆腐汤",
+    "category": "soup",
+    "ingredients": [
+      "鲫鱼",
+      "豆腐",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 62,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 2.5,
+      "carb_g": 1.5,
+      "fiber_g": 0.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [],
+    "description": "汤白如奶，补钙催乳佳品。"
+  },
+  {
+    "name": "菌菇汤",
+    "category": "soup",
+    "ingredients": [
+      "白玉菇",
+      "香菇",
+      "金针菇",
+      "姜",
+      "盐",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 32,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 0.8,
+      "carb_g": 4.5,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "菌菇鲜美，低卡养生。"
+  },
+  {
+    "name": "麻辣香锅",
+    "category": "stir_fry",
+    "ingredients": [
+      "虾",
+      "鱿鱼",
+      "土豆",
+      "藕片",
+      "豆腐",
+      "芹菜",
+      "干辣椒",
+      "花椒"
+    ],
+    "calories_kcal_per_100g": 185,
+    "nutrition": {
+      "protein_g": 11.0,
+      "fat_g": 11.5,
+      "carb_g": 10.0,
+      "fiber_g": 1.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "numbing",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "rainy"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing",
+      "yinxu"
+    ],
+    "tags": [
+      "seafood",
+      "pork"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [
+      "lidong",
+      "dongzhi"
+    ],
+    "description": "自选食材麻辣一锅，好吃又过瘾。"
+  },
+  {
+    "name": "毛血旺",
+    "category": "stir_fry",
+    "ingredients": [
+      "鸭血",
+      "毛肚",
+      "豆芽",
+      "干辣椒",
+      "花椒",
+      "蒜"
+    ],
+    "calories_kcal_per_100g": 152,
+    "nutrition": {
+      "protein_g": 11.0,
+      "fat_g": 9.5,
+      "carb_g": 5.0,
+      "fiber_g": 1.2
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "numbing",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing",
+      "yinxu"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [
+      "lidong",
+      "dongzhi"
+    ],
+    "description": "川菜名菜，麻辣鲜香嫩。"
+  },
+  {
+    "name": "酸辣粉",
+    "category": "staple",
+    "ingredients": [
+      "红薯粉",
+      "花生",
+      "榨菜",
+      "葱",
+      "醋",
+      "辣椒油",
+      "汤底"
+    ],
+    "calories_kcal_per_100g": 112,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 3.5,
+      "carb_g": 18.0,
+      "fiber_g": 0.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "boil",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "重庆酸辣粉，酸辣过瘾。"
+  },
+  {
+    "name": "麻辣烫",
+    "category": "soup",
+    "ingredients": [
+      "各种蔬菜",
+      "豆皮",
+      "粉丝",
+      "肉丸",
+      "金针菇",
+      "麻辣汤底"
+    ],
+    "calories_kcal_per_100g": 85,
+    "nutrition": {
+      "protein_g": 4.5,
+      "fat_g": 4.0,
+      "carb_g": 7.0,
+      "fiber_g": 1.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "numbing",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "自选食材麻辣汤底，一人食火锅。"
+  },
+  {
+    "name": "鸡蛋炒米粉",
+    "category": "staple",
+    "ingredients": [
+      "米粉",
+      "鸡蛋",
+      "豆芽",
+      "酱油",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 152,
+    "nutrition": {
+      "protein_g": 5.5,
+      "fat_g": 5.0,
+      "carb_g": 22.0,
+      "fiber_g": 0.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "egg",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "闽南家常炒米粉，简简单单。"
+  },
+  {
+    "name": "菠萝饭",
+    "category": "staple",
+    "ingredients": [
+      "菠萝",
+      "米饭",
+      "虾仁",
+      "青豆",
+      "胡萝卜",
+      "鸡蛋"
+    ],
+    "calories_kcal_per_100g": 145,
+    "nutrition": {
+      "protein_g": 5.5,
+      "fat_g": 4.0,
+      "carb_g": 22.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "sour"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "qiyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "seafood",
+      "egg"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman"
+    ],
+    "description": "菠萝盛器，酸甜果香炒饭。"
+  },
+  {
+    "name": "鸡丝凉面",
+    "category": "staple",
+    "ingredients": [
+      "面条",
+      "鸡丝",
+      "黄瓜",
+      "豆芽",
+      "芝麻酱",
+      "辣椒油"
+    ],
+    "calories_kcal_per_100g": 168,
+    "nutrition": {
+      "protein_g": 8.5,
+      "fat_g": 6.5,
+      "carb_g": 19.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "spicy",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "easy",
+      "cold_dish"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman",
+      "mangzhong",
+      "xiazhi"
+    ],
+    "description": "夏至凉面，芝麻酱香浓郁。"
+  },
+  {
+    "name": "蛋炒饭",
+    "category": "staple",
+    "ingredients": [
+      "米饭",
+      "鸡蛋",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 175,
+    "nutrition": {
+      "protein_g": 5.5,
+      "fat_g": 7.0,
+      "carb_g": 23.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "egg",
+      "vegetarian",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "最基础的家常主食，粒粒分明。"
+  },
+  {
+    "name": "韭菜猪肉水饺",
+    "category": "staple",
+    "ingredients": [
+      "饺子皮",
+      "猪肉",
+      "韭菜",
+      "姜",
+      "盐",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 218,
+    "nutrition": {
+      "protein_g": 9.0,
+      "fat_g": 10.0,
+      "carb_g": 23.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing",
+      "yinxu",
+      "shire"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "boil",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [
+      "dongzhi"
+    ],
+    "description": "冬至必吃韭菜饺子。"
+  },
+  {
+    "name": "叉烧肉",
+    "category": "stew",
+    "ingredients": [
+      "猪里脊",
+      "叉烧酱",
+      "蜂蜜",
+      "蚝油"
+    ],
+    "calories_kcal_per_100g": 235,
+    "nutrition": {
+      "protein_g": 16.0,
+      "fat_g": 14.0,
+      "carb_g": 12.0,
+      "fiber_g": 0.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [],
+    "description": "广式叉烧，甜香多汁。"
+  },
+  {
+    "name": "松仁玉米",
+    "category": "stir_fry",
+    "ingredients": [
+      "玉米粒",
+      "松仁",
+      "胡萝卜丁",
+      "青豆",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 128,
+    "nutrition": {
+      "protein_g": 3.5,
+      "fat_g": 6.0,
+      "carb_g": 16.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu",
+      "qiyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "甜香爽口，颜色鲜亮。"
+  },
+  {
+    "name": "虎皮青椒",
+    "category": "stir_fry",
+    "ingredients": [
+      "青椒",
+      "蒜",
+      "醋",
+      "酱油",
+      "糖"
+    ],
+    "calories_kcal_per_100g": 48,
+    "nutrition": {
+      "protein_g": 1.2,
+      "fat_g": 3.0,
+      "carb_g": 5.0,
+      "fiber_g": 1.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "spicy",
+      "sour",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "shire",
+      "yinxu"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "虎皮焦香，酱汁酸甜微辣。"
+  },
+  {
+    "name": "红烧蹄髈",
+    "category": "stew",
+    "ingredients": [
+      "猪蹄髈",
+      "冰糖",
+      "酱油",
+      "姜",
+      "八角",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 265,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 22.0,
+      "carb_g": 3.5,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "tanshi",
+      "shire"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 120,
+    "seasonal_solar_terms": [
+      "dongzhi",
+      "dahan"
+    ],
+    "description": "蹄髈肥而不腻，胶原蛋白丰富。"
+  },
+  {
+    "name": "土豆牛腩",
+    "category": "stew",
+    "ingredients": [
+      "牛腩",
+      "土豆",
+      "胡萝卜",
+      "洋葱",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 148,
+    "nutrition": {
+      "protein_g": 12.5,
+      "fat_g": 7.0,
+      "carb_g": 8.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 75,
+    "seasonal_solar_terms": [],
+    "description": "牛腩酥烂土豆粉糯。"
+  },
+  {
+    "name": "莲藕排骨汤",
+    "category": "soup",
+    "ingredients": [
+      "排骨",
+      "莲藕",
+      "花生",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 108,
+    "nutrition": {
+      "protein_g": 7.0,
+      "fat_g": 4.5,
+      "carb_g": 9.0,
+      "fiber_g": 1.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "dry",
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 90,
+    "seasonal_solar_terms": [
+      "hanlu",
+      "shuangjiang",
+      "lidong"
+    ],
+    "description": "莲藕粉糯排骨香，秋冬季养生汤。"
+  },
+  {
+    "name": "凉拌粉皮",
+    "category": "cold_dish",
+    "ingredients": [
+      "粉皮",
+      "黄瓜",
+      "蒜",
+      "醋",
+      "辣椒油",
+      "芝麻酱"
+    ],
+    "calories_kcal_per_100g": 78,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 3.0,
+      "carb_g": 11.0,
+      "fiber_g": 0.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "spleen"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish",
+      "quick"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "xiaoman",
+      "mangzhong",
+      "xiazhi"
+    ],
+    "description": "滑爽清凉，夏日凉菜。"
+  },
+  {
+    "name": "陈皮红豆沙",
+    "category": "soup",
+    "ingredients": [
+      "红豆",
+      "陈皮",
+      "冰糖"
+    ],
+    "calories_kcal_per_100g": 95,
+    "nutrition": {
+      "protein_g": 3.5,
+      "fat_g": 0.5,
+      "carb_g": 20.0,
+      "fiber_g": 2.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "xueyu",
+      "qiyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [
+      "dongzhi",
+      "xiaohan"
+    ],
+    "description": "陈皮理气红豆利水，甜品养生。"
+  },
+  {
+    "name": "冰糖雪梨",
+    "category": "soup",
+    "ingredients": [
+      "雪梨",
+      "冰糖",
+      "枸杞",
+      "银耳"
+    ],
+    "calories_kcal_per_100g": 52,
+    "nutrition": {
+      "protein_g": 0.5,
+      "fat_g": 0.1,
+      "carb_g": 13.0,
+      "fiber_g": 1.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "lung",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tebing"
+    ],
+    "suitable_weathers": [
+      "dry"
+    ],
+    "tags": [
+      "vegetarian",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [
+      "qiufen",
+      "hanlu",
+      "shuangjiang"
+    ],
+    "description": "润肺止咳降火，秋燥佳品。"
+  },
+  {
+    "name": "烤红薯",
+    "category": "other",
+    "ingredients": [
+      "红薯"
+    ],
+    "calories_kcal_per_100g": 86,
+    "nutrition": {
+      "protein_g": 1.6,
+      "fat_g": 0.1,
+      "carb_g": 20.0,
+      "fiber_g": 3.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "other",
+    "cooking_time_min": 45,
+    "seasonal_solar_terms": [
+      "hanlu",
+      "shuangjiang",
+      "lidong"
+    ],
+    "description": "烤红薯香甜软糯，秋冬街头小吃。"
+  },
+  {
+    "name": "拔丝红薯",
+    "category": "stir_fry",
+    "ingredients": [
+      "红薯",
+      "糖",
+      "油"
+    ],
+    "calories_kcal_per_100g": 168,
+    "nutrition": {
+      "protein_g": 1.0,
+      "fat_g": 5.5,
+      "carb_g": 30.0,
+      "fiber_g": 2.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "拔丝红薯外脆内软，甜甜蜜蜜。"
+  },
+  {
+    "name": "白灼秋葵",
+    "category": "cold_dish",
+    "ingredients": [
+      "秋葵",
+      "蒜",
+      "酱油",
+      "香油"
+    ],
+    "calories_kcal_per_100g": 35,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 1.5,
+      "carb_g": 4.0,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "salty"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish",
+      "quick"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "低脂健康，白灼去涩。"
+  },
+  {
+    "name": "蒜蓉炒花甲",
+    "category": "stir_fry",
+    "ingredients": [
+      "花甲",
+      "蒜",
+      "姜",
+      "葱",
+      "辣椒"
+    ],
+    "calories_kcal_per_100g": 85,
+    "nutrition": {
+      "protein_g": 10.0,
+      "fat_g": 2.5,
+      "carb_g": 5.0,
+      "fiber_g": 0
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "spicy",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "forbidden_for": [
+      "tebing",
+      "yangxu"
+    ],
+    "tags": [
+      "seafood",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "xiaoshu",
+      "dachu"
+    ],
+    "description": "花甲肉嫩味鲜，蒜蓉炒最香。"
+  },
+  {
+    "name": "清炒茼蒿",
+    "category": "stir_fry",
+    "ingredients": [
+      "茼蒿",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 28,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 1.2,
+      "carb_g": 3.5,
+      "fiber_g": 1.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [],
+    "description": "茼蒿清香味鲜。"
+  },
+  {
+    "name": "蒜蓉西蓝花",
+    "category": "stir_fry",
+    "ingredients": [
+      "西蓝花",
+      "蒜",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 42,
+    "nutrition": {
+      "protein_g": 3.0,
+      "fat_g": 2.0,
+      "carb_g": 4.0,
+      "fiber_g": 1.8
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "西蓝花营养丰富，蒜蓉增香。"
+  },
+  {
+    "name": "腊肉炒荷兰豆",
+    "category": "stir_fry",
+    "ingredients": [
+      "腊肉",
+      "荷兰豆",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 128,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 7.5,
+      "carb_g": 6.5,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "shire"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 12,
+    "seasonal_solar_terms": [],
+    "description": "腊肉咸香，荷兰豆脆嫩。"
+  },
+  {
+    "name": "韭菜炒河虾",
+    "category": "stir_fry",
+    "ingredients": [
+      "河虾",
+      "韭菜",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 95,
+    "nutrition": {
+      "protein_g": 12.0,
+      "fat_g": 4.0,
+      "carb_g": 2.5,
+      "fiber_g": 0.8
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "kidney",
+      "liver"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold"
+    ],
+    "forbidden_for": [
+      "tebing",
+      "yinxu",
+      "shire"
+    ],
+    "tags": [
+      "seafood",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "jingzhe",
+      "chunfen"
+    ],
+    "description": "韭菜补肾温阳，河虾鲜美。"
+  },
+  {
+    "name": "椒盐排骨",
+    "category": "deep_fry",
+    "ingredients": [
+      "猪排骨",
+      "椒盐",
+      "蒜",
+      "青椒",
+      "洋葱"
+    ],
+    "calories_kcal_per_100g": 285,
+    "nutrition": {
+      "protein_g": 14.0,
+      "fat_g": 20.0,
+      "carb_g": 8.0,
+      "fiber_g": 0.5
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "spicy"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "shire"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "deep_fry",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [],
+    "description": "外酥里嫩，椒香四溢。"
+  },
+  {
+    "name": "蒜蓉蒸茄子",
+    "category": "steam",
+    "ingredients": [
+      "茄子",
+      "蒜",
+      "酱油",
+      "香油",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 42,
+    "nutrition": {
+      "protein_g": 1.2,
+      "fat_g": 2.0,
+      "carb_g": 5.5,
+      "fiber_g": 2.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "xiaoshu",
+      "dachu"
+    ],
+    "description": "少油清爽，蒜香茄子。"
+  },
+  {
+    "name": "腰果虾仁",
+    "category": "stir_fry",
+    "ingredients": [
+      "虾仁",
+      "腰果",
+      "西芹",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 142,
+    "nutrition": {
+      "protein_g": 12.0,
+      "fat_g": 8.0,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "salty"
+    ],
+    "organ_meridians": [
+      "kidney",
+      "spleen"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing",
+      "tanshi"
+    ],
+    "tags": [
+      "seafood",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 12,
+    "seasonal_solar_terms": [],
+    "description": "腰果酥脆虾仁弹嫩，宴客菜。"
+  },
+  {
+    "name": "火腿炒蛋",
+    "category": "stir_fry",
+    "ingredients": [
+      "火腿",
+      "鸡蛋",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 155,
+    "nutrition": {
+      "protein_g": 10.0,
+      "fat_g": 11.0,
+      "carb_g": 3.0,
+      "fiber_g": 0.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "egg",
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "快手早餐菜，咸香下粥。"
+  },
+  {
+    "name": "菠菜炒猪肝",
+    "category": "stir_fry",
+    "ingredients": [
+      "猪肝",
+      "菠菜",
+      "姜",
+      "蒜",
+      "料酒",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 115,
+    "nutrition": {
+      "protein_g": 13.0,
+      "fat_g": 4.5,
+      "carb_g": 4.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "liver",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 12,
+    "seasonal_solar_terms": [],
+    "description": "菠菜补铁猪肝补血，营养铁三角。"
+  },
+  {
+    "name": "豆角焖面",
+    "category": "staple",
+    "ingredients": [
+      "面条",
+      "豆角",
+      "五花肉",
+      "蒜",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 175,
+    "nutrition": {
+      "protein_g": 7.0,
+      "fat_g": 6.5,
+      "carb_g": 22.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [],
+    "description": "面条吸满豆角肉汁，经典北方主食。"
+  },
+  {
+    "name": "五香卤牛肉",
+    "category": "cold_dish",
+    "ingredients": [
+      "牛腱子",
+      "八角",
+      "桂皮",
+      "香叶",
+      "姜",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 185,
+    "nutrition": {
+      "protein_g": 20.0,
+      "fat_g": 8.5,
+      "carb_g": 3.0,
+      "fiber_g": 0
+    },
+    "nature": "warm",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "beef",
+      "cold_dish"
+    ],
+    "cooking_method": "boil",
+    "cooking_time_min": 120,
+    "seasonal_solar_terms": [],
+    "description": "卤牛肉切片下酒，冷吃热吃皆宜。"
+  },
+  {
+    "name": "素烧鹅",
+    "category": "stir_fry",
+    "ingredients": [
+      "豆腐皮",
+      "酱油",
+      "糖",
+      "葱",
+      "姜"
+    ],
+    "calories_kcal_per_100g": 128,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 7.0,
+      "carb_g": 8.0,
+      "fiber_g": 0.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "杭州素菜，形似烧鹅却是豆制品。"
+  },
+  {
+    "name": "紫薯粥",
+    "category": "congee",
+    "ingredients": [
+      "大米",
+      "紫薯"
+    ],
+    "calories_kcal_per_100g": 55,
+    "nutrition": {
+      "protein_g": 1.2,
+      "fat_g": 0.2,
+      "carb_g": 12.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy",
+      "soup"
+    ],
+    "cooking_method": "congee",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [],
+    "description": "紫薯富含花青素，甜糯好喝。"
+  },
+  {
+    "name": "芹菜炒鱿鱼",
+    "category": "stir_fry",
+    "ingredients": [
+      "鱿鱼",
+      "芹菜",
+      "姜",
+      "盐",
+      "料酒"
+    ],
+    "calories_kcal_per_100g": 92,
+    "nutrition": {
+      "protein_g": 11.0,
+      "fat_g": 3.0,
+      "carb_g": 5.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "liver",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tebing"
+    ],
+    "tags": [
+      "seafood",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "鱿鱼鲜嫩芹菜脆，快炒下饭。"
+  },
+  {
+    "name": "肉末蒸蛋",
+    "category": "steam",
+    "ingredients": [
+      "鸡蛋",
+      "猪肉末",
+      "葱",
+      "姜",
+      "盐",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 118,
+    "nutrition": {
+      "protein_g": 9.0,
+      "fat_g": 8.0,
+      "carb_g": 2.0,
+      "fiber_g": 0.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "egg",
+      "easy"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [],
+    "description": "肉末香鸡蛋嫩，老少皆宜。"
+  },
+  {
+    "name": "酸汤肥牛",
+    "category": "soup",
+    "ingredients": [
+      "肥牛片",
+      "金针菇",
+      "番茄",
+      "泡椒",
+      "姜",
+      "蒜"
+    ],
+    "calories_kcal_per_100g": 128,
+    "nutrition": {
+      "protein_g": 10.5,
+      "fat_g": 8.0,
+      "carb_g": 4.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "rainy"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tebing"
+    ],
+    "tags": [
+      "beef",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman"
+    ],
+    "description": "酸辣鲜香，开胃暖身。"
+  },
+  {
+    "name": "香煎鲳鱼",
+    "category": "stir_fry",
+    "ingredients": [
+      "鲳鱼",
+      "姜",
+      "葱",
+      "盐",
+      "面粉"
+    ],
+    "calories_kcal_per_100g": 145,
+    "nutrition": {
+      "protein_g": 16.5,
+      "fat_g": 8.0,
+      "carb_g": 2.5,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "外酥内嫩，鲳鱼少刺适合家宴。"
+  },
+  {
+    "name": "鸡蛋灌饼",
+    "category": "staple",
+    "ingredients": [
+      "面粉",
+      "鸡蛋",
+      "葱",
+      "盐",
+      "油"
+    ],
+    "calories_kcal_per_100g": 256,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 12.0,
+      "carb_g": 30.0,
+      "fiber_g": 1.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "egg",
+      "easy",
+      "quick"
+    ],
+    "cooking_method": "other",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "早餐饼灌鸡蛋，外酥里软。"
+  },
+  {
+    "name": "冬瓜薏米汤",
+    "category": "soup",
+    "ingredients": [
+      "冬瓜",
+      "薏米",
+      "排骨",
+      "姜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 45,
+    "nutrition": {
+      "protein_g": 3.5,
+      "fat_g": 1.5,
+      "carb_g": 4.5,
+      "fiber_g": 0.8
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "shire",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "humid"
+    ],
+    "tags": [
+      "pork",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 60,
+    "seasonal_solar_terms": [
+      "xiaoshu",
+      "dachu",
+      "liqiu",
+      "chushu"
+    ],
+    "description": "薏米祛湿冬瓜利水，夏季祛湿汤。"
+  },
+  {
+    "name": "蒜蓉豆角丝",
+    "category": "stir_fry",
+    "ingredients": [
+      "豆角",
+      "蒜",
+      "干辣椒",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 52,
+    "nutrition": {
+      "protein_g": 2.5,
+      "fat_g": 2.5,
+      "carb_g": 6.5,
+      "fiber_g": 2.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "豆角切丝炒更易熟嫩。"
+  },
+  {
+    "name": "素炒平菇",
+    "category": "stir_fry",
+    "ingredients": [
+      "平菇",
+      "青椒",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 35,
+    "nutrition": {
+      "protein_g": 2.0,
+      "fat_g": 1.5,
+      "carb_g": 4.0,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 8,
+    "seasonal_solar_terms": [],
+    "description": "平菇滑嫩鲜香。"
+  },
+  {
+    "name": "炒南瓜",
+    "category": "stir_fry",
+    "ingredients": [
+      "南瓜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 38,
+    "nutrition": {
+      "protein_g": 0.8,
+      "fat_g": 1.5,
+      "carb_g": 7.0,
+      "fiber_g": 1.0
+    },
+    "nature": "warm",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu"
+    ],
+    "suitable_weathers": [
+      "cold",
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "hanlu",
+      "shuangjiang",
+      "lidong"
+    ],
+    "description": "南瓜甘甜暖胃，简单清炒。"
+  },
+  {
+    "name": "蒸腊肉",
+    "category": "steam",
+    "ingredients": [
+      "腊肉"
+    ],
+    "calories_kcal_per_100g": 298,
+    "nutrition": {
+      "protein_g": 13.5,
+      "fat_g": 26.0,
+      "carb_g": 2.5,
+      "fiber_g": 0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "shire",
+      "tanshi"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "steam",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [
+      "lichun",
+      "yushui",
+      "jingzhe"
+    ],
+    "description": "腊肉切片蒸熟，肥而不腻。"
+  },
+  {
+    "name": "鱼头豆腐汤",
+    "category": "soup",
+    "ingredients": [
+      "鱼头",
+      "豆腐",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 58,
+    "nutrition": {
+      "protein_g": 7.0,
+      "fat_g": 2.5,
+      "carb_g": 1.5,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yinxu",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "fish",
+      "soup",
+      "easy"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [],
+    "description": "鱼头豆腐汤白如奶，补钙佳品。"
+  },
+  {
+    "name": "凉拌海带丝",
+    "category": "cold_dish",
+    "ingredients": [
+      "海带",
+      "蒜",
+      "醋",
+      "辣椒油",
+      "盐",
+      "糖"
+    ],
+    "calories_kcal_per_100g": 38,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 1.8,
+      "carb_g": 5.0,
+      "fiber_g": 2.0
+    },
+    "nature": "cool",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "lung"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish",
+      "quick"
+    ],
+    "cooking_method": "cold",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [],
+    "description": "海带丝酸辣开胃，夏季凉菜。"
+  },
+  {
+    "name": "砂锅豆腐",
+    "category": "stew",
+    "ingredients": [
+      "老豆腐",
+      "五花肉",
+      "香菇",
+      "蒜",
+      "酱油",
+      "葱"
+    ],
+    "calories_kcal_per_100g": 118,
+    "nutrition": {
+      "protein_g": 8.5,
+      "fat_g": 7.5,
+      "carb_g": 4.0,
+      "fiber_g": 0.8
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "easy"
+    ],
+    "cooking_method": "stew",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [],
+    "description": "砂锅慢炖豆腐入味，温暖落胃。"
+  },
+  {
+    "name": "糖醋里脊",
+    "category": "deep_fry",
+    "ingredients": [
+      "猪里脊",
+      "番茄酱",
+      "醋",
+      "糖",
+      "面粉",
+      "淀粉"
+    ],
+    "calories_kcal_per_100g": 245,
+    "nutrition": {
+      "protein_g": 12.0,
+      "fat_g": 13.5,
+      "carb_g": 18.0,
+      "fiber_g": 0.2
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "tanshi"
+    ],
+    "tags": [
+      "pork"
+    ],
+    "cooking_method": "deep_fry",
+    "cooking_time_min": 25,
+    "seasonal_solar_terms": [],
+    "description": "外脆里嫩酸甜汁，孩子最爱。"
+  },
+  {
+    "name": "酸豆角炒肉末",
+    "category": "stir_fry",
+    "ingredients": [
+      "酸豆角",
+      "猪肉末",
+      "干辣椒",
+      "蒜"
+    ],
+    "calories_kcal_per_100g": 135,
+    "nutrition": {
+      "protein_g": 8.5,
+      "fat_g": 8.0,
+      "carb_g": 6.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "spicy",
+      "salty"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "酸爽开胃，配粥拌饭一绝。"
+  },
+  {
+    "name": "清炒山药木耳",
+    "category": "stir_fry",
+    "ingredients": [
+      "山药",
+      "黑木耳",
+      "胡萝卜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 58,
+    "nutrition": {
+      "protein_g": 1.8,
+      "fat_g": 2.0,
+      "carb_g": 10.0,
+      "fiber_g": 1.5
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "lung",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu",
+      "xueyu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [],
+    "description": "山药健脾木耳清肺，清爽素菜。"
+  },
+  {
+    "name": "水煮毛豆",
+    "category": "cold_dish",
+    "ingredients": [
+      "毛豆",
+      "八角",
+      "盐",
+      "花椒"
+    ],
+    "calories_kcal_per_100g": 95,
+    "nutrition": {
+      "protein_g": 8.0,
+      "fat_g": 3.5,
+      "carb_g": 8.0,
+      "fiber_g": 3.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "vegetarian",
+      "cold_dish"
+    ],
+    "cooking_method": "boil",
+    "cooking_time_min": 20,
+    "seasonal_solar_terms": [
+      "mangzhong",
+      "xiazhi",
+      "xiaoshu"
+    ],
+    "description": "夏日毛豆佐酒小食。"
+  },
+  {
+    "name": "冰糖葫芦",
+    "category": "other",
+    "ingredients": [
+      "山楂",
+      "冰糖",
+      "水"
+    ],
+    "calories_kcal_per_100g": 158,
+    "nutrition": {
+      "protein_g": 0.5,
+      "fat_g": 0.2,
+      "carb_g": 38.0,
+      "fiber_g": 2.0
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sour",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "forbidden_for": [
+      "diabetic_sugar"
+    ],
+    "tags": [
+      "vegetarian",
+      "soup"
+    ],
+    "cooking_method": "other",
+    "cooking_time_min": 30,
+    "seasonal_solar_terms": [
+      "lidong",
+      "xiaoxue",
+      "dongzhi"
+    ],
+    "description": "山楂冰糖，消食开胃冬日零食。"
+  },
+  {
+    "name": "蟹黄豆腐",
+    "category": "stir_fry",
+    "ingredients": [
+      "嫩豆腐",
+      "咸蛋黄",
+      "姜",
+      "葱",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 112,
+    "nutrition": {
+      "protein_g": 6.5,
+      "fat_g": 7.5,
+      "carb_g": 4.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "qiufen",
+      "hanlu"
+    ],
+    "description": "咸蛋黄炒出蟹黄味，嫩滑鲜香。"
+  },
+  {
+    "name": "山药枸杞粥",
+    "category": "congee",
+    "ingredients": [
+      "大米",
+      "山药",
+      "枸杞",
+      "冰糖"
+    ],
+    "calories_kcal_per_100g": 58,
+    "nutrition": {
+      "protein_g": 1.5,
+      "fat_g": 0.3,
+      "carb_g": 12.5,
+      "fiber_g": 0.8
+    },
+    "nature": "neutral",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "lung",
+      "kidney"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu",
+      "yangxu",
+      "yinxu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy",
+      "soup"
+    ],
+    "cooking_method": "congee",
+    "cooking_time_min": 40,
+    "seasonal_solar_terms": [
+      "bailu",
+      "qiufen",
+      "hanlu",
+      "shuangjiang"
+    ],
+    "description": "山药健脾润肺，秋粥佳品。"
+  },
+  {
+    "name": "肉末粉丝",
+    "category": "stir_fry",
+    "ingredients": [
+      "粉丝",
+      "猪肉末",
+      "姜",
+      "葱",
+      "酱油"
+    ],
+    "calories_kcal_per_100g": 148,
+    "nutrition": {
+      "protein_g": 6.5,
+      "fat_g": 7.0,
+      "carb_g": 15.0,
+      "fiber_g": 0.3
+    },
+    "nature": "neutral",
+    "flavor": [
+      "salty",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "spleen",
+      "stomach"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "qixu"
+    ],
+    "suitable_weathers": [
+      "any"
+    ],
+    "tags": [
+      "pork",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 10,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman"
+    ],
+    "description": "蚂蚁上树，粉丝吸满肉汁。"
+  },
+  {
+    "name": "素炒南瓜尖",
+    "category": "stir_fry",
+    "ingredients": [
+      "南瓜尖",
+      "蒜",
+      "盐"
+    ],
+    "calories_kcal_per_100g": 28,
+    "nutrition": {
+      "protein_g": 1.8,
+      "fat_g": 1.2,
+      "carb_g": 4.0,
+      "fiber_g": 1.5
+    },
+    "nature": "cool",
+    "flavor": [
+      "bland",
+      "sweet"
+    ],
+    "organ_meridians": [
+      "stomach",
+      "large_intestine"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "yinxu",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot"
+    ],
+    "tags": [
+      "vegetarian",
+      "quick"
+    ],
+    "cooking_method": "stir_fry",
+    "cooking_time_min": 5,
+    "seasonal_solar_terms": [
+      "lixia",
+      "xiaoman",
+      "mangzhong",
+      "xiazhi",
+      "xiaoshu"
+    ],
+    "description": "南瓜尖鲜嫩，夏季时蔬。"
   }
 ]
