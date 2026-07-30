@@ -186,3 +186,133 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: T06 体质测试问卷与判定 + 游客登录
+
+**Date**: 2026-07-30
+**Task**: T06 体质测试问卷与判定 + 游客登录
+**Package**: miniapp
+**Branch**: `main`
+
+### Summary
+
+完成 T06 体质测试全链路（9题问卷判定+柱状图+存档）+ 游客登录体验功能。后端 46 pytest 全过(ruff/mypy strict)，前端 type-check/lint/build 全过，E2E 13 场景全过。
+
+### Main Changes
+
+# Session 4: T06 体质测试问卷与判定 + 游客登录
+
+**Date**: 2026-07-30
+**Task**: T06 体质测试 + 游客登录（用户追加需求）
+**Package**: miniapp
+**Branch**: `main`
+
+## Summary
+
+完成 T06 体质测试全链路 + 用户新增的游客登录体验功能。后端：constitutional 9 题问卷判定算法（依据 ZYYXH/T157-2009，平和质反向题 raw=6-score 让 9 体质复用同一公式）、UserProfile 加 constitution_type + constitution_scores JSON 列、3 个 API 路由（POST/GET /profile/constitution + 公开 GET /questions）。游客登录：get_or_create_guest() 用 `guest:` 前缀隔离与真实微信 openid 命名空间，POST /auth/guest-login 不调微信、按 guestId 复用/创建用户。前端：types/constants/api 三层体质文件、user store 加 constitution ref + loginAsGuest + isGuest computed、重写 constitution.vue（9 题问卷 + 进度条 + 结果柱状图 + 未登录/未建档引导 + 重新测试）、auth.vue 加游客登录按钮与 divider、mine.vue 重写加体质 menu 项 + 游客徽章 + 升级按钮 + 退出登录。
+
+## Detailed Changes
+
+### 后端
+- `app/services/constitution.py`：QUESTIONS / OPTIONS / CONSTITUTION_NAMES 常量 + judge() / save_constitution() / get_constitution()；cast(ConstitutionType) 让 mypy strict 过
+- `app/api/v1/constitution.py`：3 路由（POST submit / GET result / GET questions 公开）
+- `app/schemas/constitution.py`：ConstitutionType Literal + ConstitutionQuestionnaire + ConstitutionResult + ConstitutionQuestionsPayload
+- `app/models/user_profile.py`：加 constitution_type: str | None + constitution_scores: dict | None (JSON 列)；to_read_dict() 扩展
+- `app/schemas/profile.py`：ProfileRead 加 constitution_type / constitution_scores
+- `app/schemas/auth.py`：新增 GuestLoginRequest（含 min_length=1 校验）
+- `app/services/user_service.py`：新增 get_or_create_guest(guest_id, nickname)；复用 upsert_by_openid，openid 命名空间用 `guest:<id>`
+- `app/api/v1/auth.py`：新增 POST /auth/guest-login 路由，不调 wx_client，签 JWT 返回 LoginResponse
+- `app/api/v1/__init__.py`：注册 constitution_router
+
+### 测试（46 pytest 全过，ruff + mypy strict 全过）
+- `tests/services/test_constitution.py`：13 例（4 主分支 + 边界 + save/get round-trip + 各种 ValidationError）
+- `tests/test_api_v1/test_constitution.py`：8 例（未登录401 / 公开questions / 未建档404 / 建档提交 / GET复读 / GET无记录404 / 422 / 重新测试覆盖）
+- `tests/test_api_v1/test_guest_login.py`：8 例（创建 / 复用 / 不同id / 默认nickname / 缺guestId422 / 空串422 / token可调受保护端点 / 不调微信）
+
+### 前端（type-check / lint / build:mp-weixin 全过）
+- `src/types/api.ts`：ConstitutionType / ConstitutionResult / ConstitutionQuestionsPayload / ConstitutionQuestion / ConstitutionOption；ProfileRead 加 constitutionType / constitutionScores
+- `src/constants/constitution.ts`：CONSTITUTION_TYPES / CONSTITUTION_NAMES / CONSTITUTION_OPTIONS
+- `src/api/constitution.ts`：getQuestions / submit / getResult（注释：数字 key 不被 camelToSnake 改动）
+- `src/api/auth.ts`：guestLogin(guestId, nickname?)
+- `src/stores/user.ts`：constitution ref + saveConstitution / fetchConstitution action + guestId ref + loginAsGuest + isGuest computed + generateGuestId() + storage eat_what_constitution / eat_what_guest_id
+- `src/pages/constitution/constitution.vue`：重写——问卷视图（9题×5radio + 进度条 + 提交按钮）+ 结果视图（主体质大字 + 兼夹chip + 9体质柱状图 + 重新测试）+ 未登录/未建档引导
+- `src/pages/auth/auth.vue`：加「游客登录」按钮 + 分隔线 divider
+- `src/pages/mine/mine.vue`：重写——体质测试 menu 项（已测/未测引导）+ 健康档案 menu 项 + 游客徽章 + 「升级为正式账号」按钮 + 退出登录
+
+### E2E 验证（13 场景全过）
+真实 uvicorn(8765) + SQLite dev.db，curl 全链路：
+1. 游客登录 → 创建 user + 签发 JWT
+2. 未登录 POST /constitution → 401
+3. 公开 GET /questions → 200 + 9 题 + 5 选项
+4. 登录后未建档 POST → 404
+5. PUT /profile 建档 → 200
+6. POST /constitution 全 1 → 主平和（scores pinghe=100）
+7. GET /constitution → 复读上次结果
+8. 重新测试（题1=5 题2=5 其余1）→ 主气虚 qixu
+9. 再 GET → 是新结果（覆盖验证通过）
+10. GET /profile → constitution_type / constitution_scores 字段已更新
+11. 同 guest_id 二次游客登录 → 复用同一 user id
+12. 不同 guest_id → 新建不同 user
+13. guestId 缺失 → 422
+
+## Key Decisions
+
+| 决策 | 选择 | 理由 |
+|---|---|---|
+| 平和质判定 | raw_pinghe = 6 - scores[1]，9 体质同公式 | 设计文档决策避免特殊路径；题1用户高分(精力充沛)→反向低分→全<60时fallback平和，语义自洽 |
+| constitution_scores 字段 | JSON 列存完整转化分 | GET 需要展示完整柱状图，不能只存字符串 |
+| 题库路由 | 公开 GET /questions | 题面静态公开数据，不需登录 |
+| 游客登录命名空间 | `guest:<id>` openid | 与真实微信 openid 隔离，便于审计/迁移；复用 upsert_by_openid |
+| guest_id 生成 | 前端生成 + 落 storage eat_what_guest_id | 后端只接受不生成，避免「后端生成前端拿不到无法复用」的不对称 |
+| 游客身份持久化 | storage key 落盘 | 刷新页面/重启小程序仍复用同一游客用户 |
+| mine.vue 升级按钮 | 游客显示「升级为正式账号」 | UX 引导，目前跳登录页；旧游客 user 行保留，未来可加迁移逻辑 |
+
+## Caveats / 已知缺口
+
+- mine.vue 的「升级为正式账号」目前只跳登录页，没做游客数据迁移到正式账号（未来增强）
+- constitution 的 `judge()` 把 pinghe 也放在 high_enough 里参与排序，但因为反向题的关系，全<60时fallback到平和，测试覆盖了所有 4 个 PRD 分支
+- 前端 lint 只剩 App.vue 旧 console.log 警告（T01 遗留，非本任务）
+
+## Git Commits
+
+| Hash | Message |
+|------|---------|
+| `83eda01` | docs(task): T06 design & implement artifacts + task 元数据 |
+| `445b83d` | feat(constitution): 后端体质判定 + 游客登录（T06） |
+| `3005f83` | feat(constitution): 前端问卷页 + 结果柱状图 + 游客登录（T06） |
+
+## Testing
+
+- 后端：`ruff check` All passed / `mypy strict` 0 issues / `pytest` 46 passed (1 warning = JWT key 长度警告，与 T06 无关)
+- 前端：`type-check` 0 错 / `lint:check` 0 错 1 警（旧 console.log） / `build:mp-weixin` Build complete
+- E2E：13 个场景全过（真实 uvicorn + SQLite + JWT 全链路）
+
+## Status
+
+[OK] **Completed**
+
+## Next Steps
+
+- 运行 `python3 ./.trellis/scripts/task.py archive 07-23-t06-constitution-test` 归档任务
+- 接着进入 T07 食物库冷启动（200 道菜 JSON + 导入脚本）
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `83eda01` | (see git log) |
+| `445b83d` | (see git log) |
+| `3005f83` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
