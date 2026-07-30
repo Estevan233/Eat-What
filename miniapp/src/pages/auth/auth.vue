@@ -9,7 +9,18 @@
       {{ loading ? '登录中…' : '微信一键登录' }}
     </button>
 
+    <view class="divider">
+      <view class="line"></view>
+      <text class="or">或</text>
+      <view class="line"></view>
+    </view>
+
+    <button class="guest-btn" :disabled="loading" @click="onGuestLogin">
+      游客登录，先体验一下
+    </button>
+
     <text class="hint">登录后才能记录心情、收藏菜品、查看历史</text>
+    <text class="hint-guest">游客数据也保存在云端，可随时升级为正式账号</text>
   </view>
 </template>
 
@@ -26,22 +37,40 @@ async function onLogin() {
   try {
     await userStore.login()
     uni.showToast({ title: '登录成功', icon: 'success' })
-
-    // 从 query 取 redirect，没有就回 today tab
-    const pages = getCurrentPages()
-    const current = pages[pages.length - 1] as { options?: { redirect?: string } }
-    const redirect = current?.options?.redirect
-
-    if (redirect) {
-      uni.redirectTo({ url: decodeURIComponent(redirect) })
-    } else {
-      uni.switchTab({ url: '/pages/today/today' })
-    }
+    goNext()
   } catch (e) {
     const msg = e instanceof Error ? e.message : '登录失败'
     uni.showToast({ title: msg, icon: 'none' })
   } finally {
     loading.value = false
+  }
+}
+
+async function onGuestLogin() {
+  if (loading.value) return
+  loading.value = true
+  try {
+    await userStore.loginAsGuest()
+    uni.showToast({ title: '已进入游客模式', icon: 'success' })
+    goNext()
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : '游客登录失败'
+    uni.showToast({ title: msg, icon: 'none' })
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 根据 query 的 redirect 跳转，没有就回 today tab。 */
+function goNext() {
+  const pages = getCurrentPages()
+  const current = pages[pages.length - 1] as { options?: { redirect?: string } }
+  const redirect = current?.options?.redirect
+
+  if (redirect) {
+    uni.redirectTo({ url: decodeURIComponent(redirect) })
+  } else {
+    uni.switchTab({ url: '/pages/today/today' })
   }
 }
 </script>
@@ -92,8 +121,50 @@ async function onLogin() {
   background: #93b7f3;
 }
 
+.divider {
+  display: flex;
+  align-items: center;
+  width: 80%;
+  margin: 10rpx 0 30rpx;
+}
+
+.line {
+  flex: 1;
+  height: 1rpx;
+  background: #e0e0e0;
+}
+
+.or {
+  margin: 0 24rpx;
+  font-size: 24rpx;
+  color: #aaa;
+}
+
+.guest-btn {
+  width: 80%;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #fff;
+  color: #2563eb;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  border: 1rpx solid #2563eb;
+  margin-bottom: 40rpx;
+}
+
+.guest-btn[disabled] {
+  color: #93b7f3;
+  border-color: #93b7f3;
+}
+
 .hint {
   font-size: 24rpx;
   color: #999;
+  margin-bottom: 8rpx;
+}
+
+.hint-guest {
+  font-size: 22rpx;
+  color: #bbb;
 }
 </style>

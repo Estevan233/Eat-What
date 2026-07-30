@@ -35,6 +35,13 @@ export type Mood = 'happy' | 'neutral' | 'tired' | 'stressed' | 'anxious'
 export type ActivityLevel = 'light' | 'normal' | 'high'
 
 /**
+ * 9 种中医体质标识符 - 与后端 backend/app/schemas/constitution.py 的 ConstitutionType 同步。
+ */
+export type ConstitutionType =
+  | 'pinghe' | 'qixu' | 'yangxu' | 'yinxu' | 'tanshi'
+  | 'shire' | 'xueyu' | 'qiyu' | 'tebing'
+
+/**
  * 用户档案详情（前端 camelCase 版本）。
  * 与后端 ProfileRead 对应，字段名经 request.ts 的 snakeToCamel 转换。
  */
@@ -45,6 +52,10 @@ export interface ProfileRead {
   heightCm?: number
   weightKg?: number
   forbiddenTags: string[]
+  /** T06 新增：体质判定结果字符串，如 "qixu;shire"（主+兼夹分号串）。 */
+  constitutionType?: string | null
+  /** T06 新增：完整转化分，如 { pinghe: 0, qixu: 100, ... }。 */
+  constitutionScores?: Record<ConstitutionType, number> | null
   zodiacSign?: string | null
   updatedAt: string
 }
@@ -82,4 +93,33 @@ export interface UserRead {
 export interface LoginResponse {
   token: string
   user: UserRead
+}
+
+/**
+ * 体质判定结果（POST/GET /profile/constitution 的 data）。
+ * 字段名经 request.ts 的 snakeToCamel 转换。
+ */
+export interface ConstitutionResult {
+  primary: ConstitutionType
+  secondary: ConstitutionType[]
+  scoresNormalized: Record<ConstitutionType, number>
+  constitutionTypeStr: string
+}
+
+/** GET /profile/constitution/questions 的 data。 */
+export interface ConstitutionQuestionsPayload {
+  questions: ConstitutionQuestion[]
+  options: ConstitutionOption[]
+}
+
+export interface ConstitutionQuestion {
+  id: number
+  text: string
+  /** 后端 QUESTIONS 里 type 字段是字符串（含 "pinghe_reverse"），前端只用来展示。 */
+  type: string
+}
+
+export interface ConstitutionOption {
+  value: number
+  label: string
 }
