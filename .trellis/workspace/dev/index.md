@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 4
+- **Total Sessions**: 5
 - **Last Active**: 2026-07-30
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~318 | Active |
+| `journal-1.md` | ~353 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 5 | 2026-07-30 | T07 食物库冷启动第1步 + 第2步进行中 | `ca0f705`, `a621124` | `main` |
 | 4 | 2026-07-30 | T06 体质测试问卷与判定 + 游客登录 | `83eda01`, `445b83d`, `3005f83` | `main` |
 | 3 | 2026-07-28 | T05: 用户档案模型与编辑页 | `8a6512b`, `cd5effc`, `cd95a01` | `main` |
 | 2 | 2026-07-28 | T01-T04: 脚手架 + FastAPI 基础设施 + uni-app 基础设施 + 微信登录全链路 | `d898246`, `464b362`, `a57a604` | `main` |
