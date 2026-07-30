@@ -52,3 +52,42 @@ def upsert_by_openid(
     session.commit()
     session.refresh(user)
     return user
+
+
+# 游客 openid 前缀 - 与真实微信 openid 命名空间隔离，便于将来审计 / 迁移
+GUEST_OPENID_PREFIX = "guest:"
+
+# 游客 nickname 默认前缀（前端可在登录页让用户输入，未输入时用此默认）
+GUEST_DEFAULT_NICKNAME = "游客"
+
+
+def get_or_create_guest(
+    session: Session,
+    *,
+    guest_id: str,
+    nickname: str | None = None,
+) -> User:
+    """游客登录：按 guest_id 复用 / 创建一个伪 openid 用户。
+
+    设计：
+    - openid 命名空间用 `guest:<guest_id>` 与真实微信 openid 隔离
+    - guest_id 由前端生成并落 storage，下次登录传回同一 guest_id → 复用同一行
+    - nickname 不传时默认「游客」
+    - 不支持 unionid（游客无微信身份）
+
+    Args:
+        session: SQLModel Session
+        guest_id: 前端生成的游客标识（建议 UUID v4），同一 guest_id 总是同一 user
+        nickname: 可选昵称，未传用默认
+
+    Returns:
+        落库后的 User 对象（含 id）。
+    """
+    openid = f"{GUEST_OPENID_PREFIX}{guest_id}"
+    return upsert_by_openid(
+        session,
+        openid=openid,
+        unionid=None,
+        nickname=nickname or GUEST_DEFAULT_NICKNAME,
+        avatar_url=None,
+    )

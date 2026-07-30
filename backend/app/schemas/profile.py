@@ -47,6 +47,9 @@ class ProfileRead(BaseModel):
     height_cm: int | None = None
     weight_kg: float | None = None
     forbidden_tags: list[str] = []
+    # T06 新增
+    constitution_type: str | None = None
+    constitution_scores: dict[str, int] | None = None
     zodiac_sign: str | None = None   # 占位，T08 实现
     updated_at: datetime
 

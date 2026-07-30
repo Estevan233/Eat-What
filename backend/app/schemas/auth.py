@@ -7,7 +7,7 @@
 - from_orm 把 ORM 对象转 Pydantic 模型
 """
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class WxLoginRequest(BaseModel):
@@ -15,6 +15,17 @@ class WxLoginRequest(BaseModel):
     code: str
     nickname: str | None = None
     avatarUrl: str | None = None  # camelCase 与微信小程序 wx.getUserProfile 返回一致
+
+
+class GuestLoginRequest(BaseModel):
+    """前端 POST /auth/guest-login 的 body。
+
+    guestId 由前端生成（建议 UUID v4）并落 storage，下次登录传回同一 guestId
+    → 后端复用同一 user 行。不传时后端会生成一个，但前端拿不到无法复用，
+    所以推荐前端必传。
+    """
+    guestId: str = Field(..., min_length=1, max_length=128)
+    nickname: str | None = Field(default=None, max_length=64)
 
 
 class AuthUserRead(BaseModel):
