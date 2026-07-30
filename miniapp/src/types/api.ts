@@ -123,3 +123,29 @@ export interface ConstitutionOption {
   value: number
   label: string
 }
+
+/**
+ * 12 西方星座英文键，与后端 backend/app/services/solar_terms.py 的
+ * compute_zodiac 返回值同步。
+ */
+export type ZodiacSign =
+  | 'aries' | 'taurus' | 'gemini' | 'cancer' | 'leo' | 'virgo'
+  | 'libra' | 'scorpio' | 'sagittarius' | 'capricorn' | 'aquarius' | 'pisces'
+
+/**
+ * 今日历法上下文 - GET /context/today 返回的 data。
+ * 字段经 request.ts 的 snakeToCamel 转换。
+ */
+export interface TodayContext {
+  date: string
+  /** 当前节气中文名，非节气日为空字符串 */
+  solarTermCurrent: string
+  solarTermNextName: string
+  solarTermNextDate: string
+  zodiacSign: ZodiacSign
+  /** 生肖中文名：马 / 羊 / 猴 ... */
+  animal: string
+  lunarMonth: number
+  lunarDay: number
+  isLeapMonth: boolean
+}
