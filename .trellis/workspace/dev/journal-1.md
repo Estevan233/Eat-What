@@ -613,3 +613,122 @@ T09 完成。调研发现和风天气公共域名 devapi.qweather.com / geoapi.q
 ### Next Steps
 
 - None - task complete
+
+
+## Session 9: T10 推荐算法核心
+
+**Date**: 2026-07-31
+**Task**: T10 推荐算法核心
+**Package**: backend
+**Branch**: `main`
+
+### Summary
+
+5 维推荐算法 + DailyLog + 前端类型
+
+### Main Changes
+
+## 概要
+
+T10 推荐算法核心：5 维打分推荐引擎 + DailyLog 表 + POST /daily/recommend 路由 + 前端类型定义。算法综合天气(30) / 节气(20) / 星座(10) / 心情(20) / 营养均衡(20) 五个维度为用户从 204 道菜库中推荐 3 道最合适的菜，附带自然语言推荐理由。
+
+## 实现内容
+
+### 后端 - 数据模型
+- `app/models/daily_log.py`：DailyLog 表 (user_id + log_date 唯一索引)
+  - 字段: recommended_food_ids_json / chosen_food_ids_json / mood / activity_level / weather_tag
+  - T10 写 recommended，T11 写 chosen
+
+### 后端 - Schema
+- `app/schemas/daily.py`：
+  - Mood / ActivityLevel Literal (与前端 types/api.ts 同步)
+  - RecommendRequest (mood/activity_level/lat?/lng?)
+  - FoodWithReason (Food 全字段 + reason + score)
+  - RecommendContext (weather + today)
+  - RecommendResponse (foods + context)
+
+### 后端 - 服务层
+- `app/services/daily_service.py`：DailyLog CRUD
+  - get_recent(session, user_id, n) 最近 N 天日志
+  - upsert_today_log(session, user_id, ...) 插入/更新今日推荐
+  - update_chosen_food_ids(session, user_id, ids) T11 用
+
+- `app/services/recommender.py`：5 维推荐算法核心
+  - **天气打分 (30分)**：cold→warm/hot 食材 +30, hot→cold/cold 食材 +30, rainy→soup/congee +20
+    - 无坐标 fallback: synthetic WeatherData(mild, 22°C)，不打 HTTP
+    - 拆分 `_weather_cold_score` / `_weather_hot_score` 子函数降低 C901 复杂度
+  - **节气打分 (20分)**：food.seed 存拼音('liqiu')，lunar_python 返中文('立秋')，bimap 转换后匹配 +20
+  - **星座打分 (10分)**：ZODIAC_ELEMENTS fire/earth/air/water → tag 偏好 (leo→easy +10)
+  - **心情打分 (20分)**：
+    - tired → 高蛋白(≥12g) +20
+    - stressed → soup/congee tags +20
+    - anxious → 色氨酸食材(鸡蛋/牛奶/燕麦/小米) +20
+  - **营养均衡 (20分)**：历史 chosen 汇总脂肪，高脂(≥60g)→低脂菜(≤5g) +20
+  - **activity 微调**：high + protein≥12 → +3, light + fat≤5 → +2
+  - **多样性约束**：category ≤2, cooking_method ≤2，不足 3 道放宽补足，同分按 food.id asc
+  - **推荐理由**：「适合今日【{维度短语}】场景，{菜名}正合时令」兜底「今天品尝{菜名}很合适」
+  - **入口**：recommend() async → profile None→NotFoundError, 写 DailyLog
+
+### 后端 - 路由
+- `app/api/v1/daily.py`：POST /daily/recommend (login required)
+- 注册于 `app/api/v1/__init__.py`
+
+### 前端
+- `types/api.ts`：FoodWithReason / RecommendContext / RecommendRequest / RecommendResponse
+  - camelCase 约定（request.ts snakeToCamel 双向转换）
+
+### 测试
+- `tests/services/test_recommender.py`：16 例
+  - 返回 3 道 / 忌口过滤 / 体质禁忌 / 冷天促暖 / 雨天促汤 / 节气应季 / 心情高蛋白 / 心景色氨酸 / 历史高脂低脂 / 多样性 / 无档案 404 / 理由关键词 / 同输入稳定 / fallback 天气 / 写 DailyLog / 真实天气坐标
+- `tests/test_api_v1/test_daily.py`：10 例
+  - 401 未登录 / 404 无档案 / 200 成功+3菜+context / 422 lat/lng/mood/activity_level / 写 DailyLog / fallback 无坐标 / 传坐标调天气
+
+### 验证
+- 后端：ruff/mypy strict 全过 / 183 pytest 全过 (157+16+10)
+- 前端：type-check / lint 全过 (1 已知 App.vue no-console warning)
+- E2E 真实数据：204 foods seeded, 用户 forbidden_tags=['pork'] + constitution='qixu'
+  - 冷天气 mock → top3 [白切鸡/白斩鸡/口水鸡] score=61.0
+  - 理由：适合今日【天冷温补、临近立秋、高蛋白缓解疲惫】场景，白切鸡正合时令
+  - 耗时 55ms < 500ms 目标
+  - 同输入稳定重复
+  - DailyLog 正确写入 (mood=tired, activity=high, weather_tag=cold, rec_ids=[14,51,53])
+
+## 取舍记录
+
+| 决策 | 选择 | 理由 |
+|---|---|---|
+| DailyLog 建表时机 | T10（非 T11） | 算法历史读取需真实数据，T11 只加 chosen writer |
+| 天气 fallback | synthetic mild 22°C | 无坐标不打 HTTP，算法仍可运行 |
+| ActivityLevel | 'high' 非 PRD 'heavy' | 与前端 types/api.ts 已有定义对齐 |
+| 节气匹配 | 拼音↔中文 bimap | food_seed 存拼音, lunar_python 返中文 |
+| 复杂度 | _weather_cold/hot_score 拆分 | C901 从 13 降到 ≤10 |
+| food_service size | 不 clamp | service 层不限制，路由 Query le=50, recommender 直接 size=500 |
+| 模块级常量 | HIGH_FAT_THRESHOLD=20 等 | 营养均衡阈值集中管理 |
+
+## Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0ad9f52` | feat(recommender): 5 维推荐算法 + DailyLog + 前端类型（T10） |
+
+## Status
+[OK] **Completed - 准备 archive**
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0ad9f52` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
