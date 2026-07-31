@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 9
+- **Total Sessions**: 10
 - **Last Active**: 2026-07-31
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~734 | Active |
+| `journal-1.md` | ~868 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 10 | 2026-07-31 | T11 今日推荐 UI + 历史记录 + 收藏 | `10de8b5` | `main` |
 | 9 | 2026-07-31 | T10 推荐算法核心 | `0ad9f52` | `main` |
 | 8 | 2026-07-31 | T09 Open-Meteo 天气接入完成（替代和风） | `80f3d43` | `main` |
 | 7 | 2026-07-30 | T08 节气与星座服务完成 | `78a6f8e` | `main` |

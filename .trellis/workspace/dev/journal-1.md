@@ -732,3 +732,137 @@ T10 推荐算法核心：5 维打分推荐引擎 + DailyLog 表 + POST /daily/re
 ### Next Steps
 
 - None - task complete
+
+
+## Session 10: T11 今日推荐 UI + 历史记录 + 收藏
+
+**Date**: 2026-07-31
+**Task**: T11 今日推荐 UI + 历史记录 + 收藏
+**Package**: miniapp
+**Branch**: `main`
+
+### Summary
+
+推荐UI + 选择 + 收藏 + 历史记录
+
+### Main Changes
+
+## 概要
+
+T11 今日推荐 UI + 历史记录 + 收藏：把 T10 推荐算法结果可视化到首页，闭环实现用户「选择今天的菜 → 写入历史」「收藏」与「查看历史」「下拉刷新」功能。后端新增 Favorite 模型、3 个 daily 路由、3 个 favorite 路由、22 个新测试；前端新增 FoodCard 组件、today 页重写、history/favorite 页、daily/favorite stores 扩展、mood/activity 常量。
+
+## 实现内容
+
+### 后端 - 数据模型
+- `app/models/favorite.py`：Favorite 表 (user_id+food_id 联合唯一约束)
+  - toggle 语义：已收藏时取消，未收藏时新增
+- 注册于 `app/models/__init__.py`
+
+### 后端 - 服务层
+- `app/services/favorite_service.py`：
+  - toggle_favorite: 找到则删，否则新增 → bool
+  - is_favorited: 单道菜收藏判断
+  - list_favorited_ids: 全部已收藏 food_id
+  - list_favorites: JOIN Food 返回完整 Food 详情 + 分页
+
+- `app/services/daily_service.py` 扩展：
+  - get_today 取今日 DailyLog
+  - append_chosen_food_id 追加菜品到 chosen_food_ids（去重）
+
+### 后端 - 路由
+- `app/api/v1/daily.py` 扩展：
+  - POST /daily/choose body {food_id} → 校验 food 存在 → append → DailyLogRead
+  - GET /daily/today → 返回 DailyLogRead，不存在返回 null
+  - GET /daily/history?days=30 → HistoryResponse (items+total)
+- `app/api/v1/favorite.py`：
+  - POST /favorite/{food_id} toggle → {foodId, favorited}
+  - GET /favorite?page=1&size=20 → 分页 (Food 详情)
+- 注册于 `app/api/v1/__init__.py`
+
+### 后端 - Schemas
+- `app/schemas/daily.py` 新增：
+  - ChooseRequest / DailyLogRead / HistoryResponse / FavoriteToggleResponse
+
+### 测试
+- `tests/test_api_v1/test_daily.py` +12 例：
+  - choose 未登录401 / 不存在食品404 / 仅推荐前choose 422 / 成功 / 重复同food幂等 / 多food追加
+  - today 未登录401 / 不存在日志返 null / 推荐后返 log
+  - history 未登录401 / 推荐后返列表 / days越界 422
+- `tests/test_api_v1/test_favorite.py` +10 例：
+  - toggle 401/404/首次 true/二次 false/三次 true
+  - list 空列表/有数据/分页/未登录401/size越界422
+
+### 验证
+- 后端：ruff/mypy strict (47 源文件) 全过 / 205 pytest 全过 (183+22)
+- 前端：type-check / lint (1 已知 App.vue no-console warning)
+
+### 前端 - API & Stores
+- `api/daily.ts` 新建：recommend/chooseFood/getTodayLog/getHistory
+- `api/favorite.ts` 新建：toggleFavorite/listFavorites
+- `stores/daily.ts` 扩展：
+  - 新增状态: recommendation/todayLog/mood/activityLevel/loading
+  - 新增 actions: fetchRecommend/chooseFood/fetchTodayLog/fetchHistory/setMood/setActivityLevel
+  - mood/activityLevel 落 storage 跨页保持
+- `stores/favorite.ts` 新建：
+  - 状态: favoritedIds (Set) / favorites / loading
+  - actions: toggle / fetchList / isFavorited
+  - favoritedIds 落 storage 供 FoodCard 即时同步
+- `constants/daily.ts` 新建：MOOD_LABELS/ACTIVITY_LABELS + 排列顺序
+
+### 前端 - 组件 / 页面
+- `components/FoodCard.vue` 新建：
+  - props food / chosen；emits choose / 内置 toggle favorite
+  - 卡片头：菜名 + 收藏图标（♡→♥）
+  - 信息行：卡路里 / 烹饪方式 / tags chips
+  - 推荐理由：折叠/展开切换
+  - 底部：分值徽章 + "就吃这个"按钮（已选变灰）
+- `pages/today/today.vue` 重写：
+  - 顶部 WeatherBadge（沿用 T09）
+  - 今日已选提示条 + 收藏快捷入口
+  - 心情 5-chip / 活动量 3-chip 选择器
+  - "看看今天吃啥"主按钮 + loading 骨架屏
+  - FoodCard 列表（onChoose 写后端 + toast）
+  - onShow 同步 todayLog + favoriteStore
+- `pages/history/history.vue` 重写：近 30 天日志列表，每条日期+心情+选中数+天气
+- `pages/favorite/favorite.vue` 新建：收藏列表，每条取消收藏按钮
+- `pages.json` +favorite 页注册
+
+## 取舍记录
+
+| 决策 | 选择 | 理由 |
+|---|---|---|
+| chosen 模型 | list[int]（非 PRD 的 single id） | T10 用 list 更灵活，choose append 去重 |
+| Favorite toggle | POST 一条路由 | 前端一个按钮两种操作，比 POST+DELETE 分开更简洁 |
+| 校验 | food 存在 + 推荐前先调 recommend | choose 缺 recommend 422 提示先推荐 |
+| daily 路由总数 | 4 条（recommend/choose/today/history） | 合理覆盖"推荐-选择-查询-历史"流 |
+| FoodCard favorite | 内置 store.toggle | 收藏交互响应即时，不需父级转发 |
+| mood/activity 落盘 | storage | 跨页保持用户选择，避免重选 |
+| 骨架屏 | CSS animation 实现 | 无需第三方组件，轻量 |
+| history 数据 | 拉取后端列表 | 完整数据源在 backend，前端不缓存 |
+
+## Git Commits
+
+| Hash | Message |
+|------|---------|
+| `10de8b5` | feat(today): 推荐UI + 选择 + 收藏 + 历史记录（T11） |
+
+## Status
+[OK] **Completed - 准备 archive**
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `10de8b5` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
