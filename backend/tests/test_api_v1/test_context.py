@@ -1,10 +1,66 @@
-"""T08 今日上下文 API 集成测。
+"""T08/T09 今日上下文 API 集成测。
 
-覆盖 PRD 验收：
+T08 覆盖：
 1. GET /context/today 公开无需登录 → 200
 2. 返回 TodayContext JSON 含所有字段
 3. 同一天重复调用一致（缓存）
+
+T09 覆盖：
+4. POST /context/weather 未登录 → 401
+5. 登录后 + 合法坐标 → 200 + WeatherData 字段 + weather_tag 6+1
+6. lat/lng 越界 → 422
+7. mock weather_client 不真实联网
 """
+from unittest.mock import AsyncMock
+
+import pytest
+
+
+@pytest.fixture
+def auth_token(client, monkeypatch):
+    """构造登录 token，与 test_constitution.py 同风格。"""
+    from app.services import wx_client as mod
+    from app.services.wx_client import Code2SessionResult
+    result: Code2SessionResult = {
+        "openid": "openid_for_weather_test",
+        "session_key": "fake",
+        "unionid": None,
+    }
+    mod.wx_client.code2session = AsyncMock(return_value=result)
+    res = client.post("/api/v1/auth/wx-login", json={"code": "fake"})
+    assert res.status_code == 200
+    token = res.json()["data"]["token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def mock_weather():
+    """替换 weather_client 单例的 get_current 为 AsyncMock，返回一个雨天 mock。"""
+    from datetime import datetime, timezone
+
+    from app.schemas.weather import WeatherData
+    from app.services import weather_client as mod
+
+    sample = WeatherData(
+        location_name="Open-Meteo @ 39.92,116.41",
+        temp_c=22.5,
+        feels_like_c=24.0,
+        text="小雨",
+        wind_dir="南",
+        wind_scale="2级 轻风",
+        humidity=78,
+        precipitation_mm=1.5,
+        weather_tag="rainy",
+        fetched_at=datetime.now(timezone.utc),
+    )
+    # 单例的 get_current 是 async 方法，TestClient 同步调用流程会通过 ASGI 跑协程
+    # AsyncMock 让 await 正常工作
+    mod.weather_client.get_current = AsyncMock(return_value=sample)
+    mod.weather_client.cache_clear()
+    yield mod.weather_client
+    # 测试结束无需还原（pytest fixture 之间互不影响）
+
+
 def test_get_today_context_returns_full_payload(client):
     res = client.get("/api/v1/context/today")
     assert res.status_code == 200
@@ -68,3 +124,95 @@ def test_get_today_context_zodiac_value_in_12_signs(client):
         "aries", "taurus", "gemini", "cancer", "leo", "virgo",
         "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
     }
+
+
+# ---- T09 weather API ----
+
+
+def test_post_weather_unauthenticated_returns_401(client):
+    """未登录 POST /context/weather → 401。"""
+    res = client.post("/api/v1/context/weather", json={"lat": 39.92, "lng": 116.41})
+    assert res.status_code == 401
+    body = res.json()
+    assert body["ok"] is False
+    assert body["code"] == "AUTH_ERROR"
+
+
+def test_post_weather_authenticated_returns_data(client, auth_token, mock_weather):
+    """登录后 → 200 + WeatherData 完整 payload + weather_tag 在 6+1 集合。"""
+    res = client.post(
+        "/api/v1/context/weather",
+        json={"lat": 39.92, "lng": 116.41},
+        headers=auth_token,
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["ok"] is True
+    data = body["data"]
+
+    # WeatherData 全部字段
+    assert "location_name" in data
+    assert "temp_c" in data
+    assert "feels_like_c" in data
+    assert "text" in data
+    assert "wind_dir" in data
+    assert "wind_scale" in data
+    assert "humidity" in data
+    assert "precipitation_mm" in data
+    assert "weather_tag" in data
+    assert "fetched_at" in data
+
+    # mock 的天气值冒泡走到 API
+    assert data["temp_c"] == 22.5
+    assert data["text"] == "小雨"
+    assert data["weather_tag"] == "rainy"
+
+    # weather_tag 在 6+1 集合
+    assert data["weather_tag"] in {
+        "cold", "hot", "rainy", "snowy", "dry", "mild", "any",
+    }
+
+
+def test_post_weather_invalid_lat_returns_422(client, auth_token, mock_weather):
+    """lat 越界（>90）→ 422。"""
+    res = client.post(
+        "/api/v1/context/weather",
+        json={"lat": 200.0, "lng": 116.41},
+        headers=auth_token,
+    )
+    assert res.status_code == 422
+
+
+def test_post_weather_invalid_lng_returns_422(client, auth_token, mock_weather):
+    """lng 越界（>180）→ 422。"""
+    res = client.post(
+        "/api/v1/context/weather",
+        json={"lat": 39.92, "lng": 999.0},
+        headers=auth_token,
+    )
+    assert res.status_code == 422
+
+
+def test_post_weather_missing_lat_returns_422(client, auth_token, mock_weather):
+    """lat 缺失 → 422。"""
+    res = client.post(
+        "/api/v1/context/weather",
+        json={"lng": 116.41},
+        headers=auth_token,
+    )
+    assert res.status_code == 422
+
+
+def test_post_weather_calls_client_with_coords(client, auth_token, mock_weather):
+    """天气端点应把 lat/lng（snake）原样传给 weather_client.get_current。"""
+    res = client.post(
+        "/api/v1/context/weather",
+        json={"lat": 39.92, "lng": 116.41},
+        headers=auth_token,
+    )
+    assert res.status_code == 200
+    # 验证 mock 被调用过，且参数对
+    mock_weather.get_current.assert_awaited()
+    args, kwargs = mock_weather.get_current.call_args
+    # 按位置参数：get_current(lat, lng)
+    assert args == (39.92, 116.41) or kwargs.get("lat") == 39.92

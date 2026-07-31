@@ -149,3 +149,32 @@ export interface TodayContext {
   lunarDay: number
   isLeapMonth: boolean
 }
+
+/**
+ * 天气离散标签 - 给推荐算法 6+1 种，与后端 backend/app/schemas/weather.py WeatherTag 同步。
+ */
+export type WeatherTag = 'cold' | 'hot' | 'rainy' | 'snowy' | 'dry' | 'mild' | 'any'
+
+/**
+ * 当前实况天气 - POST /context/weather 返回的 data。
+ * 字段经 request.ts 的 snakeToCamel 转换。
+ */
+export interface WeatherData {
+  locationName: string
+  tempC: number
+  feelsLikeC: number
+  /** 晴/多云/小雨/雪/阵雨/雷暴 - 后端映射的 WMO code 中文 */
+  text: string
+  windDir: string
+  windScale: string
+  humidity: number
+  precipitationMm: number
+  weatherTag: WeatherTag
+  fetchedAt: string
+}
+
+/** POST /context/weather 请求体。 */
+export interface WeatherRequest {
+  lat: number
+  lng: number
+}
