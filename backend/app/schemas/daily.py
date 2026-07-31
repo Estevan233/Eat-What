@@ -69,3 +69,40 @@ class RecommendResponse(BaseModel):
 
     foods: list[FoodWithReason]
     context: RecommendContext
+
+
+class ChooseRequest(BaseModel):
+    """POST /daily/choose 请求体。"""
+
+    food_id: int = Field(description="用户选择的菜 id")
+
+
+class DailyLogRead(BaseModel):
+    """DailyLog 对外暴露的读模型。"""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    user_id: int
+    log_date: str
+    recommended_food_ids: list[int]
+    chosen_food_ids: list[int]
+    mood: str
+    activity_level: str
+    weather_tag: str | None = None
+
+
+class HistoryResponse(BaseModel):
+    """GET /daily/history 响应 data。"""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    items: list[DailyLogRead]
+    total: int
+
+
+class FavoriteToggleResponse(BaseModel):
+    """POST/DELETE /favorite/{food_id} 响应 data。"""
+
+    food_id: int
+    favorited: bool

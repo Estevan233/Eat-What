@@ -382,3 +382,177 @@ def test_recommend_calls_weather_client_with_coords(
     )
     assert res.status_code == 200
     mock_weather.get_current.assert_awaited_once_with(39.92, 116.41)
+
+
+# ---------- T11: choose / today / history ----------
+
+
+@pytest.fixture
+def recommend_first(
+    client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch
+):
+    """先跑一次推荐，拿到 food_ids + 写入 DailyLog。"""
+    from datetime import date
+
+    from app.schemas.today_context import TodayContext
+    monkeypatch.setattr(
+        recommender, "get_today_context_cached",
+        lambda: TodayContext(
+            date=date.today(),
+            solar_term_current="",
+            solar_term_next_name="立秋",
+            solar_term_next_date="2026-08-07",
+            zodiac_sign="leo",
+            animal="马",
+            lunar_month=7,
+            lunar_day=15,
+            is_leap_month=False,
+        ),
+    )
+    res = client.post(
+        "/api/v1/daily/recommend",
+        json={"mood": "neutral", "lat": 39.92, "lng": 116.41},
+        headers=auth_token,
+    )
+    assert res.status_code == 200
+    foods = res.json()["data"]["foods"]
+    return [f["id"] for f in foods]
+
+
+def test_choose_unauthenticated_returns_401(client):
+    """未登录 POST /daily/choose → 401。"""
+    res = client.post("/api/v1/daily/choose", json={"food_id": 1})
+    assert res.status_code == 401
+
+
+def test_choose_food_not_found_returns_404(client, auth_token, recommend_first):
+    """选不存在的 food_id → 404。"""
+    res = client.post(
+        "/api/v1/daily/choose",
+        json={"food_id": 99999},
+        headers=auth_token,
+    )
+    assert res.status_code == 404
+    assert res.json()["code"] == "NOT_FOUND"
+
+
+def test_choose_no_recommend_first_returns_422(client, auth_token, seed_profile_and_foods, mock_weather):
+    """没有推荐记录就 choose → 422。"""
+    res = client.post(
+        "/api/v1/daily/choose",
+        json={"food_id": seed_profile_and_foods[1][0]},
+        headers=auth_token,
+    )
+    assert res.status_code == 422
+    assert res.json()["code"] == "VALIDATION_ERROR"
+
+
+def test_choose_success_returns_daily_log(
+    client, auth_token, recommend_first, seed_profile_and_foods
+):
+    """选一道菜 → 200 + DailyLogRead + chosen_food_ids 含该菜。"""
+    food_id = recommend_first[0]
+    res = client.post(
+        "/api/v1/daily/choose",
+        json={"food_id": food_id},
+        headers=auth_token,
+    )
+    assert res.status_code == 200
+    data = res.json()["data"]
+    assert data["chosen_food_ids"] == [food_id]
+    assert data["mood"] == "neutral"
+    assert data["recommended_food_ids"] == recommend_first
+
+
+def test_choose_idempotent_same_food(
+    client, auth_token, recommend_first
+):
+    """重复选同一道菜 → chosen_food_ids 不重复。"""
+    food_id = recommend_first[0]
+    client.post(
+        "/api/v1/daily/choose",
+        json={"food_id": food_id},
+        headers=auth_token,
+    )
+    res = client.post(
+        "/api/v1/daily/choose",
+        json={"food_id": food_id},
+        headers=auth_token,
+    )
+    assert res.status_code == 200
+    assert res.json()["data"]["chosen_food_ids"] == [food_id]
+
+
+def test_choose_multiple_foods(
+    client, auth_token, recommend_first
+):
+    """选多道菜 → chosen_food_ids 追加。"""
+    f1, f2 = recommend_first[0], recommend_first[1]
+    client.post(
+        "/api/v1/daily/choose",
+        json={"food_id": f1},
+        headers=auth_token,
+    )
+    res = client.post(
+        "/api/v1/daily/choose",
+        json={"food_id": f2},
+        headers=auth_token,
+    )
+    assert res.status_code == 200
+    assert res.json()["data"]["chosen_food_ids"] == [f1, f2]
+
+
+def test_today_unauthenticated_returns_401(client):
+    """未登录 GET /daily/today → 401。"""
+    res = client.get("/api/v1/daily/today")
+    assert res.status_code == 401
+
+
+def test_today_no_log_returns_null(
+    client, auth_token, seed_profile_and_foods, mock_weather
+):
+    """今天没有推荐过 → data=null。"""
+    res = client.get("/api/v1/daily/today", headers=auth_token)
+    assert res.status_code == 200
+    assert res.json()["data"] is None
+
+
+def test_today_returns_log_after_recommend(
+    client, auth_token, recommend_first
+):
+    """推荐后 GET /daily/today → 返回 DailyLogRead。"""
+    res = client.get("/api/v1/daily/today", headers=auth_token)
+    assert res.status_code == 200
+    data = res.json()["data"]
+    assert data is not None
+    assert data["recommended_food_ids"] == recommend_first
+    assert data["chosen_food_ids"] == []
+    assert data["mood"] == "neutral"
+
+
+def test_history_unauthenticated_returns_401(client):
+    """未登录 GET /daily/history → 401。"""
+    res = client.get("/api/v1/daily/history")
+    assert res.status_code == 401
+
+
+def test_history_returns_logs_after_recommend(
+    client, auth_token, recommend_first
+):
+    """推荐后 GET /daily/history → 1 条记录。"""
+    res = client.get("/api/v1/daily/history", headers=auth_token)
+    assert res.status_code == 200
+    data = res.json()["data"]
+    assert data["total"] == 1
+    assert len(data["items"]) == 1
+    assert data["items"][0]["recommended_food_ids"] == recommend_first
+
+
+def test_history_days_param_validation(
+    client, auth_token
+):
+    """days=0 → 422, days=100 → 422。"""
+    res1 = client.get("/api/v1/daily/history?days=0", headers=auth_token)
+    assert res1.status_code == 422
+    res2 = client.get("/api/v1/daily/history?days=100", headers=auth_token)
+    assert res2.status_code == 422

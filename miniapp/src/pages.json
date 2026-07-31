@@ -23,6 +23,10 @@
     {
       "path": "pages/auth/auth",
       "style": { "navigationBarTitleText": "登录" }
+    },
+    {
+      "path": "pages/favorite/favorite",
+      "style": { "navigationBarTitleText": "我的收藏" }
     }
   ],
   "tabBar": {

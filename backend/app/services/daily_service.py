@@ -91,6 +91,18 @@ def upsert_today_log(
     return record
 
 
+def get_today(session: Session, user_id: int, *, log_date: date | None = None) -> DailyLog | None:
+    """取今天的 DailyLog，不存在返回 None。T11 用。"""
+    if log_date is None:
+        log_date = date.today()
+    stmt = (
+        select(DailyLog)
+        .where(DailyLog.user_id == user_id)
+        .where(DailyLog.log_date == log_date)
+    )
+    return session.exec(stmt).first()
+
+
 def update_chosen_food_ids(
     session: Session,
     user_id: int,
@@ -111,6 +123,36 @@ def update_chosen_food_ids(
     if record is None:
         return None
     record.chosen_food_ids_json = list(chosen_food_ids)
+    record.updated_at = datetime.utcnow()
+    session.add(record)
+    session.commit()
+    session.refresh(record)
+    return record
+
+
+def append_chosen_food_id(
+    session: Session,
+    user_id: int,
+    food_id: int,
+    *,
+    log_date: date | None = None,
+) -> DailyLog | None:
+    """T11 用：用户选了一道菜，追加到 chosen_food_ids（去重）。"""
+    if log_date is None:
+        log_date = date.today()
+
+    stmt = (
+        select(DailyLog)
+        .where(DailyLog.user_id == user_id)
+        .where(DailyLog.log_date == log_date)
+    )
+    record = session.exec(stmt).first()
+    if record is None:
+        return None
+    chosen = list(record.chosen_food_ids_json)
+    if food_id not in chosen:
+        chosen.append(food_id)
+    record.chosen_food_ids_json = chosen
     record.updated_at = datetime.utcnow()
     session.add(record)
     session.commit()

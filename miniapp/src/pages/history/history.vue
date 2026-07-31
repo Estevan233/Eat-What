@@ -1,32 +1,133 @@
 <template>
   <view class="page">
-    <text class="title">{{ title }}</text>
-    <text class="hint">页面占位 · {{ hint }}</text>
+    <text class="page-title">历史记录</text>
+
+    <view v-if="loading" class="hint"><text>加载中…</text></view>
+
+    <view v-else-if="items.length === 0" class="hint">
+      <text>还没有历史记录，去推荐几道菜吧～</text>
+    </view>
+
+    <view v-else class="list">
+      <view v-for="log in items" :key="log.id" class="log-item">
+        <view class="log-date">{{ log.logDate }}</view>
+        <view class="log-meta">
+          <text class="mood-text">{{ moodLabel(log.mood) }}</text>
+          <text v-if="log.chosenFoodIds.length" class="chosen-text">
+            选了 {{ log.chosenFoodIds.length }} 道
+          </text>
+          <text v-else class="unselected-text">未选</text>
+        </view>
+        <text v-if="log.weatherTag" class="weather-text">{{ weatherLabel(log.weatherTag) }}</text>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup lang="ts">
-const title = '历史记录'
-const hint = 'T11 任务会实现历史列表'
+import { ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
+import { useDailyStore } from '@/stores/daily'
+import { MOOD_LABELS } from '@/constants/daily'
+import { WEATHER_TAG_LABEL } from '@/constants/weather'
+import type { DailyLogRead } from '@/api/daily'
+
+const dailyStore = useDailyStore()
+const items = ref<DailyLogRead[]>([])
+const loading = ref(false)
+
+onShow(async () => {
+  loading.value = true
+  try {
+    const resp = await dailyStore.fetchHistory(30)
+    if (resp) {
+      items.value = resp.items
+    }
+  } finally {
+    loading.value = false
+  }
+})
+
+function moodLabel(mood: string): string {
+  return (MOOD_LABELS as Record<string, string>)[mood] || mood
+}
+
+function weatherLabel(tag: string): string {
+  return (WEATHER_TAG_LABEL as Record<string, string>)[tag] || tag
+}
 </script>
 
 <style lang="scss" scoped>
 .page {
   padding: 40rpx;
+}
+
+.page-title {
+  font-size: 42rpx;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 32rpx;
+}
+
+.hint {
+  padding: 100rpx 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 28rpx;
+}
+
+.list {
   display: flex;
   flex-direction: column;
+  gap: 20rpx;
+}
+
+.log-item {
+  background: #f9fafb;
+  border: 1rpx solid #e5e7eb;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  display: flex;
   align-items: center;
-  min-height: 60vh;
-  justify-content: center;
+  gap: 24rpx;
 }
-.title {
-  font-size: 48rpx;
+
+.log-date {
+  font-size: 28rpx;
   font-weight: 600;
-  color: #2563eb;
-  margin-bottom: 20rpx;
+  color: #1f2937;
+  min-width: 200rpx;
 }
-.hint {
-  font-size: 26rpx;
-  color: #888;
+
+.log-meta {
+  display: flex;
+  gap: 12rpx;
+  flex: 1;
+}
+
+.mood-text {
+  font-size: 24rpx;
+  color: #4b5563;
+  background: #e0e7ff;
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+}
+
+.chosen-text {
+  font-size: 24rpx;
+  color: #047857;
+}
+
+.unselected-text {
+  font-size: 24rpx;
+  color: #94a3b8;
+}
+
+.weather-text {
+  font-size: 22rpx;
+  color: #6b7280;
+  background: #f3f4f6;
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
 }
 </style>
