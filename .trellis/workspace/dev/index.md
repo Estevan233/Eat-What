@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
-- **Last Active**: 2026-07-30
+- **Total Sessions**: 8
+- **Last Active**: 2026-07-31
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~515 | Active |
+| `journal-1.md` | ~615 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 8 | 2026-07-31 | T09 Open-Meteo 天气接入完成（替代和风） | `80f3d43` | `main` |
 | 7 | 2026-07-30 | T08 节气与星座服务完成 | `78a6f8e` | `main` |
 | 6 | 2026-07-30 | T07 食物库扩至 204 道（第2步完成） | `ba7dc5c` | `main` |
 | 5 | 2026-07-30 | T07 食物库冷启动第1步 + 第2步进行中 | `ca0f705`, `a621124` | `main` |

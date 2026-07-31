@@ -513,3 +513,103 @@ T08 完成。后端用 lunar_python 集成节气/星座/生肖/农历计算，GE
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: T09 Open-Meteo 天气接入完成（替代和风）
+
+**Date**: 2026-07-31
+**Task**: T09 Open-Meteo 天气接入完成（替代和风）
+**Package**: miniapp
+**Branch**: `main`
+
+### Summary
+
+T09 完成：调研确认和风公共域名2026停用，切换到 Open-Meteo（免Key免Host，CMA GRAPES中国数据源同源）。后端 WMO code 中文映射 + 蒲福风级 + 8方位风向 + 6+1 weather_tag 归类 + 1h坐标缓存。前端 useLocation 组合 + WeatherBadge 集成节气+天气。157 pytest 全过，前端 type-check/lint/build 全过，E2E 真实 Open-Meteo 北京 31.8°C 雷暴验通。
+
+### Main Changes
+
+# Session 8: T09 Open-Meteo 天气接入完成
+
+**Date**: 2026-07-31
+**Task**: T09 天气 API 接入（已完成）
+**Branch**: `main`
+
+## Summary
+
+T09 完成。调研发现和风天气公共域名 devapi.qweather.com / geoapi.qweather.com 从 2026 起逐步停用（curl 测试返回 403 Invalid Host），需迁移到用户专属 API Host + JWT/Ed25519。对比 Open-Meteo 后选择切换：免Key免Host、CMA GRAPES中国气象局数据源同源、MIT开源、坐标直查。
+
+## Detailed Changes
+
+### 后端
+- `services/weather_client.py`：OpenMeteoClient
+  - WMO weather code → 中文映射（0=晴,51=小雨,75=大雪,95=雷暴 等）
+  - 蒲福风级 0-12 (km/h 区间 → 中文标签)
+  - 风向 8 方位 (deg → 北/东北/...)
+  - classify_weather_tag 6+1（snowy/rainy/cold/hot/dry/mild + any）
+  - 1h 进程内缓存（坐标 6 位小数 round，~11m 精度）
+  - 429 → RateLimitError / 500 → ExternalAPIError / httpx error → ExternalAPIError
+- `schemas/weather.py`：WeatherData + WeatherRequest（lat ∈ [-90,90], lng ∈ [-180,180]）
+- `api/v1/context.py`：POST /context/weather（需登录，PRD：防滥用）
+- `config.py + .env.example`：加 OPEN_METEO_API（默认 https://api.open-meteo.com/v1/forecast）
+- `design.md`：说明为何从和风切换到 Open-Meteo
+
+### 前端
+- `types/api.ts`：WeatherTag 6+1 + WeatherData + WeatherRequest
+- `constants/weather.ts`：6+1 tag 中文 + 颜色映射
+- `api/context.ts`：加 getWeather(lat, lng)
+- `composables/useLocation.ts`：wx.getLocation Promise 化 + permissionDenied 状态 + requestPermission 引导
+- `stores/daily.ts`：todayContext + weather ref + fetchTodayContext/fetchWeather actions + storage 落盘
+- `components/WeatherBadge.vue`：扩展节气+生肖+天气 chip + 拒绝授权「点击授权位置」引导
+- `pages/today/today.vue`：onShow 拉天气 + 集成 WeatherBadge
+
+### 测试
+- `tests/services/test_weather_client.py`：39 例
+  - beaufort_label 蒲福风级参数化
+  - wind_dir_label 8 方位参数化
+  - classify_weather_tag 6+1 离散值 + 优先级（snow>rain>cold>hot>dry>mild）
+  - OpenMeteoClient mock httpx：解析/缓存命中/429/500/网络异常/缺字段/cache_rounds
+- `tests/test_api_v1/test_context.py`：+6 例（未登录401/登录成功/lat越界422/lng越界422/缺lat422/坐标传递验证）
+
+### 验证
+- 后端：ruff/mypy strict 全过 / 157 pytest 全过
+- 前端：type-check / lint / build:mp-weixin 全过
+- E2E 真实 Open-Meteo：北京 31.8°C 雷暴 rainy tag, 缓存命中1次, lat越界422
+
+## 取舍记录
+
+| 决策 | 选择 | 理由 |
+|---|---|---|
+| 天气 API | Open-Meteo 替代和风 | 同源（CMA GRAPES/ECMWF）+免Key+免Host+MIT |
+| weather_tag | 6+1（PRD 5+1）+ snowy | 雪天对推荐有显著影响，单列 |
+| 缓存粒度 | 坐标 6 位小数 round | ~11m 精度，避免近邻坐标重复打 |
+| 城市名 | "Open-Meteo @ lat,lng" | Open-Meteo 不返城市名，前端不依赖 |
+| 鉴权 | 无（不需要） | Open-Meteo 免Key，无需 JWT/Ed25519 |
+| Provider 抽象 | 单 OpenMeteoClient | MVP 不引入多 provider 分发 |
+
+## Git Commits
+
+| Hash | Message |
+|------|---------|
+| `80f3d43` | feat(weather): Open-Meteo 天气接入 + 位置授权 + 历法徽章集成（T09） |
+
+## Status
+[OK] **Completed - 准备 archive**
+
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `80f3d43` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
