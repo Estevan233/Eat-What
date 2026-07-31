@@ -4,6 +4,7 @@ from fastapi import APIRouter
 from app.api.v1.auth import router as auth_router
 from app.api.v1.constitution import router as constitution_router
 from app.api.v1.context import router as context_router
+from app.api.v1.daily import router as daily_router
 from app.api.v1.food import router as food_router
 from app.api.v1.profile import router as profile_router
 
@@ -13,5 +14,6 @@ api_router.include_router(profile_router)
 api_router.include_router(constitution_router)
 api_router.include_router(food_router)
 api_router.include_router(context_router)
+api_router.include_router(daily_router)
 
 __all__ = ["api_router"]

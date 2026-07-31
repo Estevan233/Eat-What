@@ -178,3 +178,58 @@ export interface WeatherRequest {
   lat: number
   lng: number
 }
+
+/**
+ * 单条带理由的推荐结果 - POST /daily/recommend 响应中的 food 项。
+ * 字段经 request.ts 的 snakeToCamel 转换。
+ */
+export interface FoodWithReason {
+  id: number
+  name: string
+  category: string
+  ingredients: string[]
+  caloriesKcalPer100g?: number
+  nutrition: Record<string, number>
+  nature: string
+  flavor: string[]
+  organMeridians: string[]
+  suitableConstitutions: string[]
+  suitableWeathers: string[]
+  forbiddenFor: string[]
+  tags: string[]
+  cookingMethod: string
+  cookingTimeMin?: number
+  imageUrl?: string
+  seasonalSolarTerms: string[]
+  description?: string
+  /** T10: 自然语言推荐理由 */
+  reason: string
+  /** T10: 0-100 打分（含小数） */
+  score: number
+}
+
+/**
+ * 推荐结果附带的上下文 - POST /daily/recommend 响应中的 context。
+ * 字段经 request.ts 的 snakeToCamel 转换。
+ */
+export interface RecommendContext {
+  weather: WeatherData
+  today: TodayContext
+}
+
+/**
+ * POST /daily/recommend 请求体（前端 camelCase）。
+ * request.ts 会在发送前自动转 snake_case。
+ */
+export interface RecommendRequest {
+  mood: Mood
+  activityLevel: ActivityLevel
+  lat?: number
+  lng?: number
+}
+
+/** POST /daily/recommend 成功响应的 data。 */
+export interface RecommendResponse {
+  foods: FoodWithReason[]
+  context: RecommendContext
+}
