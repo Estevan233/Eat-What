@@ -866,3 +866,107 @@ T11 今日推荐 UI + 历史记录 + 收藏：把 T10 推荐算法结果可视�
 ### Next Steps
 
 - None - task complete
+
+
+## Session 11: MVP 父任务收尾 (E2E 验收 + 整体回顾)
+
+**Date**: 2026-07-31
+**Task**: MVP 父任务收尾 (E2E 验收 + 整体回顾)
+**Package**: miniapp
+**Branch**: `main`
+
+### Summary
+
+MVP 验收: E2E烟测试 + gen:apiValid + 项目归档
+
+### Main Changes
+
+## 概要
+
+MVP 父任务（07-23-today-eat-mvp）收尾会话：所有 11 个子任务 T01-T11 已归档，本次补全父任务级 Cross-Task 验收 + 项目归档。
+
+## 子任务归档确认
+
+11 个子任务全部 archive：
+T01 项目脚手架 / T02 FastAPI 基础设施 / T03 uni-app 基础设施 / T04 微信登录 /
+T05 用户档案 / T06 体质测试 / T07 食物库冷启动 / T08 节气与星座 / T09 天气API /
+T10 推荐算法核心 / T11 推荐UI+历史+收藏。
+
+## 验收清单（PRD 列项）
+
+| # | 项目 | 状态 | 说明 |
+|---|------|------|------|
+| 1 | 11 个子任务全部归档 | ✅ | 全部在 archive/2026-07/ |
+| 2 | 微信登录→档案→体质→推荐→收藏→历史闭环 | ✅（API 层） | 见 test_e2e_mvp_smoke |
+| 3 | gen:api 无 TS 报错 | ✅（已验证） | openapi-typescript 输出 32KB TS 无报错 |
+| 4 | 后端 ruff/mypy/pytest 全绿 | ✅ | 206 pytest (含 e2e) + ruff + mypy strict (47文件) |
+| 5 | 前端 lint/type-check 全绿 | ✅ | 仅 App.vue no-console known warning |
+| 6 | 网络断开 fallback | ⚠️ 部分 | request.ts 5xx 不 toast、401 跳登录、storage 缓存天气；微信开发者工具端到端未测 |
+
+## E2E 烟测试覆盖
+
+新增 `tests/test_e2e_mvp_smoke.py::test_mvp_e2e_flow`，单测端到端验证：
+- 模拟 wx code2session → POST /auth/wx-login → 拿 token
+- PUT /profile (forbiddenTags=['pork']) → 200
+- GET /profile/constitution/questions → 9 题
+- POST /profile/constitution (answers 全 1 → 主平和) → 200
+- GET /context/today → 200 (节气 星座)
+- mock 天气 cold → POST /daily/recommend (mood=tired,activity=high, coords) → 3 foods + reason + score
+- POST /daily/choose → chosen_food_ids 写入
+- GET /daily/today → 同步显示已选
+- 3 次 toggle favorite (收藏→取消→收藏另一道)
+- GET /favorite → 1 条列表
+- GET /daily/history?days=30 → 含今天的 chosen_daily_log
+- 再推荐（验证 upsert 覆盖同一天）
+
+## gen:api 验证方式
+
+`npm run gen:api` 会用 openapi-typescript 从后端 OpenAPI 自动生成 TS 类型。验证：
+- 启动 uvicorn → curl /openapi.json → 拿到 18KB 合法 OpenAPI 文档
+- 跑 `openapi-typescript /tmp/openapi.json -o /tmp/api.gen.ts` → 生成 32KB TS 文件，无报错
+
+不覆盖生产 `src/types/api.ts`：手写版本含 M/AL Mood/ActivityLevel 等类型别名
+和 camelCase 约定注释，与 request.ts 的 snakeToCamel/camelToSnake 双向转换配合，
+自动生成版本会丢失这些注释和别名。
+手写版本 `npm run type-check` 全绿即视为前后端类型同步。
+
+## 测试与构建
+
+- 后端: `ruff check .` ✅ / `mypy app/ --strict` ✅ / `pytest -q` 206 passed ✅
+- 前端: `npm run lint:check` 1 known warning (App.vue) / `npm run type-check` ✅
+- 后端服务: 启 uvicorn /health = healthy, /openapi.json 18KB
+
+## 剩余注解
+
+- 微信开发者工具内端到端流程未测（仅后端 API 层 E2E）。
+- 网络断开场景的前端 fallback 行为未在微信开发者工具里端到端验证。
+- T07 food 数据种子脚本（CLI）需要手工跑一次确保生产 DB 有菜库。
+- 体质测试 / auth 全链路在真实设备小程序里仍未端到端验证需要 AppID。
+- gen:api 的"无 TS 报错"项以生成器无错误+手写版本 type-check 通过为准。
+
+## Git Commits
+
+| Hash | Message |
+|------|---------|
+| `bcb8eb0` | test(e2e): MVP 全流程烟测试 |
+
+## Status
+[OK] **MVP 父任务完成，准备 archive**
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `bcb8eb0` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
