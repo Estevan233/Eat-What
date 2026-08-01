@@ -1,36 +1,44 @@
 <template>
-  <view class="card">
-    <view class="card-header">
-      <text class="name">{{ food.name }}</text>
-      <view class="actions">
-        <text
-          class="fav-btn"
-          :class="{ 'fav-active': isFav }"
-          @click="onToggleFavorite"
-        >{{ isFav ? '♥' : '♡' }}</text>
+  <view class="card" :class="{ 'card-chosen': chosen }">
+    <!-- 左侧色条 -->
+    <view class="accent-bar" :class="`bar-${food.nature}`" />
+
+    <view class="card-body">
+      <!-- 头部：菜名 + 收藏 -->
+      <view class="head">
+        <text class="name">{{ food.name }}</text>
+        <text class="fav-btn" :class="{ 'fav-on': isFav }" @click="onToggleFavorite">
+          {{ isFav ? '♥' : '♡' }}
+        </text>
       </view>
-    </view>
 
-    <view class="info-row">
-      <text v-if="calories" class="info-item">×100g {{ calories }}千卡</text>
-      <text class="info-item">{{ food.cookingMethod }}</text>
-      <text v-for="tag in tags" :key="tag" class="tag-chip">{{ tag }}</text>
-    </view>
+      <!-- 元信息 -->
+      <view class="meta-row">
+        <text class="meta-chip chip-cat">{{ food.category }}</text>
+        <text class="meta-chip">{{ food.cookingMethod }}</text>
+        <text v-if="calories" class="meta-chip chip-cal">🔥 {{ calories }}千卡</text>
+        <text v-for="tag in tags" :key="tag" class="meta-chip chip-tag">{{ tag }}</text>
+      </view>
 
-    <view v-if="expanding" class="reason-box">
-      <text class="reason-text">{{ food.reason }}</text>
-    </view>
-    <text v-else class="reason-line" @click="expanding = true">
-      <text class="reason-ellipsis">{{ food.reason }}</text>
-    </text>
+      <!-- 推荐理由 -->
+      <view v-if="expanding" class="reason-box">
+        <text class="reason-label">为什么推荐</text>
+        <text class="reason-text">{{ food.reason }}</text>
+      </view>
+      <view v-else class="reason-line" @click="expanding = true">
+        <text class="reason-ellipsis">💡 {{ food.reason }}</text>
+      </view>
 
-    <view class="footer">
-      <text class="score-badge">{{ Math.round(food.score) }}分</text>
-      <text
-        class="choose-btn"
-        :class="{ 'chosen-btn': chosen }"
-        @click="onChoose"
-      >{{ chosen ? '已选 ✓' : '就吃这个' }}</text>
+      <!-- 底部：分数 + 选择 -->
+      <view class="footer">
+        <view class="score">
+          <text class="score-num">{{ Math.round(food.score) }}</text>
+          <text class="score-unit">分</text>
+        </view>
+        <text class="choose-btn" :class="{ 'chosen-btn': chosen }" @click="onChoose">
+          {{ chosen ? '已选 ✓' : '就吃这个' }}
+        </text>
+      </view>
     </view>
   </view>
 </template>
@@ -76,69 +84,100 @@ async function onToggleFavorite() {
 
 <style lang="scss" scoped>
 .card {
-  flex: 1;
-  background: #f9fafb;
-  border: 1rpx solid #e5e7eb;
-  border-radius: 18rpx;
-  padding: 32rpx;
+  position: relative;
+  display: flex;
+  background: $card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  border: 1rpx solid $line;
 }
 
-.card-header {
+.card-chosen {
+  border-color: #bfe8c8;
+}
+
+/* 左侧性味色条 */
+.accent-bar {
+  width: 10rpx;
+  flex-shrink: 0;
+}
+
+.bar-cold, .bar-cool { background: #3b82f6; }
+.bar-neutral { background: #94a3b8; }
+.bar-warm, .bar-hot { background: $brand; }
+
+.card-body {
+  flex: 1;
+  padding: 28rpx 28rpx 24rpx;
+}
+
+.head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12rpx;
+  margin-bottom: 14rpx;
 }
 
 .name {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.actions {
-  display: flex;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: $ink;
 }
 
 .fav-btn {
-  font-size: 38rpx;
-  color: #cbd5e1;
-  padding: 4rpx 8rpx;
+  font-size: 40rpx;
+  color: #d8cfc4;
+  padding: 0 8rpx;
+  transition: all 0.2s;
 }
 
-.fav-active {
+.fav-on {
   color: #ef4444;
+  transform: scale(1.1);
 }
 
-.info-row {
+/* 元信息 chips */
+.meta-row {
   display: flex;
-  gap: 12rpx;
+  gap: 10rpx;
   flex-wrap: wrap;
   margin-bottom: 16rpx;
 }
 
-.info-item {
-  font-size: 24rpx;
-  color: #6b7280;
-}
-
-.tag-chip {
-  font-size: 22rpx;
-  color: #4b5563;
-  background: #e0e7ff;
+.meta-chip {
+  font-size: 20rpx;
+  color: $ink-2;
+  background: $bg;
   border-radius: 8rpx;
-  padding: 4rpx 12rpx;
+  padding: 4rpx 14rpx;
 }
 
+.chip-cat {
+  color: $brand-dark;
+  background: $brand-light;
+  font-weight: 600;
+}
+
+.chip-cal {
+  color: #b45309;
+  background: #fff7ed;
+}
+
+.chip-tag {
+  color: $fresh;
+  background: $fresh-light;
+}
+
+/* 理由 */
 .reason-line {
-  display: block;
-  font-size: 26rpx;
-  color: #4338ca;
-  line-height: 1.4;
-  margin-bottom: 12rpx;
+  margin-bottom: 18rpx;
 }
 
 .reason-ellipsis {
+  font-size: 24rpx;
+  color: $ink-2;
+  line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -147,38 +186,63 @@ async function onToggleFavorite() {
 }
 
 .reason-box {
-  background: #eff6ff;
-  border-radius: 12rpx;
-  padding: 14rpx 18rpx;
-  margin-bottom: 12rpx;
+  background: $brand-light;
+  border-radius: $radius-sm;
+  padding: 16rpx 20rpx;
+  margin-bottom: 18rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.reason-label {
+  font-size: 20rpx;
+  color: $brand;
+  font-weight: 700;
 }
 
 .reason-text {
-  font-size: 26rpx;
-  color: #4338ca;
-  line-height: 1.4;
+  font-size: 24rpx;
+  color: #8a4b22;
+  line-height: 1.6;
 }
 
+/* 底部 */
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.score-badge {
-  font-size: 22rpx;
-  color: #94a3b8;
+.score {
+  display: flex;
+  align-items: baseline;
+  gap: 2rpx;
+}
+
+.score-num {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: $brand;
+}
+
+.score-unit {
+  font-size: 20rpx;
+  color: $ink-3;
 }
 
 .choose-btn {
   font-size: 26rpx;
-  color: #ffffff;
-  background: #2563eb;
-  border-radius: 32rpx;
-  padding: 12rpx 32rpx;
+  color: #fff;
+  background: $grad-brand;
+  border-radius: 999rpx;
+  padding: 14rpx 44rpx;
+  font-weight: 600;
+  box-shadow: $shadow-cta;
 }
 
 .chosen-btn {
-  background: #94a3b8;
+  background: #c9bfb2;
+  box-shadow: none;
 }
 </style>

@@ -55,19 +55,21 @@ async function onUndo(foodId: number) {
 <style lang="scss" scoped>
 .page {
   padding: 40rpx;
+  min-height: 100vh;
+  background: $bg;
 }
 
 .page-title {
   font-size: 42rpx;
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 700;
+  color: $ink;
   margin-bottom: 32rpx;
 }
 
 .loading-hint, .empty-hint {
   padding: 100rpx 0;
   text-align: center;
-  color: #94a3b8;
+  color: $ink-3;
   font-size: 28rpx;
 }
 
@@ -81,10 +83,11 @@ async function onUndo(foodId: number) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f9fafb;
-  border: 1rpx solid #e5e7eb;
-  border-radius: 16rpx;
+  background: $card;
+  border: 1rpx solid $line;
+  border-radius: $radius-md;
   padding: 28rpx;
+  box-shadow: $shadow-card;
 }
 
 .fav-info {
@@ -96,17 +99,17 @@ async function onUndo(foodId: number) {
 .fav-name {
   font-size: 30rpx;
   font-weight: 600;
-  color: #1f2937;
+  color: $ink;
 }
 
 .fav-meta {
   font-size: 22rpx;
-  color: #6b7280;
+  color: $ink-2;
 }
 
 .fav-cal {
   font-size: 22rpx;
-  color: #94a3b8;
+  color: $ink-3;
 }
 
 .unfav-btn {
@@ -114,6 +117,6 @@ async function onUndo(foodId: number) {
   color: #dc2626;
   padding: 10rpx 24rpx;
   background: #fef2f2;
-  border-radius: 24rpx;
+  border-radius: 999rpx;
 }
 </style>

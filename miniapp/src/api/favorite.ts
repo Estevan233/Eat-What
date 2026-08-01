@@ -44,11 +44,11 @@ export type FavoriteListResponse = {
 
 /** POST /favorite/{foodId} - 切换收藏状态。 */
 export const toggleFavorite = (foodId: number): Promise<FavoriteToggleResponse> =>
-  request<FavoriteToggleResponse>({ url: `/v1/favorite/${foodId}`, method: 'POST' })
+  request<FavoriteToggleResponse>({ url: `/api/v1/favorite/${foodId}`, method: 'POST' })
 
 /** GET /favorite - 分页查询收藏列表。 */
 export const listFavorites = (
   page: number = 1,
   size: number = 20,
 ): Promise<FavoriteListResponse> =>
-  request<FavoriteListResponse>({ url: `/v1/favorite?page=${page}&size=${size}` })
+  request<FavoriteListResponse>({ url: `/api/v1/favorite?page=${page}&size=${size}` })

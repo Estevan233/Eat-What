@@ -9,7 +9,7 @@ import { request } from './request'
 import type { ProfileRead, ProfileUpsert, UserWithProfile } from '@/types/api'
 
 export const getProfile = () =>
-  request<UserWithProfile>({ url: '/v1/profile' })
+  request<UserWithProfile>({ url: '/api/v1/profile' })
 
 export const upsertProfile = (data: ProfileUpsert) =>
-  request<ProfileRead, ProfileUpsert>({ url: '/v1/profile', method: 'PUT', data })
+  request<ProfileRead, ProfileUpsert>({ url: '/api/v1/profile', method: 'PUT', data })

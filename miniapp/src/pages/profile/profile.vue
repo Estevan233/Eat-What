@@ -212,44 +212,44 @@ async function onSubmit() {
 .page {
   padding: 40rpx;
   min-height: 100vh;
-  background: #f8f8f8;
+  background: $bg;
 }
 
 .header {
-  margin-bottom: 60rpx;
+  margin-bottom: 40rpx;
   text-align: center;
 }
 
 .title {
   display: block;
   font-size: 48rpx;
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 700;
+  color: $ink;
   margin-bottom: 12rpx;
 }
 
 .hint {
   display: block;
   font-size: 24rpx;
-  color: #888;
+  color: $ink-2;
 }
 
 .login-prompt {
   margin-top: 100rpx;
   text-align: center;
-  color: #888;
+  color: $ink-2;
 }
 
 .form {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx 24rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  background: $card;
+  border-radius: $radius-lg;
+  padding: 30rpx 28rpx;
+  box-shadow: $shadow-card;
 }
 
 .field {
   padding: 24rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid $line;
 }
 
 .field:last-of-type {
@@ -259,13 +259,14 @@ async function onSubmit() {
 .label {
   display: block;
   font-size: 26rpx;
-  color: #555;
+  color: $ink-2;
   margin-bottom: 16rpx;
+  font-weight: 600;
 }
 
 .picker-value {
   font-size: 30rpx;
-  color: #1f2937;
+  color: $ink;
   padding: 8rpx 0;
 }
 
@@ -278,16 +279,17 @@ async function onSubmit() {
 .radio-label {
   margin-left: 8rpx;
   font-size: 28rpx;
-  color: #1f2937;
+  color: $ink;
 }
 
 .input {
   font-size: 30rpx;
-  border: 1rpx solid #e5e7eb;
-  border-radius: 8rpx;
+  border: 1rpx solid $line;
+  border-radius: $radius-sm;
   padding: 16rpx 20rpx;
   width: 100%;
   box-sizing: border-box;
+  background: $bg;
 }
 
 .chip-row {
@@ -298,17 +300,18 @@ async function onSubmit() {
 
 .chip {
   padding: 12rpx 24rpx;
-  border: 1rpx solid #e5e7eb;
-  border-radius: 32rpx;
+  border: 1rpx solid $line;
+  border-radius: 999rpx;
   font-size: 26rpx;
-  color: #555;
-  background: #fff;
+  color: $ink-2;
+  background: $bg;
 }
 
 .chip-on {
-  background: #2563eb;
+  background: $brand;
   color: #fff;
-  border-color: #2563eb;
+  border-color: $brand;
+  font-weight: 600;
 }
 
 .submit-btn {
@@ -316,25 +319,28 @@ async function onSubmit() {
   margin-top: 40rpx;
   height: 88rpx;
   line-height: 88rpx;
-  background: #2563eb;
+  background: $grad-brand;
   color: #fff;
   font-size: 32rpx;
-  border-radius: 44rpx;
+  font-weight: 700;
+  border-radius: 999rpx;
   border: none;
+  box-shadow: $shadow-cta;
 }
 
 .submit-btn[disabled] {
-  background: #93b7f3;
+  background: $brand-soft;
+  box-shadow: none;
 }
 
 .btn-primary {
   display: inline-block;
   margin-top: 30rpx;
   padding: 16rpx 40rpx;
-  background: #2563eb;
+  background: $brand;
   color: #fff;
   border: none;
-  border-radius: 8rpx;
+  border-radius: 999rpx;
   font-size: 28rpx;
 }
 </style>

@@ -18,12 +18,12 @@ onShow(() => {
 </script>
 
 <style lang="scss">
-/* 全局 reset */
+/* 全局 reset - 品牌暖色系 */
 page {
-  background-color: #f8f8f8;
+  background-color: $bg;
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
   font-size: 28rpx;
-  color: #333;
+  color: $ink;
 }
 
 /* 通用工具类 */

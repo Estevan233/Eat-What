@@ -60,19 +60,21 @@ function weatherLabel(tag: string): string {
 <style lang="scss" scoped>
 .page {
   padding: 40rpx;
+  min-height: 100vh;
+  background: $bg;
 }
 
 .page-title {
   font-size: 42rpx;
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 700;
+  color: $ink;
   margin-bottom: 32rpx;
 }
 
 .hint {
   padding: 100rpx 0;
   text-align: center;
-  color: #94a3b8;
+  color: $ink-3;
   font-size: 28rpx;
 }
 
@@ -83,19 +85,20 @@ function weatherLabel(tag: string): string {
 }
 
 .log-item {
-  background: #f9fafb;
-  border: 1rpx solid #e5e7eb;
-  border-radius: 16rpx;
+  background: $card;
+  border: 1rpx solid $line;
+  border-radius: $radius-md;
   padding: 28rpx;
   display: flex;
   align-items: center;
   gap: 24rpx;
+  box-shadow: $shadow-card;
 }
 
 .log-date {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1f2937;
+  color: $ink;
   min-width: 200rpx;
 }
 
@@ -107,26 +110,26 @@ function weatherLabel(tag: string): string {
 
 .mood-text {
   font-size: 24rpx;
-  color: #4b5563;
-  background: #e0e7ff;
+  color: $brand-dark;
+  background: $brand-light;
   border-radius: 8rpx;
   padding: 4rpx 12rpx;
 }
 
 .chosen-text {
   font-size: 24rpx;
-  color: #047857;
+  color: $fresh;
 }
 
 .unselected-text {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: $ink-3;
 }
 
 .weather-text {
   font-size: 22rpx;
-  color: #6b7280;
-  background: #f3f4f6;
+  color: $ink-2;
+  background: $bg;
   border-radius: 8rpx;
   padding: 4rpx 12rpx;
 }

@@ -232,7 +232,7 @@ function goProfile() {
 .page {
   padding: 40rpx 30rpx;
   min-height: 100vh;
-  background: #f8f8f8;
+  background: $bg;
 }
 
 .state-prompt {
@@ -243,15 +243,15 @@ function goProfile() {
 .state-title {
   display: block;
   font-size: 40rpx;
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 700;
+  color: $ink;
   margin-bottom: 16rpx;
 }
 
 .state-hint {
   display: block;
   font-size: 26rpx;
-  color: #888;
+  color: $ink-2;
   margin-bottom: 40rpx;
 }
 
@@ -266,7 +266,7 @@ function goProfile() {
 .progress-track {
   flex: 1;
   height: 12rpx;
-  background: #e5e7eb;
+  background: $line;
   border-radius: 6rpx;
   overflow: hidden;
   margin-right: 20rpx;
@@ -274,23 +274,23 @@ function goProfile() {
 
 .progress-fill {
   height: 100%;
-  background: #2563eb;
+  background: $grad-brand;
   transition: width 0.2s ease;
 }
 
 .progress-text {
   font-size: 24rpx;
-  color: #888;
+  color: $ink-2;
   min-width: 80rpx;
   text-align: right;
 }
 
 .question {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx 24rpx;
+  background: $card;
+  border-radius: $radius-lg;
+  padding: 30rpx 28rpx;
   margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-card;
 }
 
 .q-head {
@@ -306,7 +306,7 @@ function goProfile() {
   width: 40rpx;
   height: 40rpx;
   border-radius: 20rpx;
-  background: #2563eb;
+  background: $brand;
   color: #fff;
   font-size: 24rpx;
   font-weight: 600;
@@ -318,7 +318,7 @@ function goProfile() {
 .q-text {
   flex: 1;
   font-size: 30rpx;
-  color: #1f2937;
+  color: $ink;
   line-height: 1.5;
 }
 
@@ -337,40 +337,43 @@ function goProfile() {
 }
 
 .q-opt-on {
-  background: #eff6ff;
-  border-color: #2563eb;
+  background: $brand-light;
+  border-color: $brand;
 }
 
 .q-opt-label {
   margin-left: 8rpx;
   font-size: 28rpx;
-  color: #333;
+  color: $ink;
 }
 
 .submit-btn {
   width: 100%;
   height: 88rpx;
   line-height: 88rpx;
-  background: #2563eb;
+  background: $grad-brand;
   color: #fff;
   font-size: 32rpx;
-  border-radius: 44rpx;
+  font-weight: 700;
+  border-radius: 999rpx;
   border: none;
   margin-top: 30rpx;
+  box-shadow: $shadow-cta;
 }
 
 .submit-btn[disabled] {
-  background: #93b7f3;
+  background: $brand-soft;
+  box-shadow: none;
 }
 
 .btn-primary {
   display: inline-block;
   margin-top: 30rpx;
   padding: 16rpx 40rpx;
-  background: #2563eb;
+  background: $brand;
   color: #fff;
   border: none;
-  border-radius: 8rpx;
+  border-radius: 999rpx;
   font-size: 28rpx;
 }
 
@@ -381,26 +384,27 @@ function goProfile() {
 }
 
 .result-header {
-  background: #fff;
-  border-radius: 16rpx;
+  background: $brand-light;
+  border: 1rpx solid $brand-soft;
+  border-radius: $radius-lg;
   padding: 40rpx 24rpx;
   text-align: center;
   margin-bottom: 30rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-card;
 }
 
 .result-label {
   display: block;
   font-size: 24rpx;
-  color: #888;
+  color: $ink-2;
   margin-bottom: 12rpx;
 }
 
 .result-primary {
   display: block;
   font-size: 56rpx;
-  font-weight: 700;
-  color: #2563eb;
+  font-weight: 800;
+  color: $brand;
   margin-bottom: 16rpx;
 }
 
@@ -414,29 +418,30 @@ function goProfile() {
 
 .secondary-label {
   font-size: 26rpx;
-  color: #555;
+  color: $ink-2;
 }
 
 .chip {
   padding: 8rpx 20rpx;
-  background: #eff6ff;
-  color: #2563eb;
-  border-radius: 32rpx;
+  background: $card;
+  color: $brand-dark;
+  border-radius: 999rpx;
   font-size: 26rpx;
+  border: 1rpx solid $brand-soft;
 }
 
 .chart {
-  background: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx 24rpx;
+  background: $card;
+  border-radius: $radius-lg;
+  padding: 30rpx 28rpx;
   margin-bottom: 30rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-card;
 }
 
 .chart-title {
   display: block;
   font-size: 28rpx;
-  color: #1f2937;
+  color: $ink;
   font-weight: 600;
   margin-bottom: 24rpx;
 }
@@ -450,14 +455,14 @@ function goProfile() {
 .bar-name {
   width: 130rpx;
   font-size: 24rpx;
-  color: #555;
+  color: $ink-2;
   flex-shrink: 0;
 }
 
 .bar-track {
   flex: 1;
   height: 24rpx;
-  background: #f0f0f0;
+  background: $bg;
   border-radius: 12rpx;
   overflow: hidden;
   margin: 0 16rpx;
@@ -465,40 +470,40 @@ function goProfile() {
 
 .bar-fill {
   height: 100%;
-  background: #c4d3f0;
+  background: $brand-soft;
   transition: width 0.3s ease;
 }
 
 .bar-fill-on {
-  background: #2563eb;
+  background: $grad-brand;
 }
 
 .bar-score {
   width: 60rpx;
   font-size: 24rpx;
-  color: #888;
+  color: $ink-3;
   text-align: right;
   flex-shrink: 0;
 }
 
 .bar-score-on {
-  color: #2563eb;
-  font-weight: 600;
+  color: $brand;
+  font-weight: 700;
 }
 
 .retake-btn {
   width: 100%;
   height: 80rpx;
   line-height: 80rpx;
-  background: #fff;
-  color: #2563eb;
-  border: 1rpx solid #2563eb;
-  border-radius: 40rpx;
+  background: $card;
+  color: $brand;
+  border: 1rpx solid $brand;
+  border-radius: 999rpx;
   font-size: 28rpx;
 }
 
 .retake-btn[disabled] {
-  color: #93b7f3;
-  border-color: #93b7f3;
+  color: $brand-soft;
+  border-color: $brand-soft;
 }
 </style>

@@ -35,7 +35,7 @@ export type HistoryResponse = {
  */
 export const recommend = (data: RecommendRequest): Promise<RecommendResponse> =>
   request<RecommendResponse, RecommendRequest>({
-    url: '/v1/daily/recommend',
+    url: '/api/v1/daily/recommend',
     method: 'POST',
     data,
   })
@@ -43,15 +43,15 @@ export const recommend = (data: RecommendRequest): Promise<RecommendResponse> =>
 /** POST /daily/choose - 选择一道菜写入 DailyLog。 */
 export const chooseFood = (foodId: number): Promise<DailyLogRead> =>
   request<DailyLogRead, { foodId: number }>({
-    url: '/v1/daily/choose',
+    url: '/api/v1/daily/choose',
     method: 'POST',
     data: { foodId },
   })
 
 /** GET /daily/today - 取今天的 DailyLog，不存在返回 null。 */
 export const getTodayLog = (): Promise<DailyLogRead | null> =>
-  request<DailyLogRead | null>({ url: '/v1/daily/today' })
+  request<DailyLogRead | null>({ url: '/api/v1/daily/today' })
 
 /** GET /daily/history - 近 N 天的日志列表。 */
 export const getHistory = (days: number = 30): Promise<HistoryResponse> =>
-  request<HistoryResponse>({ url: `/v1/daily/history?days=${days}` })
+  request<HistoryResponse>({ url: `/api/v1/daily/history?days=${days}` })

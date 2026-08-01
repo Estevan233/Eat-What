@@ -11,7 +11,7 @@ import type { LoginResponse } from '@/types/api'
 
 export const wxLogin = (code: string, nickname?: string, avatarUrl?: string) =>
   request<LoginResponse>({
-    url: '/v1/auth/wx-login',
+    url: '/api/v1/auth/wx-login',
     method: 'POST',
     data: { code, nickname, avatarUrl },
   })
@@ -22,7 +22,7 @@ export const wxLogin = (code: string, nickname?: string, avatarUrl?: string) =>
  */
 export const guestLogin = (guestId: string, nickname?: string) =>
   request<LoginResponse>({
-    url: '/v1/auth/guest-login',
+    url: '/api/v1/auth/guest-login',
     method: 'POST',
     data: { guestId, nickname },
   })

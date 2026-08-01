@@ -1,26 +1,30 @@
 <template>
   <view class="page">
-    <view class="hero">
+    <!-- 品牌区 -->
+    <view class="brand">
+      <image class="logo" src="/static/brand-avatar.png" mode="aspectFill" />
       <text class="title">今天吃啥</text>
-      <text class="subtitle">用星座、节气、天气、心情、体质告诉你今天该吃啥</text>
+      <text class="subtitle">每天 3 道菜，结合天气 · 节气 · 心情 · 体质</text>
     </view>
 
-    <button class="login-btn" :disabled="loading" @click="onLogin">
-      {{ loading ? '登录中…' : '微信一键登录' }}
-    </button>
+    <!-- 按钮区 -->
+    <view class="actions">
+      <view class="btn-primary" :class="{ 'btn-disabled': loading }" @click="onLogin">
+        <text class="btn-text">{{ loading ? '登录中…' : '微信一键登录' }}</text>
+      </view>
 
-    <view class="divider">
-      <view class="line"></view>
-      <text class="or">或</text>
-      <view class="line"></view>
+      <view class="divider">
+        <view class="divider-line" />
+        <text class="divider-text">或</text>
+        <view class="divider-line" />
+      </view>
+
+      <view class="btn-guest" @click="onGuestLogin">
+        <text class="btn-guest-text">游客登录，先体验一下</text>
+      </view>
     </view>
 
-    <button class="guest-btn" :disabled="loading" @click="onGuestLogin">
-      游客登录，先体验一下
-    </button>
-
-    <text class="hint">登录后才能记录心情、收藏菜品、查看历史</text>
-    <text class="hint-guest">游客数据也保存在云端，可随时升级为正式账号</text>
+    <text class="footnote">游客模式无需微信授权，体验完整功能</text>
   </view>
 </template>
 
@@ -31,140 +35,147 @@ import { useUserStore } from '@/stores/user'
 const userStore = useUserStore()
 const loading = ref(false)
 
-async function onLogin() {
-  if (loading.value) return
-  loading.value = true
-  try {
-    await userStore.login()
-    uni.showToast({ title: '登录成功', icon: 'success' })
-    goNext()
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : '登录失败'
-    uni.showToast({ title: msg, icon: 'none' })
-  } finally {
-    loading.value = false
-  }
-}
-
-async function onGuestLogin() {
-  if (loading.value) return
-  loading.value = true
-  try {
-    await userStore.loginAsGuest()
-    uni.showToast({ title: '已进入游客模式', icon: 'success' })
-    goNext()
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : '游客登录失败'
-    uni.showToast({ title: msg, icon: 'none' })
-  } finally {
-    loading.value = false
-  }
-}
-
-/** 根据 query 的 redirect 跳转，没有就回 today tab。 */
 function goNext() {
   const pages = getCurrentPages()
-  const current = pages[pages.length - 1] as { options?: { redirect?: string } }
-  const redirect = current?.options?.redirect
-
+  const last = pages[pages.length - 1]
+  const redirect = (last as unknown as { options?: { redirect?: string } }).options?.redirect
   if (redirect) {
     uni.redirectTo({ url: decodeURIComponent(redirect) })
   } else {
     uni.switchTab({ url: '/pages/today/today' })
   }
 }
+
+async function onLogin() {
+  loading.value = true
+  try {
+    await userStore.login()
+    uni.showToast({ title: '登录成功', icon: 'success' })
+    goNext()
+  } catch {
+    // toast 已由 request 层处理
+  } finally {
+    loading.value = false
+  }
+}
+
+async function onGuestLogin() {
+  loading.value = true
+  try {
+    await userStore.loginAsGuest()
+    uni.showToast({ title: '已进入游客模式', icon: 'none' })
+    goNext()
+  } catch {
+    // toast 已处理
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style lang="scss" scoped>
 .page {
+  min-height: 100vh;
+  background: $bg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 64rpx;
+  box-sizing: border-box;
+}
+
+/* 品牌区 */
+.brand {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 60rpx;
+  gap: 24rpx;
+  padding-top: 120rpx;
 }
 
-.hero {
-  text-align: center;
-  margin-bottom: 80rpx;
+.logo {
+  width: 168rpx;
+  height: 168rpx;
+  border-radius: 48rpx;
+  box-shadow: $shadow-cta;
 }
 
 .title {
-  display: block;
-  font-size: 72rpx;
-  font-weight: 700;
-  color: #2563eb;
-  margin-bottom: 20rpx;
+  font-size: 56rpx;
+  font-weight: 800;
+  color: $ink;
+  letter-spacing: 4rpx;
 }
 
 .subtitle {
-  display: block;
   font-size: 26rpx;
-  color: #888;
-  line-height: 1.5;
+  color: $ink-2;
+  text-align: center;
+  line-height: 1.6;
 }
 
-.login-btn {
-  width: 80%;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: #2563eb;
+/* 按钮区 */
+.actions {
+  width: 100%;
+  padding-bottom: 80rpx;
+}
+
+.btn-primary {
+  background: $grad-brand;
+  border-radius: 999rpx;
+  padding: 30rpx 0;
+  text-align: center;
+  box-shadow: $shadow-cta;
+}
+
+.btn-disabled {
+  opacity: 0.7;
+}
+
+.btn-text {
   color: #fff;
   font-size: 32rpx;
-  border-radius: 44rpx;
-  border: none;
-  margin-bottom: 30rpx;
-}
-
-.login-btn[disabled] {
-  background: #93b7f3;
+  font-weight: 700;
+  letter-spacing: 2rpx;
 }
 
 .divider {
   display: flex;
   align-items: center;
-  width: 80%;
-  margin: 10rpx 0 30rpx;
+  gap: 24rpx;
+  margin: 40rpx 0;
 }
 
-.line {
+.divider-line {
   flex: 1;
   height: 1rpx;
-  background: #e0e0e0;
+  background: $line;
 }
 
-.or {
-  margin: 0 24rpx;
+.divider-text {
   font-size: 24rpx;
-  color: #aaa;
+  color: $ink-3;
 }
 
-.guest-btn {
-  width: 80%;
-  height: 80rpx;
-  line-height: 80rpx;
-  background: #fff;
-  color: #2563eb;
-  font-size: 28rpx;
-  border-radius: 40rpx;
-  border: 1rpx solid #2563eb;
-  margin-bottom: 40rpx;
+.btn-guest {
+  border: 2rpx solid $brand-soft;
+  border-radius: 999rpx;
+  padding: 28rpx 0;
+  text-align: center;
+  background: $card;
 }
 
-.guest-btn[disabled] {
-  color: #93b7f3;
-  border-color: #93b7f3;
+.btn-guest-text {
+  color: $brand;
+  font-size: 30rpx;
+  font-weight: 600;
 }
 
-.hint {
-  font-size: 24rpx;
-  color: #999;
-  margin-bottom: 8rpx;
-}
-
-.hint-guest {
+.footnote {
   font-size: 22rpx;
-  color: #bbb;
+  color: $ink-3;
+  padding-bottom: 40rpx;
 }
 </style>

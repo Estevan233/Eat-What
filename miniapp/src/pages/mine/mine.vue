@@ -1,41 +1,66 @@
 <template>
   <view class="page">
-    <view v-if="userStore.isLoggedIn" class="logged-in">
-      <image v-if="avatarUrl" class="avatar" :src="avatarUrl" mode="aspectFill" />
-      <view v-else class="avatar avatar-placeholder">
-        <text class="avatar-letter">{{ userStore.profile?.nickname?.charAt(0) || '?' }}</text>
-      </view>
-      <text class="nickname">{{ userStore.profile?.nickname || '微信用户' }}</text>
-      <view class="badges">
-        <text v-if="userStore.isGuest" class="badge badge-guest">游客</text>
-        <text class="badge badge-id">id {{ userStore.profile?.id }}</text>
-      </view>
-
-      <view class="menu">
-        <view class="menu-item" @click="goConstitution">
-          <text class="menu-label">体质测试</text>
-          <text v-if="userStore.hasConstitution" class="menu-value">已测 · {{ primaryLabel }}</text>
-          <text v-else class="menu-action">未测，去测 →</text>
-        </view>
-
-        <view class="menu-item" @click="goProfile">
-          <text class="menu-label">健康档案</text>
-          <text v-if="userStore.hasProfile" class="menu-value">已填</text>
-          <text v-else class="menu-action">未填，去填 →</text>
-        </view>
-      </view>
-
-      <button v-if="userStore.isGuest" class="upgrade-btn" @click="goLogin">
-        升级为正式账号
-      </button>
-
-      <button class="logout-btn" @click="onLogout">退出登录</button>
-    </view>
-
-    <view v-else class="not-logged-in">
+    <!-- 未登录 -->
+    <view v-if="!userStore.isLoggedIn" class="not-logged-in">
+      <image class="logo" src="/static/brand-avatar.png" mode="aspectFill" />
       <text class="title">未登录</text>
       <text class="subtitle">登录后可记录心情、收藏菜品、查看历史</text>
-      <button class="login-btn" @click="goLogin">去登录</button>
+      <view class="btn-primary" @click="goLogin">
+        <text class="btn-text">去登录</text>
+      </view>
+    </view>
+
+    <!-- 已登录 -->
+    <view v-else class="logged-in">
+      <!-- 用户卡 -->
+      <view class="user-card">
+        <image v-if="avatarUrl" class="avatar" :src="avatarUrl" mode="aspectFill" />
+        <view v-else class="avatar avatar-placeholder">
+          <text class="avatar-letter">{{ userStore.profile?.nickname?.charAt(0) || '?' }}</text>
+        </view>
+        <view class="user-info">
+          <text class="nickname">{{ userStore.profile?.nickname || '微信用户' }}</text>
+          <view class="badges">
+            <text v-if="userStore.isGuest" class="badge badge-guest">游客</text>
+            <text class="badge badge-id">id {{ userStore.profile?.id }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 菜单 -->
+      <view class="menu">
+        <view class="menu-item" @click="goConstitution">
+          <view class="menu-left">
+            <text class="menu-icon">🧬</text>
+            <text class="menu-label">体质测试</text>
+          </view>
+          <text v-if="userStore.hasConstitution" class="menu-value">{{ primaryLabel }}</text>
+          <text v-else class="menu-action">未测 ›</text>
+        </view>
+        <view class="menu-item" @click="goProfile">
+          <view class="menu-left">
+            <text class="menu-icon">📋</text>
+            <text class="menu-label">健康档案</text>
+          </view>
+          <text v-if="userStore.hasProfile" class="menu-value">已填 ✓</text>
+          <text v-else class="menu-action">未填 ›</text>
+        </view>
+        <view class="menu-item" @click="goFavorite">
+          <view class="menu-left">
+            <text class="menu-icon">❤️</text>
+            <text class="menu-label">我的收藏</text>
+          </view>
+          <text class="menu-action">›</text>
+        </view>
+      </view>
+
+      <!-- 操作 -->
+      <view v-if="userStore.isGuest" class="btn-upgrade" @click="goLogin">
+        <text class="btn-upgrade-text">升级为正式账号</text>
+      </view>
+      <view class="btn-logout" @click="onLogout">
+        <text class="btn-logout-text">退出登录</text>
+      </view>
     </view>
   </view>
 </template>
@@ -67,6 +92,10 @@ function goProfile() {
   uni.navigateTo({ url: '/pages/profile/profile' })
 }
 
+function goFavorite() {
+  uni.navigateTo({ url: '/pages/favorite/favorite' })
+}
+
 function onLogout() {
   uni.showModal({
     title: '确认退出',
@@ -83,60 +112,108 @@ function onLogout() {
 
 <style lang="scss" scoped>
 .page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60rpx 40rpx;
-  min-height: 80vh;
+  min-height: 100vh;
+  background: $bg;
+  padding: 32rpx;
+  box-sizing: border-box;
 }
 
-.logged-in,
+/* ---- 未登录 ---- */
 .not-logged-in {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  padding-top: 160rpx;
+}
+
+.logo {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 44rpx;
+  box-shadow: $shadow-cta;
+  margin-bottom: 36rpx;
+}
+
+.title {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: $ink;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: $ink-2;
+  margin-bottom: 64rpx;
+  text-align: center;
+}
+
+.btn-primary {
+  background: $grad-brand;
+  border-radius: 999rpx;
+  padding: 26rpx 120rpx;
+  box-shadow: $shadow-cta;
+}
+
+.btn-text {
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+/* ---- 已登录 ---- */
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  background: $card;
+  border-radius: $radius-lg;
+  padding: 36rpx 32rpx;
+  box-shadow: $shadow-card;
+  margin-bottom: 28rpx;
 }
 
 .avatar {
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 80rpx;
-  margin-bottom: 30rpx;
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 40rpx;
 }
 
 .avatar-placeholder {
-  background: #e8edf5;
+  background: $brand-light;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .avatar-letter {
-  font-size: 64rpx;
-  font-weight: 600;
-  color: #2563eb;
+  font-size: 52rpx;
+  font-weight: 700;
+  color: $brand;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
 }
 
 .nickname {
-  font-size: 40rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: $ink;
 }
 
 .badges {
   display: flex;
   gap: 12rpx;
-  margin-bottom: 40rpx;
 }
 
 .badge {
-  font-size: 22rpx;
+  font-size: 20rpx;
   padding: 4rpx 16rpx;
   border-radius: 24rpx;
-  color: #888;
-  background: #f0f0f0;
 }
 
 .badge-guest {
@@ -145,89 +222,85 @@ function onLogout() {
 }
 
 .badge-id {
-  color: #aaa;
+  color: $ink-2;
+  background: $bg;
 }
 
+/* ---- 菜单 ---- */
 .menu {
-  width: 100%;
-  background: #fff;
-  border-radius: 16rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-  margin-bottom: 30rpx;
+  background: $card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: 32rpx;
+  overflow: hidden;
 }
 
 .menu-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx 24rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  padding: 32rpx;
+  border-bottom: 1rpx solid $line;
+
+  &:active {
+    background: $bg;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
-.menu-item:last-child {
-  border-bottom: none;
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.menu-icon {
+  font-size: 36rpx;
 }
 
 .menu-label {
   font-size: 30rpx;
-  color: #1f2937;
+  color: $ink;
+  font-weight: 600;
 }
 
 .menu-value {
   font-size: 26rpx;
-  color: #2563eb;
+  color: $fresh;
 }
 
 .menu-action {
   font-size: 26rpx;
-  color: #888;
+  color: $ink-3;
 }
 
-.upgrade-btn {
-  width: 100%;
-  height: 80rpx;
-  line-height: 80rpx;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 40rpx;
+/* ---- 操作按钮 ---- */
+.btn-upgrade {
+  border: 2rpx solid $brand-soft;
+  background: $card;
+  border-radius: 999rpx;
+  padding: 26rpx 0;
+  text-align: center;
+  margin-bottom: 24rpx;
+}
+
+.btn-upgrade-text {
+  color: $brand;
   font-size: 28rpx;
-  margin-bottom: 20rpx;
-}
-
-.logout-btn {
-  width: 100%;
-  height: 80rpx;
-  line-height: 80rpx;
-  background: #fff;
-  color: #dc2626;
-  border: 1rpx solid #dc2626;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-}
-
-.title {
-  font-size: 48rpx;
   font-weight: 600;
-  color: #2563eb;
-  margin-bottom: 20rpx;
 }
 
-.subtitle {
-  font-size: 26rpx;
-  color: #888;
-  margin-bottom: 60rpx;
+.btn-logout {
+  border-radius: 999rpx;
+  padding: 26rpx 0;
   text-align: center;
 }
 
-.login-btn {
-  background: #2563eb;
-  color: #fff;
-  height: 80rpx;
-  line-height: 80rpx;
-  font-size: 30rpx;
-  border-radius: 40rpx;
-  border: none;
-  padding: 0 60rpx;
+.btn-logout-text {
+  color: #dc2626;
+  font-size: 28rpx;
 }
 </style>
