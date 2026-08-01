@@ -1,0 +1,5 @@
+# Windows 下载残留元数据
+*.Zone.Identifier
+
+# 品牌素材压缩包（已解压到 eat_what_brand_assets/）
+*.zip
