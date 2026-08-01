@@ -14,17 +14,18 @@ class WxLoginRequest(BaseModel):
     """前端 POST /auth/wx-login 的 body。"""
     code: str
     nickname: str | None = None
-    avatarUrl: str | None = None  # camelCase 与微信小程序 wx.getUserProfile 返回一致
+    # snake_case 与全项目约定一致；前端 request.ts 会 camelToSnake 自动转换
+    avatar_url: str | None = None
 
 
 class GuestLoginRequest(BaseModel):
     """前端 POST /auth/guest-login 的 body。
 
-    guestId 由前端生成（建议 UUID v4）并落 storage，下次登录传回同一 guestId
+    guest_id 由前端生成（建议 UUID v4）并落 storage，下次登录传回同一 guest_id
     → 后端复用同一 user 行。不传时后端会生成一个，但前端拿不到无法复用，
     所以推荐前端必传。
     """
-    guestId: str = Field(..., min_length=1, max_length=128)
+    guest_id: str = Field(..., min_length=1, max_length=128)
     nickname: str | None = Field(default=None, max_length=64)
 
 

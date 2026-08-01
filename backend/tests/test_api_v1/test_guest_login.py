@@ -4,7 +4,7 @@
 1. 首次游客登录 → 创建 user，返回 token
 2. 同一 guest_id 二次登录 → 复用同一 user 行
 3. 不同 guest_id → 不同 user
-4. guestId 缺失 → 422（Pydantic 校验）
+4. guest_id 缺失 → 422（Pydantic 校验）
 5. 游客 user 用 token 调需要登录的端点能成功（如 GET /profile）
 6. 游客 user 在 user 表的 openid 带 `guest:` 前缀
 
@@ -23,7 +23,7 @@ def test_first_guest_login_creates_user(client, session):
     guest_id = str(uuid.uuid4())
     res = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": guest_id, "nickname": "体验员"},
+        json={"guest_id": guest_id, "nickname": "体验员"},
     )
     assert res.status_code == 200
     body = res.json()
@@ -51,7 +51,7 @@ def test_same_guest_id_reuses_same_user(client, session):
 
     res1 = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": guest_id, "nickname": "游客一号"},
+        json={"guest_id": guest_id, "nickname": "游客一号"},
     )
     assert res1.status_code == 200
     user_id_1 = res1.json()["data"]["user"]["id"]
@@ -59,7 +59,7 @@ def test_same_guest_id_reuses_same_user(client, session):
     # 二次登录，换 nickname
     res2 = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": guest_id, "nickname": "游客二号"},
+        json={"guest_id": guest_id, "nickname": "游客二号"},
     )
     assert res2.status_code == 200
     user_id_2 = res2.json()["data"]["user"]["id"]
@@ -84,11 +84,11 @@ def test_same_guest_id_reuses_same_user(client, session):
 def test_different_guest_ids_create_different_users(client, session):
     res1 = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": str(uuid.uuid4())},
+        json={"guest_id": str(uuid.uuid4())},
     )
     res2 = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": str(uuid.uuid4())},
+        json={"guest_id": str(uuid.uuid4())},
     )
     assert res1.status_code == 200
     assert res2.status_code == 200
@@ -102,21 +102,21 @@ def test_guest_login_without_nickname_uses_default(client, session):
     """不传 nickname → 默认「游客」。"""
     res = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": str(uuid.uuid4())},
+        json={"guest_id": str(uuid.uuid4())},
     )
     assert res.status_code == 200
     assert res.json()["data"]["user"]["nickname"] == "游客"
 
 
 def test_guest_login_missing_guest_id_returns_422(client):
-    """guestId 缺失 → Pydantic 422。"""
+    """guest_id 缺失 → Pydantic 422。"""
     res = client.post("/api/v1/auth/guest-login", json={})
     assert res.status_code == 422
 
 
 def test_guest_login_empty_guest_id_returns_422(client):
-    """guestId 为空串 → min_length=1 校验失败 422。"""
-    res = client.post("/api/v1/auth/guest-login", json={"guestId": ""})
+    """guest_id 为空串 → min_length=1 校验失败 422。"""
+    res = client.post("/api/v1/auth/guest-login", json={"guest_id": ""})
     assert res.status_code == 422
 
 
@@ -124,7 +124,7 @@ def test_guest_token_works_for_protected_endpoint(client):
     """游客拿 token 调需要登录的 GET /profile 应该成功（profile=null 也算 200）。"""
     res_login = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": str(uuid.uuid4())},
+        json={"guest_id": str(uuid.uuid4())},
     )
     token = res_login.json()["data"]["token"]
 
@@ -149,6 +149,6 @@ def test_guest_login_does_not_call_wechat(client, monkeypatch):
 
     res = client.post(
         "/api/v1/auth/guest-login",
-        json={"guestId": str(uuid.uuid4())},
+        json={"guest_id": str(uuid.uuid4())},
     )
     assert res.status_code == 200

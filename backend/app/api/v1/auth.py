@@ -25,7 +25,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def wx_login(req: WxLoginRequest, request: Request, session: Session = Depends(get_db)) -> dict[str, object]:
     """小程序登录入口。
 
-    Body: {"code": "...", "nickname"?: "...", "avatarUrl"?: "..."}
+    Body: {"code": "...", "nickname"?: "...", "avatar_url"?: "..."}
     Returns: {"ok": true, "data": {"token": "...", "user": {...}}}
     """
     # 1. 拿 code 换 openid（异步调微信服务器）
@@ -37,7 +37,7 @@ async def wx_login(req: WxLoginRequest, request: Request, session: Session = Dep
         openid=wx_data["openid"],
         unionid=wx_data.get("unionid"),
         nickname=req.nickname,
-        avatar_url=req.avatarUrl,
+        avatar_url=req.avatar_url,
     )
 
     # 3. 签 JWT（7 天有效，settings.jwt_ttl_minutes 控制）
@@ -61,12 +61,12 @@ def guest_login(req: GuestLoginRequest, session: Session = Depends(get_db)) -> d
 
     用于小程序体验：用户不想授权微信也能进入应用。
 
-    Body: {"guestId": "<前端生成的 uuid>", "nickname"?: "..."}
+    Body: {"guest_id": "<前端生成的 uuid>", "nickname"?: "..."}
     Returns: {"ok": true, "data": {"token": "...", "user": {...}}}
     """
     user = get_or_create_guest(
         session,
-        guest_id=req.guestId,
+        guest_id=req.guest_id,
         nickname=req.nickname,
     )
 

@@ -119,6 +119,12 @@ async function onRecommend() {
     uni.navigateTo({ url: '/pages/auth/auth' })
     return
   }
+  // 未建档 → 引导去档案页（后端会 404，提前拦截 UX 更顺）
+  if (!userStore.hasProfile) {
+    uni.showToast({ title: '请先填写健康档案', icon: 'none' })
+    uni.navigateTo({ url: '/pages/profile/profile' })
+    return
+  }
   let coords: Coords | null = null
   try {
     coords = await getLocation()

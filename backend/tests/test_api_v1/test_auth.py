@@ -39,7 +39,7 @@ def test_first_login_creates_user(client, session, mock_wx_success):
 
     res = client.post(
         "/api/v1/auth/wx-login",
-        json={"code": "fake_code", "nickname": "张三", "avatarUrl": "https://example.com/a.png"},
+        json={"code": "fake_code", "nickname": "张三", "avatar_url": "https://example.com/a.png"},
     )
 
     assert res.status_code == 200
@@ -69,7 +69,7 @@ def test_second_login_reuses_and_updates(client, session, mock_wx_success):
     # 第一次登录
     res1 = client.post(
         "/api/v1/auth/wx-login",
-        json={"code": "c1", "nickname": "李四", "avatarUrl": "https://e.com/1.png"},
+        json={"code": "c1", "nickname": "李四", "avatar_url": "https://e.com/1.png"},
     )
     assert res1.status_code == 200
     user_id_1 = res1.json()["data"]["user"]["id"]
@@ -77,7 +77,7 @@ def test_second_login_reuses_and_updates(client, session, mock_wx_success):
     # 第二次登录，换 nickname 和 avatar
     res2 = client.post(
         "/api/v1/auth/wx-login",
-        json={"code": "c2", "nickname": "李四丰", "avatarUrl": "https://e.com/2.png"},
+        json={"code": "c2", "nickname": "李四丰", "avatar_url": "https://e.com/2.png"},
     )
     assert res2.status_code == 200
     user_id_2 = res2.json()["data"]["user"]["id"]
