@@ -14,7 +14,7 @@ from app.api.v1 import api_router
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.logging import RequestContextMiddleware, configure_logging
-from app.db import init_db
+from app.db import check_database, init_db
 from app.utils.response import error, success
 
 log = structlog.get_logger()
@@ -74,8 +74,21 @@ def create_app() -> FastAPI:
 
     # ---- 健康检查 ----
     @app.get("/health", tags=["meta"])
-    def health() -> dict[str, object]:
-        return success(data={"status": "healthy", "env": settings.environment})
+    def health() -> JSONResponse:
+        if not check_database():
+            return JSONResponse(
+                status_code=503,
+                content=error(
+                    code="SERVICE_UNAVAILABLE",
+                    message="服务暂不可用",
+                    data={"status": "degraded", "database": "unavailable"},
+                ),
+            )
+        return JSONResponse(
+            content=success(
+                data={"status": "healthy", "database": "ready", "env": settings.environment}
+            )
+        )
 
     return app
 

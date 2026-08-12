@@ -1,28 +1,51 @@
-"""数据库引擎与会话工厂。
+"""Database engine, sessions, and readiness checks."""
 
-学习点：
-- SQLModel.metadata.create_all 在开发期直接建表，无需 Alembic
-- SessionLocal 是工厂，每次请求 yield 一个独立 Session
-"""
+from typing import Any
+
+import structlog
+from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import Session, SQLModel, create_engine
 
 from app.core.config import get_settings
 
+log = structlog.get_logger()
 settings = get_settings()
 
-# SQLite 需要 check_same_thread=False 才能在 FastAPI 多线程下用
-connect_args = {"check_same_thread": False} if settings.database_url.startswith("sqlite") else {}
-engine = create_engine(settings.database_url, echo=settings.debug, connect_args=connect_args)
+
+def build_engine_options(database_url: str, *, debug: bool) -> dict[str, Any]:
+    """Return driver-specific SQLAlchemy options without leaking credentials."""
+    options: dict[str, Any] = {"echo": debug}
+    if database_url.startswith("sqlite"):
+        options["connect_args"] = {"check_same_thread": False}
+    elif database_url.startswith("mysql"):
+        options["pool_pre_ping"] = True
+        options["pool_recycle"] = 300
+    return options
+
+
+engine = create_engine(
+    settings.database_url,
+    **build_engine_options(settings.database_url, debug=settings.debug),
+)
 
 SessionLocal = sessionmaker(bind=engine, class_=Session, autocommit=False, autoflush=False)
 
 
 def init_db() -> None:
-    """启动时调用：建所有已导入的表。
+    """Create tables only for local/test SQLite; deployed environments use Alembic."""
+    import app.models  # noqa: F401
 
-    import app.models 让 SQLModel.metadata 知道有哪些表，
-    然后 create_all 才能真正 DDL。这一步必须在 create_all 之前。
-    """
-    import app.models  # noqa: F401  # 触发表注册
-    SQLModel.metadata.create_all(engine)
+    if settings.environment.lower() in {"dev", "development", "test"}:
+        SQLModel.metadata.create_all(engine)
+
+
+def check_database() -> bool:
+    """Run the smallest useful readiness query; never expose a DSN or DB error."""
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        log.exception("database_readiness_failed")
+        return False
