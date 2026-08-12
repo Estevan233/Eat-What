@@ -19,7 +19,7 @@
         <view class="divider-line" />
       </view>
 
-      <view class="btn-guest" @click="onGuestLogin">
+      <view class="btn-guest" :class="{ 'btn-disabled': loading }" @click="onGuestLogin">
         <text class="btn-guest-text">游客登录，先体验一下</text>
       </view>
     </view>
@@ -30,6 +30,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { shouldShowAuthErrorToast, toAuthErrorMessage } from '@/auth/error'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
@@ -46,27 +47,36 @@ function goNext() {
   }
 }
 
+function handleLoginError(action: string, error: unknown) {
+  console.error(`[auth] ${action} failed`, error)
+  if (shouldShowAuthErrorToast(error)) {
+    uni.showToast({ title: toAuthErrorMessage(error), icon: 'none' })
+  }
+}
+
 async function onLogin() {
+  if (loading.value) return
   loading.value = true
   try {
     await userStore.login()
     uni.showToast({ title: '登录成功', icon: 'success' })
     goNext()
-  } catch {
-    // toast 已由 request 层处理
+  } catch (error) {
+    handleLoginError('wx-login', error)
   } finally {
     loading.value = false
   }
 }
 
 async function onGuestLogin() {
+  if (loading.value) return
   loading.value = true
   try {
     await userStore.loginAsGuest()
     uni.showToast({ title: '已进入游客模式', icon: 'none' })
     goNext()
-  } catch {
-    // toast 已处理
+  } catch (error) {
+    handleLoginError('guest-login', error)
   } finally {
     loading.value = false
   }

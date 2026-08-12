@@ -9,6 +9,15 @@
 import { request } from './request'
 import type { LoginResponse } from '@/types/api'
 
+/** CloudBase 私有链路会注入可信 openid，不需要把 wx.login code 发给后端。 */
+export const cloudLogin = () =>
+  request<LoginResponse>({
+    url: '/api/v1/auth/cloud-login',
+    method: 'POST',
+    data: {},
+    loading: false,
+  })
+
 export const wxLogin = (code: string, nickname?: string, avatarUrl?: string) =>
   request<LoginResponse>({
     url: '/api/v1/auth/wx-login',

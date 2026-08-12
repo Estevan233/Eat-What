@@ -19,12 +19,14 @@ export interface ApiResult<T> {
 export class ApiError extends Error {
   code?: string
   statusCode?: number
+  requestId?: string
 
-  constructor(message: string, code?: string, statusCode?: number) {
+  constructor(message: string, code?: string, statusCode?: number, requestId?: string) {
     super(message)
     this.name = 'ApiError'
     this.code = code
     this.statusCode = statusCode
+    this.requestId = requestId
   }
 }
 

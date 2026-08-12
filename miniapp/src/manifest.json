@@ -1,9 +1,12 @@
 {
   "name": "今天吃啥",
-  "appid": "",
+  "appid": "wx59c5620b7a894f8e",
   "description": "结合星座、节气、天气、心情、体质与忌口，告诉你今天吃啥",
   "versionName": "0.1.0",
   "versionCode": "100",
+  "uniStatistics": {
+    "enable": false
+  },
   "transformPx": false,
   "app-plus": {
     "usingComponents": true,
@@ -24,7 +27,10 @@
   },
   "quickapp": {},
   "mp-weixin": {
-    "appid": "",
+    "appid": "wx59c5620b7a894f8e",
+    "uniStatistics": {
+      "enable": false
+    },
     "setting": {
       "urlCheck": false,
       "es6": true,

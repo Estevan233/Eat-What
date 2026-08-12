@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { onLaunch, onShow } from '@dcloudio/uni-app'
+import { getCloudConfig } from '@/config/env'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 
 onLaunch(() => {
-  console.log('App 启动，token 存在？', userStore.isLoggedIn)
+  // #ifdef MP-WEIXIN
+  const cloudConfig = getCloudConfig()
+  wx.cloud.init({
+    env: cloudConfig.environmentId,
+    traceUser: true,
+  })
+  // #endif
+
+  // 触发一次持久化登录态恢复；模板中会读取该计算属性。
+  void userStore.isLoggedIn
 })
 
 onShow(() => {

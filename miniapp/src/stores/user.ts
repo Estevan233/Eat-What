@@ -20,22 +20,29 @@
  * - 注意区分 user（id+nickname+avatar_url）与 userProfile（生日/性别/身高/...）
  */
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
-import { guestLogin, wxLogin } from '@/api/auth'
+import { computed, onScopeDispose, ref } from 'vue'
+import { cloudLogin, guestLogin } from '@/api/auth'
 import { getProfile, upsertProfile } from '@/api/profile'
 import { getResult, submit as submitConstitution } from '@/api/constitution'
+import { getCloudContainerApi } from '@/platform/cloudbase'
+import {
+  AUTH_STORAGE_KEYS,
+  clearAuthStorage,
+  getStoredToken,
+  readStoredJson,
+  readStoredString,
+  removeStoredValue,
+  saveLoginSession,
+  subscribeAuthClear,
+  writeStoredJson,
+  writeStoredString,
+} from '@/auth/storage'
 import type {
   ConstitutionResult,
   ProfileRead,
   ProfileUpsert,
   UserRead,
 } from '@/types/api'
-
-const TOKEN_KEY = 'eat_what_token'
-const PROFILE_KEY = 'eat_what_profile'
-const USER_PROFILE_KEY = 'eat_what_user_profile'
-const GUEST_ID_KEY = 'eat_what_guest_id'
-const CONSTITUTION_KEY = 'eat_what_constitution'
 
 /** 生成一个游客身份标识（UUID v4 风格，无依赖）。 */
 function generateGuestId(): string {
@@ -59,33 +66,21 @@ export const useUserStore = defineStore('user', () => {
   // 游客身份持久化标识
   const guestId = ref<string>('')
 
+  const unsubscribeAuthClear = subscribeAuthClear((includeGuestId) => {
+    token.value = ''
+    profile.value = null
+    userProfile.value = null
+    constitution.value = null
+    if (includeGuestId) guestId.value = ''
+  })
+  onScopeDispose(unsubscribeAuthClear)
+
   // 启动时从 storage 恢复
-  token.value = uni.getStorageSync(TOKEN_KEY) || ''
-  const storedProfile = uni.getStorageSync(PROFILE_KEY)
-  if (storedProfile) {
-    try {
-      profile.value = JSON.parse(storedProfile) as UserRead
-    } catch {
-      profile.value = null
-    }
-  }
-  const storedUserProfile = uni.getStorageSync(USER_PROFILE_KEY)
-  if (storedUserProfile) {
-    try {
-      userProfile.value = JSON.parse(storedUserProfile) as ProfileRead
-    } catch {
-      userProfile.value = null
-    }
-  }
-  const storedConstitution = uni.getStorageSync(CONSTITUTION_KEY)
-  if (storedConstitution) {
-    try {
-      constitution.value = JSON.parse(storedConstitution) as ConstitutionResult
-    } catch {
-      constitution.value = null
-    }
-  }
-  guestId.value = uni.getStorageSync(GUEST_ID_KEY) || ''
+  token.value = getStoredToken()
+  profile.value = readStoredJson<UserRead>(AUTH_STORAGE_KEYS.profile)
+  userProfile.value = readStoredJson<ProfileRead>(AUTH_STORAGE_KEYS.userProfile)
+  constitution.value = readStoredJson<ConstitutionResult>(AUTH_STORAGE_KEYS.constitution)
+  guestId.value = readStoredString(AUTH_STORAGE_KEYS.guestId)
 
   /** 调 wx.login 拿 code */
   function getWxCode(): Promise<string> {
@@ -104,14 +99,19 @@ export const useUserStore = defineStore('user', () => {
     })
   }
 
-  /** 完整登录流程：wx.login → wxLogin API → 存 token/profile */
+  /**
+   * 微信小程序登录走 CloudBase 私有链路，由云托管注入可信身份头。
+   * H5 不具备 callContainer，界面应引导用户使用游客登录。
+   */
   async function login(): Promise<UserRead> {
-    const code = await getWxCode()
-    const data = await wxLogin(code)
+    if (!getCloudContainerApi()) {
+      throw new Error('微信一键登录仅支持微信小程序，请使用游客登录')
+    }
+
+    const data = await cloudLogin()
     token.value = data.token
     profile.value = data.user
-    uni.setStorageSync(TOKEN_KEY, data.token)
-    uni.setStorageSync(PROFILE_KEY, JSON.stringify(data.user))
+    saveLoginSession(data.token, data.user)
     return data.user
   }
 
@@ -122,13 +122,12 @@ export const useUserStore = defineStore('user', () => {
   async function loginAsGuest(nickname?: string): Promise<UserRead> {
     if (!guestId.value) {
       guestId.value = generateGuestId()
-      uni.setStorageSync(GUEST_ID_KEY, guestId.value)
+      writeStoredString(AUTH_STORAGE_KEYS.guestId, guestId.value)
     }
     const data = await guestLogin(guestId.value, nickname)
     token.value = data.token
     profile.value = data.user
-    uni.setStorageSync(TOKEN_KEY, data.token)
-    uni.setStorageSync(PROFILE_KEY, JSON.stringify(data.user))
+    saveLoginSession(data.token, data.user)
     return data.user
   }
 
@@ -136,7 +135,7 @@ export const useUserStore = defineStore('user', () => {
   async function fetchUserProfile(): Promise<ProfileRead | null> {
     const data = await getProfile()
     userProfile.value = data.profile
-    uni.setStorageSync(USER_PROFILE_KEY, JSON.stringify(data.profile))
+    writeStoredJson(AUTH_STORAGE_KEYS.userProfile, data.profile)
     return data.profile
   }
 
@@ -144,7 +143,7 @@ export const useUserStore = defineStore('user', () => {
   async function saveUserProfile(payload: ProfileUpsert): Promise<ProfileRead> {
     const data = await upsertProfile(payload)
     userProfile.value = data
-    uni.setStorageSync(USER_PROFILE_KEY, JSON.stringify(data))
+    writeStoredJson(AUTH_STORAGE_KEYS.userProfile, data)
     return data
   }
 
@@ -155,7 +154,7 @@ export const useUserStore = defineStore('user', () => {
   async function saveConstitution(answers: Record<number, number>): Promise<ConstitutionResult> {
     const result = await submitConstitution(answers)
     constitution.value = result
-    uni.setStorageSync(CONSTITUTION_KEY, JSON.stringify(result))
+    writeStoredJson(AUTH_STORAGE_KEYS.constitution, result)
     // 同步把档案里的 constitutionType / constitutionScores 字段也刷新一次
     // 避免下次 GET /profile 时显示旧字段
     if (userProfile.value) {
@@ -164,7 +163,7 @@ export const useUserStore = defineStore('user', () => {
         constitutionType: result.constitutionTypeStr,
         constitutionScores: result.scoresNormalized,
       }
-      uni.setStorageSync(USER_PROFILE_KEY, JSON.stringify(userProfile.value))
+      writeStoredJson(AUTH_STORAGE_KEYS.userProfile, userProfile.value)
     }
     return result
   }
@@ -174,37 +173,28 @@ export const useUserStore = defineStore('user', () => {
     try {
       const result = await getResult()
       constitution.value = result
-      uni.setStorageSync(CONSTITUTION_KEY, JSON.stringify(result))
+      writeStoredJson(AUTH_STORAGE_KEYS.constitution, result)
       return result
     } catch (e) {
       // 404 / 网络错误都清空缓存，避免显示旧结果
       constitution.value = null
-      uni.removeStorageSync(CONSTITUTION_KEY)
+      removeStoredValue(AUTH_STORAGE_KEYS.constitution)
       throw e
     }
   }
 
   function setToken(t: string) {
     token.value = t
-    uni.setStorageSync(TOKEN_KEY, t)
+    writeStoredString(AUTH_STORAGE_KEYS.token, t)
   }
 
   function setProfile(p: UserRead) {
     profile.value = p
-    uni.setStorageSync(PROFILE_KEY, JSON.stringify(p))
+    writeStoredJson(AUTH_STORAGE_KEYS.profile, p)
   }
 
   function clear() {
-    token.value = ''
-    profile.value = null
-    userProfile.value = null
-    constitution.value = null
-    guestId.value = ''
-    uni.removeStorageSync(TOKEN_KEY)
-    uni.removeStorageSync(PROFILE_KEY)
-    uni.removeStorageSync(USER_PROFILE_KEY)
-    uni.removeStorageSync(CONSTITUTION_KEY)
-    uni.removeStorageSync(GUEST_ID_KEY)
+    clearAuthStorage({ includeGuestId: true })
   }
 
   const isLoggedIn = computed(() => !!token.value)
