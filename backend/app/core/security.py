@@ -15,6 +15,7 @@ from app.core.errors import AuthError
 
 _settings = get_settings()
 _pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_JWT_CLOCK_SKEW_SECONDS = 5
 
 
 def create_access_token(user_id: int) -> str:
@@ -31,7 +32,12 @@ def create_access_token(user_id: int) -> str:
 def decode_token(token: str) -> dict[str, Any]:
     """校验并解码 JWT。失败抛 AuthError。"""
     try:
-        return jwt.decode(token, _settings.jwt_secret, algorithms=[_settings.jwt_algorithm])
+        return jwt.decode(
+            token,
+            _settings.jwt_secret,
+            algorithms=[_settings.jwt_algorithm],
+            leeway=_JWT_CLOCK_SKEW_SECONDS,
+        )
     except jwt.ExpiredSignatureError:
         raise AuthError("登录已过期，请重新登录") from None
     except jwt.InvalidTokenError:

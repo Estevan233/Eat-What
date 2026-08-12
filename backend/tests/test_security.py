@@ -1,8 +1,10 @@
 """JWT 与密码哈希单测。"""
 import time
+from datetime import datetime, timedelta
 
 import jwt
 
+import app.core.security as security
 from app.core.errors import AuthError
 from app.core.security import create_access_token, decode_token, hash_password, verify_password
 
@@ -32,7 +34,7 @@ def test_decode_token_rejects_wrong_secret():
     settings = get_settings()
     bad = jwt.encode(
         {"sub": "1", "iat": int(time.time()), "exp": int(time.time()) + 60},
-        "different-secret",
+        "different-secret-that-is-at-least-32-bytes",
         algorithm=settings.jwt_algorithm,
     )
     try:
@@ -40,6 +42,44 @@ def test_decode_token_rejects_wrong_secret():
     except AuthError:
         return
     raise AssertionError("expected AuthError for wrong-secret token")
+
+
+def test_decode_token_allows_small_clock_skew(monkeypatch):
+    """A freshly issued token remains valid across a small host clock correction."""
+    real_datetime = datetime
+
+    class TwoSecondsAhead(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return real_datetime.now(tz) + timedelta(seconds=2)
+
+    monkeypatch.setattr(security, "datetime", TwoSecondsAhead)
+    token = security.create_access_token(user_id=42)
+    monkeypatch.setattr(security, "datetime", real_datetime)
+
+    payload = security.decode_token(token)
+
+    assert payload["sub"] == "42"
+
+
+def test_decode_token_rejects_large_future_iat(monkeypatch):
+    """Clock tolerance must not make arbitrary future tokens valid."""
+    real_datetime = datetime
+
+    class ThirtySecondsAhead(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return real_datetime.now(tz) + timedelta(seconds=30)
+
+    monkeypatch.setattr(security, "datetime", ThirtySecondsAhead)
+    token = security.create_access_token(user_id=42)
+    monkeypatch.setattr(security, "datetime", real_datetime)
+
+    try:
+        security.decode_token(token)
+    except AuthError:
+        return
+    raise AssertionError("expected AuthError for token issued too far in the future")
 
 
 def test_hash_and_verify_password():
