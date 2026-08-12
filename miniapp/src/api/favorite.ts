@@ -31,6 +31,9 @@ export type FavoriteFood = {
   cookingMethod: string
   cookingTimeMin?: number
   imageUrl?: string
+  mealRole?: import('@/types/api').MealRole | null
+  recipeReady?: boolean
+  visualKey?: string | null
   seasonalSolarTerms: string[]
   description?: string
 }

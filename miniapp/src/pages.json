@@ -5,6 +5,10 @@
       "style": { "navigationBarTitleText": "今天吃啥" }
     },
     {
+      "path": "pages/recipe/recipe",
+      "style": { "navigationBarTitleText": "菜谱详情" }
+    },
+    {
       "path": "pages/profile/profile",
       "style": { "navigationBarTitleText": "档案" }
     },
