@@ -21,7 +21,8 @@
 - 直接在 in-memory session 里建 Food + UserProfile + DailyLog
 - 不调 API 路由，直接调 service 函数，便于断言内部细节
 """
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
+from time import perf_counter
 from typing import Any
 from unittest.mock import AsyncMock
 
@@ -31,12 +32,14 @@ from sqlmodel import select
 from app.core.errors import NotFoundError
 from app.models.daily_log import DailyLog
 from app.models.food import Food
+from app.models.recommendation_event import RecommendationEvent
 from app.models.user import User
 from app.models.user_profile import UserProfile
 from app.schemas.daily import RecommendRequest
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 from app.services import recommender
+from app.services.recommendation_ranking import RerankAdjustment
 
 # ---- Fixtures ----
 
@@ -404,18 +407,22 @@ async def test_reason_contains_keywords(session, seeded_session, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_stable_result_for_same_input(session, seeded_session, monkeypatch):
-    """同输入两次推荐结果一致（不含随机/时间敏感性）。"""
+async def test_refresh_rotates_results_when_six_unseen_foods_exist(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    """同一天重复刷新时，候选充足则不重复上一批。"""
     user, _ = seeded_session
     _patch_external(monkeypatch, solar_term_current="立秋")
-
     req = RecommendRequest(mood="neutral")
-    resp1 = await recommender.recommend(session, user, req)
-    resp2 = await recommender.recommend(session, user, req)
 
-    names1 = [f.name for f in resp1.foods]
-    names2 = [f.name for f in resp2.foods]
-    assert names1 == names2, f"同输入结果应稳定，实际: {names1} vs {names2}"
+    first = await recommender.recommend(session, user, req)
+    second = await recommender.recommend(session, user, req)
+
+    first_ids = {food.id for food in first.foods}
+    second_ids = {food.id for food in second.foods}
+    assert first_ids.isdisjoint(second_ids)
 
 
 @pytest.mark.asyncio
@@ -478,3 +485,179 @@ async def test_uses_real_weather_when_coords_provided(session, seeded_session, m
 
     mock.assert_awaited_once_with(39.92, 116.41)
     assert resp.context.weather.weather_tag == "rainy"
+
+
+def test_weather_score_is_capped_and_gap_is_not_dominant():
+    warm = _make_food("温性菜", nature="warm")
+    cool = _make_food("凉性菜", nature="cool")
+    neutral = _make_food("中性菜", nature="neutral")
+    scores = [
+        recommender._score_weather(food, _make_weather("cold"))[0]
+        for food in (warm, cool, neutral)
+    ]
+    assert max(scores) == 15.0
+    assert min(scores) == 3.0
+    assert max(scores) - min(scores) == 12.0
+
+
+def test_score_food_uses_seventy_five_point_breakdown():
+    food = _make_food(
+        "高蛋白温性菜",
+        nature="warm",
+        tags=["easy"],
+        suitable_constitutions=["qixu"],
+        nutrition={"protein_g": 18.0, "fat_g": 3.0},
+        seasonal_solar_terms=["liqiu"],
+    )
+    profile = _make_profile(1, constitution_type="qixu")
+    candidate = recommender._score_food(
+        food,
+        _make_weather("cold"),
+        _make_today(solar_term_current="立秋", zodiac_sign="taurus"),
+        profile,
+        [],
+        [food],
+        "tired",
+        "high",
+    )
+    assert candidate.breakdown.weather == 15.0
+    assert candidate.breakdown.solar_term == 15.0
+    assert candidate.breakdown.mood == 12.0
+    assert candidate.breakdown.constitution == 10.0
+    assert candidate.breakdown.activity == 5.0
+    assert 0.0 <= candidate.base_score <= 75.0
+
+
+@pytest.mark.asyncio
+async def test_four_refreshes_return_twelve_unique_foods_when_pool_allows(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    user, _ = seeded_session
+    for index in range(3):
+        session.add(
+            _make_food(
+                f"扩展菜{index}",
+                category=f"extra_{index}",
+                cooking_method=f"method_{index}",
+            )
+        )
+    session.commit()
+    _patch_external(monkeypatch)
+    req = RecommendRequest(mood="neutral")
+
+    batches = [await recommender.recommend(session, user, req) for _ in range(4)]
+    ids = [food.id for batch in batches for food in batch.foods]
+    assert len(ids) == 12
+    assert len(set(ids)) == 12
+
+
+@pytest.mark.asyncio
+async def test_recently_chosen_food_is_avoided_when_alternatives_exist(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    user, foods = seeded_session
+    chosen = foods[0]
+    assert chosen.id is not None
+    session.add(
+        DailyLog(
+            user_id=user.id,
+            log_date=date.today() - timedelta(days=1),
+            recommended_food_ids_json=[chosen.id],
+            chosen_food_ids_json=[chosen.id],
+        )
+    )
+    session.commit()
+    _patch_external(monkeypatch)
+
+    response = await recommender.recommend(
+        session,
+        user,
+        RecommendRequest(mood="neutral"),
+    )
+    assert chosen.id not in {food.id for food in response.foods}
+
+
+@pytest.mark.asyncio
+async def test_invalid_reranker_output_falls_back_without_reintroducing_forbidden_food(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    user, foods = seeded_session
+    forbidden = next(food for food in foods if food.name == "红烧肉")
+    assert forbidden.id is not None
+    profile = session.exec(
+        select(UserProfile).where(UserProfile.user_id == user.id)
+    ).first()
+    assert profile is not None
+    profile.forbidden_tags = ["pork"]
+    session.add(profile)
+    session.commit()
+    _patch_external(monkeypatch)
+
+    class InvalidReranker:
+        engine_name = "invalid_agent"
+
+        async def rerank(self, candidates, context):
+            return [
+                RerankAdjustment(
+                    food_id=forbidden.id,
+                    score_delta=15.0,
+                    reason="不应被采用",
+                )
+            ]
+
+    response = await recommender.recommend(
+        session,
+        user,
+        RecommendRequest(mood="neutral"),
+        reranker=InvalidReranker(),
+    )
+    assert forbidden.id not in {food.id for food in response.foods}
+    event = session.exec(
+        select(RecommendationEvent)
+        .where(RecommendationEvent.user_id == user.id)
+        .order_by(RecommendationEvent.id.desc())  # type: ignore[attr-defined]
+    ).first()
+    assert event is not None
+    assert event.engine == "rules_v2"
+
+
+@pytest.mark.asyncio
+async def test_two_hundred_food_recommendation_finishes_under_half_second(
+    session,
+    monkeypatch,
+):
+    user = User(openid="perf_user", nickname="性能用户", avatar_url=None)
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    assert user.id is not None
+    session.add(_make_profile(user.id, constitution_type="pinghe"))
+    session.add_all(
+        [
+            _make_food(
+                f"性能菜{index}",
+                category=f"category_{index % 12}",
+                cooking_method=f"method_{index % 10}",
+                tags=["easy"],
+            )
+            for index in range(200)
+        ]
+    )
+    session.commit()
+    _patch_external(monkeypatch)
+
+    started = perf_counter()
+    response = await recommender.recommend(
+        session,
+        user,
+        RecommendRequest(mood="neutral"),
+    )
+    elapsed = perf_counter() - started
+    assert len(response.foods) == 3
+    assert elapsed < 0.5

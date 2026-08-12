@@ -305,6 +305,7 @@ def test_recommend_writes_daily_log(
 
     from app.db import SessionLocal
     from app.models.daily_log import DailyLog
+    from app.models.recommendation_event import RecommendationEvent
     user_id = seed_profile_and_foods[0]
     session = SessionLocal()
     try:
@@ -315,6 +316,15 @@ def test_recommend_writes_daily_log(
         assert log.mood == "tired"
         assert log.weather_tag == "mild"
         assert len(log.recommended_food_ids_json) == 3
+        events = list(
+            session.exec(
+                select(RecommendationEvent).where(
+                    RecommendationEvent.user_id == user_id
+                )
+            ).all()
+        )
+        assert len(events) == 1
+        assert events[0].recommended_food_ids_json == log.recommended_food_ids_json
     finally:
         session.close()
 
