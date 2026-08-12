@@ -9,6 +9,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.meal import MealSnapshot, MealSubstitution
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 
@@ -68,6 +69,11 @@ class RecommendResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     foods: list[FoodWithReason]
+    recommendation_id: int
+    primary_meal: MealSnapshot
+    substitutions: list[MealSubstitution]
+    substitution_notice: str | None = None
+    engine: str
     context: RecommendContext
 
 

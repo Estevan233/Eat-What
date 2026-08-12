@@ -15,6 +15,7 @@ from sqlmodel import Session, select
 from app.core.errors import NotFoundError, ValidationError
 from app.models.daily_log import DailyLog
 from app.models.food import Food
+from app.models.recipe import Recipe
 from app.models.user import User
 from app.models.user_profile import UserProfile
 from app.schemas.daily import (
@@ -25,19 +26,22 @@ from app.schemas.daily import (
     RecommendRequest,
     RecommendResponse,
 )
+from app.schemas.meal import MealBuildResult
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData, WeatherTag
 from app.services import daily_service, food_service, profile_service
+from app.services.meal_builder import MealCandidate, build_meal
 from app.services.recommendation_ranking import (
+    RULE_V3_WEIGHTS,
     CandidateReranker,
     IdentityReranker,
     RankedCandidate,
+    RecommendationHistory,
     RecommendationRankingContext,
     ScoreBreakdown,
     apply_novelty,
     apply_rerank_adjustments,
     build_recommendation_history,
-    select_diverse,
 )
 from app.services.solar_terms import get_today_context_cached
 from app.services.weather_client import weather_client
@@ -147,6 +151,18 @@ def _is_forbidden(food: Food, profile: UserProfile | None, req: RecommendRequest
     return False
 
 
+def hard_filter(
+    foods: list[Food],
+    profile: UserProfile | None,
+    req: RecommendRequest,
+) -> list[Food]:
+    """仅保留有结构化菜谱且通过忌口/体质安全约束的候选。"""
+    return [
+        food for food in foods
+        if food.recipe_ready and not _is_forbidden(food, profile, req)
+    ]
+
+
 # ---- 打分 ----
 
 _MOISTENING_INGREDIENTS = ("银耳", "梨", "百合", "蜂蜜", "雪梨")
@@ -219,6 +235,36 @@ def _score_activity(food: Food, activity_level: ActivityLevel) -> float:
         fat_g = float(nutrition.get("fat_g", 0.0) or 0.0)
         return 3.0 if fat_g <= LOW_FAT_THRESHOLD else 0.0
     return 0.0
+
+
+def _score_method_time(food: Food) -> float:
+    """优先省时且相对清爽的做法，合计上限 13 分。"""
+    method_score = {
+        "steam": 4.0,
+        "boil": 4.0,
+        "soup": 4.0,
+        "congee": 4.0,
+        "cold": 3.0,
+        "stir_fry": 3.0,
+        "stew": 2.0,
+        "other": 1.0,
+        "deep_fry": 0.0,
+    }.get(food.cooking_method, 1.0)
+    minutes = food.cooking_time_min or 30
+    if minutes <= 20:
+        time_score = 9.0
+    elif minutes <= 40:
+        time_score = 6.0
+    elif minutes <= 60:
+        time_score = 4.0
+    else:
+        time_score = 2.0
+    return min(float(RULE_V3_WEIGHTS["method_time"]), method_score + time_score)
+
+
+def _scale_score(raw: float, raw_max: float, dimension: str) -> float:
+    cap = float(RULE_V3_WEIGHTS[dimension])
+    return round(max(0.0, min(raw_max, raw)) / raw_max * cap, 2)
 
 
 def _score_solar_term(food: Food, today: TodayContext) -> tuple[float, str]:
@@ -338,13 +384,14 @@ def _score_food(
     c_score, c_phrase = _score_constitution(food, profile)
     a_score = _score_activity(food, activity_level)
     breakdown = ScoreBreakdown(
-        weather=w_score,
-        solar_term=s_score,
-        mood=m_score,
-        nutrition=n_score,
-        constitution=c_score,
-        activity=a_score,
-        zodiac=z_score,
+        weather=_scale_score(w_score, 15.0, "weather"),
+        solar_term=_scale_score(s_score, 15.0, "solar_term"),
+        mood=_scale_score(m_score, 12.0, "mood"),
+        nutrition=_scale_score(n_score, 15.0, "nutrition"),
+        constitution=_scale_score(c_score, 10.0, "constitution"),
+        activity=_scale_score(a_score, 5.0, "activity"),
+        zodiac=_scale_score(z_score, 3.0, "zodiac"),
+        method_time=_score_method_time(food),
     )
     return RankedCandidate(
         food=food,
@@ -394,6 +441,45 @@ def _make_reason(phrases: dict[str, str], food: Food, mood: Mood) -> str:
     return f"适合今日【{scene}】场景，{food.name}正合时令"
 
 
+def _build_complete_meal(
+    session: Session,
+    candidates: list[RankedCandidate],
+    ranking_history: RecommendationHistory,
+    mood: Mood,
+) -> tuple[MealBuildResult, list[RankedCandidate]]:
+    fresh_candidates: list[RankedCandidate] = []
+    for meal_role in ("main", "vegetable", "staple"):
+        role_candidates = [
+            candidate for candidate in candidates
+            if candidate.food.meal_role == meal_role
+        ]
+        fresh_candidates.extend(
+            apply_novelty(role_candidates, ranking_history, top_n=1)
+        )
+
+    recipes_by_food_id = {
+        recipe.food_id: recipe
+        for recipe in session.exec(select(Recipe)).all()
+    }
+    meal_candidates = [
+        MealCandidate(
+            ranked=candidate,
+            recipe=recipes_by_food_id[candidate.food.id],
+            reason=candidate.rerank_reason or _make_reason(
+                dict(candidate.reason_phrases),
+                candidate.food,
+                mood,
+            ),
+        )
+        for candidate in fresh_candidates
+        if candidate.food.id in recipes_by_food_id
+    ]
+    try:
+        return build_meal(meal_candidates), fresh_candidates
+    except ValueError as exc:
+        raise ValidationError(str(exc)) from exc
+
+
 # ---- 主入口 ----
 
 async def recommend(
@@ -435,7 +521,7 @@ async def recommend(
         as_of=today,
     )
     foods, _ = food_service.get_all(session, page=1, size=500)
-    kept = [food for food in foods if not _is_forbidden(food, profile, req)]
+    kept = hard_filter(foods, profile, req)
     if not kept:
         raise ValidationError("没有可选菜（全部被忌口/体质禁忌过滤）")
 
@@ -474,20 +560,21 @@ async def recommend(
             reranker=active_reranker.engine_name,
             error_type=type(exc).__name__,
         )
-        engine_name = "rules_v2"
+        engine_name = "rules_v3"
 
     ranking_history = build_recommendation_history(
         history_7d,
         events_7d,
         as_of=today,
     )
-    fresh_candidates = apply_novelty(candidates, ranking_history, top_n=3)
-    top3 = select_diverse(fresh_candidates, top_n=3)
-    rec_ids = [
-        candidate.food.id
-        for candidate in top3
-        if candidate.food.id is not None
-    ]
+    meal, fresh_candidates = _build_complete_meal(
+        session,
+        candidates,
+        ranking_history,
+        req.mood,
+    )
+
+    rec_ids = [item.food_id for item in meal.primary_meal.items]
     _, event = daily_service.record_recommendation(
         session,
         user.id,
@@ -499,8 +586,14 @@ async def recommend(
         event_date=today,
     )
 
+    candidates_by_id = {
+        candidate.food.id: candidate
+        for candidate in fresh_candidates
+        if candidate.food.id is not None
+    }
     response_foods: list[FoodWithReason] = []
-    for candidate in top3:
+    for food_id in rec_ids:
+        candidate = candidates_by_id[food_id]
         data = candidate.food.to_read_dict()
         data["reason"] = candidate.rerank_reason or _make_reason(
             dict(candidate.reason_phrases),
@@ -522,6 +615,11 @@ async def recommend(
     )
     return RecommendResponse(
         foods=response_foods,
+        recommendation_id=event.id or 0,
+        primary_meal=meal.primary_meal,
+        substitutions=meal.substitutions,
+        substitution_notice=meal.substitution_notice,
+        engine=engine_name,
         context=RecommendContext(weather=weather, today=today_context),
     )
 

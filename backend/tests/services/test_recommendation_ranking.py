@@ -6,6 +6,7 @@ from app.models.daily_log import DailyLog
 from app.models.recommendation_event import RecommendationEvent
 from app.services.recommendation_ranking import (
     MAX_RULE_SCORE,
+    RULE_V3_WEIGHTS,
     IdentityReranker,
     RankedCandidate,
     RerankAdjustment,
@@ -37,6 +38,21 @@ def _candidate(food_id: int, *, score: float = 30.0) -> RankedCandidate:
     )
 
 
+def test_rule_v3_weights_make_weather_a_minor_signal() -> None:
+    assert RULE_V3_WEIGHTS == {
+        "nutrition": 20,
+        "constitution": 12,
+        "mood": 10,
+        "activity": 8,
+        "method_time": 13,
+        "weather": 6,
+        "solar_term": 5,
+        "zodiac": 1,
+    }
+    assert sum(RULE_V3_WEIGHTS.values()) == 75
+    assert RULE_V3_WEIGHTS["weather"] < RULE_V3_WEIGHTS["nutrition"]
+
+
 def test_normalized_score_is_clamped_to_zero_and_one_hundred():
     high = _candidate(1, score=MAX_RULE_SCORE + 20)
     low = _candidate(2, score=-20)
@@ -50,7 +66,7 @@ def test_rerank_adjustment_is_bounded_and_rejects_unknown_ids():
         candidates,
         [RerankAdjustment(food_id=1, score_delta=999, reason="更符合口味")],
     )
-    assert adjusted[0].rerank_adjustment == 15.0
+    assert adjusted[0].rerank_adjustment == 10.0
     assert adjusted[0].rerank_reason == "更符合口味"
 
     try:
@@ -80,7 +96,7 @@ def test_duplicate_rerank_adjustments_are_rejected():
 
 async def test_identity_reranker_returns_no_adjustments():
     reranker = IdentityReranker()
-    assert reranker.engine_name == "rules_v2"
+    assert reranker.engine_name == "rules_v3"
     assert await reranker.rerank([], None) == ()
 
 

@@ -18,6 +18,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.models.food import Food
+from app.models.recipe import Recipe
 from app.schemas.weather import WeatherData
 from app.services import recommender
 from app.services.wx_client import Code2SessionResult
@@ -92,6 +93,31 @@ def seed_profile_and_foods(client, auth_token):
         session.commit()
         for f in foods:
             session.refresh(f)
+        roles = ('staple', 'main', 'main', 'vegetable', 'vegetable')
+        for food, role in zip(foods, roles, strict=True):
+            assert food.id is not None
+            food.meal_role = role
+            food.recipe_ready = True
+            food.visual_key = f'api-{role}-{food.id}'
+            session.add(food)
+            session.add(
+                Recipe(
+                    food_id=food.id,
+                    servings=2,
+                    ingredients_json=[],
+                    steps_json=['一', '二', '三', '四'],
+                    prep_time_min=5,
+                    cook_time_min=20,
+                    nutrition_per_serving_json={
+                        'energy_kcal': 250,
+                        'protein_g': 10,
+                        'fat_g': 5,
+                        'carb_g': 20,
+                    },
+                    nutrition_basis='API 测试估算',
+                )
+            )
+        session.commit()
         food_ids = [f.id for f in foods if f.id is not None]
     finally:
         session.close()
@@ -177,6 +203,9 @@ def test_recommend_success_returns_three_foods(
     body = res.json()
     assert body["ok"] is True
     data = body["data"]
+    assert [item['meal_role'] for item in data['primary_meal']['items']] == [
+        'main', 'vegetable', 'staple'
+    ]
 
     # 3 道菜
     assert len(data["foods"]) == 3

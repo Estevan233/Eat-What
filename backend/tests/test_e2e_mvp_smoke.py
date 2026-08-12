@@ -11,6 +11,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.models.food import Food
+from app.models.recipe import Recipe
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 from app.services import recommender
@@ -71,6 +72,32 @@ def _seed_foods(session) -> list[int]:
     session.commit()
     for f in foods:
         session.refresh(f)
+    roles = ('main', 'vegetable', 'staple')
+    for index, food in enumerate(foods):
+        assert food.id is not None
+        role = roles[index % 3]
+        food.meal_role = role
+        food.recipe_ready = True
+        food.visual_key = f'e2e-{role}-{food.id}'
+        session.add(food)
+        session.add(
+            Recipe(
+                food_id=food.id,
+                servings=2,
+                ingredients_json=[],
+                steps_json=['一', '二', '三', '四'],
+                prep_time_min=5,
+                cook_time_min=20,
+                nutrition_per_serving_json={
+                    'energy_kcal': 250,
+                    'protein_g': 10,
+                    'fat_g': 5,
+                    'carb_g': 20,
+                },
+                nutrition_basis='E2E 测试估算',
+            )
+        )
+    session.commit()
     return [f.id for f in foods if f.id is not None]  # type: ignore[misc]
 
 
@@ -149,6 +176,9 @@ def test_mvp_e2e_flow(client, authed, seeded_ids):
     rec_data = res.json()["data"]
     foods = rec_data["foods"]
     assert len(foods) == 3
+    assert [item['meal_role'] for item in rec_data['primary_meal']['items']] == [
+        'main', 'vegetable', 'staple'
+    ]
     chosen_ids = [f["id"] for f in foods]
     for f in foods:
         assert "reason" in f

@@ -8,8 +8,18 @@ from app.models.daily_log import DailyLog
 from app.models.food import Food
 from app.models.recommendation_event import RecommendationEvent
 
+RULE_V3_WEIGHTS = {
+    "nutrition": 20,
+    "constitution": 12,
+    "mood": 10,
+    "activity": 8,
+    "method_time": 13,
+    "weather": 6,
+    "solar_term": 5,
+    "zodiac": 1,
+}
 MAX_RULE_SCORE = 75.0
-MAX_RERANK_DELTA = 15.0
+MAX_RERANK_DELTA = 10.0
 CHOSEN_PENALTIES = (-30.0, -24.0, -18.0, -12.0, -8.0, -5.0, -3.0)
 EXPOSED_PENALTIES = (-12.0, -10.0, -8.0, -6.0, -4.0, -3.0, -2.0)
 SEEN_TODAY_PENALTY = -30.0
@@ -24,6 +34,7 @@ class ScoreBreakdown:
     constitution: float
     activity: float
     zodiac: float
+    method_time: float = 0.0
 
     @property
     def total(self) -> float:
@@ -34,6 +45,7 @@ class ScoreBreakdown:
             + self.nutrition
             + self.constitution
             + self.activity
+            + self.method_time
             + self.zodiac
         )
 
@@ -92,7 +104,7 @@ class CandidateReranker(Protocol):
 
 
 class IdentityReranker:
-    engine_name = "rules_v2"
+    engine_name = "rules_v3"
 
     async def rerank(
         self,

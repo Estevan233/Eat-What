@@ -32,6 +32,7 @@ from sqlmodel import select
 from app.core.errors import NotFoundError
 from app.models.daily_log import DailyLog
 from app.models.food import Food
+from app.models.recipe import Recipe
 from app.models.recommendation_event import RecommendationEvent
 from app.models.user import User
 from app.models.user_profile import UserProfile
@@ -39,7 +40,7 @@ from app.schemas.daily import RecommendRequest
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 from app.services import recommender
-from app.services.recommendation_ranking import RerankAdjustment
+from app.services.recommendation_ranking import RULE_V3_WEIGHTS, RerankAdjustment
 
 # ---- Fixtures ----
 
@@ -97,6 +98,31 @@ def _make_profile(
     )
     record.updated_at = datetime.utcnow()
     return record
+
+
+def _attach_recipe(session, food: Food, role: str) -> None:
+    assert food.id is not None
+    food.meal_role = role
+    food.recipe_ready = True
+    food.visual_key = f'test-{role}-{food.id}'
+    session.add(food)
+    session.add(
+        Recipe(
+            food_id=food.id,
+            servings=2,
+            ingredients_json=[],
+            steps_json=['一', '二', '三', '四'],
+            prep_time_min=5,
+            cook_time_min=food.cooking_time_min or 20,
+            nutrition_per_serving_json={
+                'energy_kcal': (food.calories_kcal_per_100g or 100) * 2.5,
+                'protein_g': float((food.nutrition_json or {}).get('protein_g', 0)),
+                'fat_g': float((food.nutrition_json or {}).get('fat_g', 0)),
+                'carb_g': float((food.nutrition_json or {}).get('carb_g', 0)),
+            },
+            nutrition_basis='测试估算',
+        )
+    )
 
 
 def _make_weather(tag: str = "mild", *, temp_c: float = 22.0) -> WeatherData:
@@ -215,10 +241,81 @@ def seeded_session(session):
     for f in foods:
         session.add(f)
     session.commit()
+    roles = {
+        '白米饭': 'staple',
+        '小米粥': 'staple',
+        '凉拌黄瓜': 'vegetable',
+        '银耳莲子羹': 'vegetable',
+    }
+    for food in foods:
+        _attach_recipe(session, food, roles.get(food.name, 'main'))
+    session.commit()
     return user, foods
 
 
 # ---- 测试 ----
+
+
+def test_score_food_uses_exact_v3_caps() -> None:
+    food = _make_food(
+        'v3满分菜',
+        cooking_method='steam',
+        nature='warm',
+        tags=['spicy'],
+        suitable_constitutions=['qixu'],
+        nutrition={'protein_g': 20, 'fat_g': 2, 'carb_g': 8, 'fiber_g': 3},
+        seasonal_solar_terms=['liqiu'],
+    )
+    food.id = 1
+    food.cooking_time_min = 15
+    fatty = _make_food(
+        '历史高脂菜',
+        nutrition={'protein_g': 10, 'fat_g': 65, 'carb_g': 8, 'fiber_g': 1},
+    )
+    fatty.id = 2
+    profile = _make_profile(1, constitution_type='qixu')
+    history = [
+        DailyLog(
+            user_id=1,
+            log_date=date.today(),
+            chosen_food_ids_json=[2],
+        )
+    ]
+
+    ranked = recommender._score_food(
+        food,
+        _make_weather('cold', temp_c=5),
+        _make_today(solar_term_current='立秋', zodiac_sign='leo'),
+        profile,
+        history,
+        [food, fatty],
+        'tired',
+        'high',
+    )
+
+    assert ranked.breakdown.weather == RULE_V3_WEIGHTS['weather']
+    assert ranked.breakdown.solar_term == RULE_V3_WEIGHTS['solar_term']
+    assert ranked.breakdown.mood == RULE_V3_WEIGHTS['mood']
+    assert ranked.breakdown.nutrition == RULE_V3_WEIGHTS['nutrition']
+    assert ranked.breakdown.constitution == RULE_V3_WEIGHTS['constitution']
+    assert ranked.breakdown.activity == RULE_V3_WEIGHTS['activity']
+    assert ranked.breakdown.method_time == RULE_V3_WEIGHTS['method_time']
+    assert ranked.breakdown.zodiac == RULE_V3_WEIGHTS['zodiac']
+    assert ranked.breakdown.total == 75
+
+
+def test_hard_filter_only_keeps_recipe_ready_safe_foods() -> None:
+    ready = _make_food('有菜谱')
+    ready.recipe_ready = True
+    missing_recipe = _make_food('无菜谱')
+
+    result = recommender.hard_filter(
+        [ready, missing_recipe],
+        _make_profile(1),
+        RecommendRequest(),
+    )
+
+    assert result == [ready]
 
 
 @pytest.mark.asyncio
@@ -229,6 +326,9 @@ async def test_returns_three_foods(session, seeded_session, monkeypatch):
     req = RecommendRequest(mood="neutral")
     resp = await recommender.recommend(session, user, req)
     assert len(resp.foods) == 3
+    assert [item.meal_role for item in resp.primary_meal.items] == [
+        'main', 'vegetable', 'staple'
+    ]
     assert resp.context.weather.weather_tag == "mild"
     assert resp.context.today.zodiac_sign == "leo"
     for f in resp.foods:
@@ -466,6 +566,12 @@ async def test_writes_daily_log(session, seeded_session, monkeypatch):
     returned_ids = {f.id for f in resp.foods}
     logged_ids = set(log.recommended_food_ids_json)
     assert returned_ids == logged_ids
+    event = session.exec(
+        select(RecommendationEvent).where(RecommendationEvent.user_id == user.id)
+    ).first()
+    assert event is not None
+    assert resp.recommendation_id == event.id
+    assert [item.food_id for item in resp.primary_meal.items] == event.recommended_food_ids_json
 
 
 @pytest.mark.asyncio
@@ -520,11 +626,11 @@ def test_score_food_uses_seventy_five_point_breakdown():
         "tired",
         "high",
     )
-    assert candidate.breakdown.weather == 15.0
-    assert candidate.breakdown.solar_term == 15.0
-    assert candidate.breakdown.mood == 12.0
-    assert candidate.breakdown.constitution == 10.0
-    assert candidate.breakdown.activity == 5.0
+    assert candidate.breakdown.weather == 6.0
+    assert candidate.breakdown.solar_term == 5.0
+    assert candidate.breakdown.mood == 10.0
+    assert candidate.breakdown.constitution == 12.0
+    assert candidate.breakdown.activity == 8.0
     assert 0.0 <= candidate.base_score <= 75.0
 
 
@@ -535,14 +641,18 @@ async def test_four_refreshes_return_twelve_unique_foods_when_pool_allows(
     monkeypatch,
 ):
     user, _ = seeded_session
-    for index in range(3):
-        session.add(
-            _make_food(
-                f"扩展菜{index}",
-                category=f"extra_{index}",
-                cooking_method=f"method_{index}",
-            )
+    extras = []
+    for index, role in enumerate(('vegetable', 'staple', 'vegetable', 'staple')):
+        food = _make_food(
+            f"扩展菜{index}",
+            category=f"extra_{index}",
+            cooking_method=f"method_{index}",
         )
+        extras.append((food, role))
+        session.add(food)
+    session.commit()
+    for food, role in extras:
+        _attach_recipe(session, food, role)
     session.commit()
     _patch_external(monkeypatch)
     req = RecommendRequest(mood="neutral")
@@ -624,7 +734,7 @@ async def test_invalid_reranker_output_falls_back_without_reintroducing_forbidde
         .order_by(RecommendationEvent.id.desc())  # type: ignore[attr-defined]
     ).first()
     assert event is not None
-    assert event.engine == "rules_v2"
+    assert event.engine == "rules_v3"
 
 
 @pytest.mark.asyncio
@@ -638,17 +748,20 @@ async def test_two_hundred_food_recommendation_finishes_under_half_second(
     session.refresh(user)
     assert user.id is not None
     session.add(_make_profile(user.id, constitution_type="pinghe"))
-    session.add_all(
-        [
-            _make_food(
+    perf_foods = [
+        _make_food(
                 f"性能菜{index}",
                 category=f"category_{index % 12}",
                 cooking_method=f"method_{index % 10}",
                 tags=["easy"],
             )
             for index in range(200)
-        ]
-    )
+    ]
+    session.add_all(perf_foods)
+    session.commit()
+    roles = ('main', 'vegetable', 'staple')
+    for index, food in enumerate(perf_foods):
+        _attach_recipe(session, food, roles[index % 3])
     session.commit()
     _patch_external(monkeypatch)
 
