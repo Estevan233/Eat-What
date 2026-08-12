@@ -2,6 +2,7 @@
 from app.models.daily_log import DailyLog
 from app.models.favorite import Favorite
 from app.models.food import Food
+from app.models.recipe import Recipe
 from app.models.recommendation_event import RecommendationEvent
 from app.models.user import User
 from app.models.user_profile import UserProfile
@@ -10,6 +11,7 @@ __all__ = [
     "DailyLog",
     "Favorite",
     "Food",
+    "Recipe",
     "RecommendationEvent",
     "User",
     "UserProfile",

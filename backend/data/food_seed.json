@@ -37,7 +37,12 @@
     ],
     "cooking_method": "boil",
     "cooking_time_min": 30,
-    "seasonal_solar_terms": [],
+    "seasonal_solar_terms": [
+      "guyu",
+      "mangzhong",
+      "chushu",
+      "shuangjiang"
+    ],
     "description": "最基础的主食，性平味甘，补中益气，老少皆宜。"
   },
   {
@@ -9624,5 +9629,60 @@
       "xiaoshu"
     ],
     "description": "南瓜尖鲜嫩，夏季时蔬。"
+  },
+  {
+    "name": "冬瓜香菜汤",
+    "category": "soup",
+    "ingredients": [
+      "冬瓜",
+      "香菜",
+      "食用油",
+      "盐",
+      "水"
+    ],
+    "calories_kcal_per_100g": 22,
+    "nutrition": {
+      "protein_g": 0.6,
+      "fat_g": 0.8,
+      "carb_g": 3.4,
+      "fiber_g": 0.7
+    },
+    "nature": "cool",
+    "flavor": [
+      "sweet",
+      "bland"
+    ],
+    "organ_meridians": [
+      "lung",
+      "large_intestine",
+      "bladder"
+    ],
+    "suitable_constitutions": [
+      "pinghe",
+      "tanshi",
+      "shire"
+    ],
+    "suitable_weathers": [
+      "hot",
+      "humid",
+      "any"
+    ],
+    "forbidden_for": [
+      "yangxu"
+    ],
+    "tags": [
+      "vegetarian",
+      "easy",
+      "soup",
+      "quick"
+    ],
+    "cooking_method": "soup",
+    "cooking_time_min": 15,
+    "seasonal_solar_terms": [
+      "xiaoshu",
+      "dachu",
+      "liqiu"
+    ],
+    "description": "冬瓜清爽，出锅前加入香菜，适合炎热或潮湿天气。"
   }
 ]

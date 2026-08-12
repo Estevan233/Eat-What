@@ -41,6 +41,9 @@ class Food(SQLModel, table=True):
     image_url: str | None = Field(default=None, max_length=512)
     seasonal_solar_terms_json: list[str] = Field(default=[], sa_column=Column(JSON))
     description: str | None = Field(default=None)
+    meal_role: str | None = Field(default=None, max_length=16, index=True)
+    recipe_ready: bool = Field(default=False, index=True)
+    visual_key: str | None = Field(default=None, max_length=64)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -68,4 +71,7 @@ class Food(SQLModel, table=True):
             "image_url": self.image_url,
             "seasonal_solar_terms": list(self.seasonal_solar_terms_json),
             "description": self.description,
+            "meal_role": self.meal_role,
+            "recipe_ready": self.recipe_ready,
+            "visual_key": self.visual_key,
         }

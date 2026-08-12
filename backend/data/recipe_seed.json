@@ -1,0 +1,3698 @@
+[
+  {
+    "food_name": "白米饭",
+    "meal_role": "staple",
+    "visual_key": "staple-01",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "大米",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "水",
+        "amount": 700,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将大米、水分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅中加入配方清水并煮沸，先放入耐煮食材。",
+      "再次沸腾后加入主料，中火煮约 25 分钟至熟透。",
+      "加入剩余易熟食材和调味料，煮 1 至 2 分钟后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 30,
+    "nutrition_per_serving": {
+      "energy_kcal": 325,
+      "protein_g": 7.3,
+      "fat_g": 0.8,
+      "carb_g": 71.7
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "小米粥",
+    "meal_role": "staple",
+    "visual_key": "staple-02",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "小米",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "水",
+        "amount": 700,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将小米、水分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "谷物淘洗后加配方清水浸泡 15 分钟，肉类等配料另行切小块。",
+      "大火煮沸后转小火，留缝慢煮约 40 分钟并间歇搅拌。",
+      "米粒软烂后加入易熟配料煮熟，少量盐调味后关火。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 40,
+    "nutrition_per_serving": {
+      "energy_kcal": 129,
+      "protein_g": 3.9,
+      "fat_g": 1.1,
+      "carb_g": 26.9
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "阳春面",
+    "meal_role": "staple",
+    "visual_key": "staple-03",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "面条",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "猪油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将面条、葱、酱油、猪油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅中加入配方清水并煮沸，先放入耐煮食材。",
+      "再次沸腾后加入主料，中火煮约 15 分钟至熟透。",
+      "加入剩余易熟食材和调味料，煮 1 至 2 分钟后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 386,
+      "protein_g": 12.6,
+      "fat_g": 9.0,
+      "carb_g": 61.6
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "杂粮馒头",
+    "meal_role": "staple",
+    "visual_key": "staple-04",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "全麦粉",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "玉米面",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "小米面",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酵母",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将全麦粉、玉米面、小米面、酵母分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "主料铺入耐热盘，加入葱姜、料酒等配方调料并腌 5 分钟。",
+      "蒸锅水沸后放入，大火蒸约 20 分钟至中心熟透。",
+      "关火静置 2 分钟，按配方补入豉油或葱花后即可食用。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 30,
+    "nutrition_per_serving": {
+      "energy_kcal": 624,
+      "protein_g": 20.2,
+      "fat_g": 3.1,
+      "carb_g": 128.8
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "鲜肉小馄饨",
+    "meal_role": "staple",
+    "visual_key": "staple-05",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "馄饨皮",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "猪肉",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "紫菜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "虾皮",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将馄饨皮、猪肉、葱、姜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅中加入配方清水并煮沸，先放入耐煮食材。",
+      "再次沸腾后加入主料，中火煮约 20 分钟至熟透。",
+      "加入剩余易熟食材和调味料，煮 1 至 2 分钟后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 20,
+    "nutrition_per_serving": {
+      "energy_kcal": 549,
+      "protein_g": 24.1,
+      "fat_g": 19.6,
+      "carb_g": 63.0
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "红豆包子",
+    "meal_role": "staple",
+    "visual_key": "staple-06",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "面粉",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "红豆",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "红糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将面粉、红豆、红糖分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "主料铺入耐热盘，加入葱姜、料酒等配方调料并腌 5 分钟。",
+      "蒸锅水沸后放入，大火蒸约 20 分钟至中心熟透。",
+      "关火静置 2 分钟，按配方补入豉油或葱花后即可食用。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 25,
+    "nutrition_per_serving": {
+      "energy_kcal": 658,
+      "protein_g": 19.0,
+      "fat_g": 3.4,
+      "carb_g": 135.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "皮蛋瘦肉粥",
+    "meal_role": "staple",
+    "visual_key": "staple-07",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "大米",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "皮蛋",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "瘦猪肉",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将大米、皮蛋、瘦猪肉、姜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "谷物淘洗后加配方清水浸泡 15 分钟，肉类等配料另行切小块。",
+      "大火煮沸后转小火，留缝慢煮约 45 分钟并间歇搅拌。",
+      "米粒软烂后加入易熟配料煮熟，少量盐调味后关火。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 45,
+    "nutrition_per_serving": {
+      "energy_kcal": 246,
+      "protein_g": 12.6,
+      "fat_g": 6.2,
+      "carb_g": 35.0
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "八宝粥",
+    "meal_role": "staple",
+    "visual_key": "staple-08",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "糯米",
+        "amount": 220,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "红豆",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "绿豆",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "花生",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "红枣",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "莲子",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "桂圆",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "薏米",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将糯米、红豆、绿豆、花生分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "谷物淘洗后加配方清水浸泡 15 分钟，肉类等配料另行切小块。",
+      "大火煮沸后转小火，留缝慢煮约 60 分钟并间歇搅拌。",
+      "米粒软烂后加入易熟配料煮熟，少量盐调味后关火。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 60,
+    "nutrition_per_serving": {
+      "energy_kcal": 370,
+      "protein_g": 11.2,
+      "fat_g": 4.2,
+      "carb_g": 77.0
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "绿豆粥",
+    "meal_role": "staple",
+    "visual_key": "staple-09",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "大米",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "绿豆",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将大米、绿豆分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "谷物淘洗后加配方清水浸泡 15 分钟，肉类等配料另行切小块。",
+      "大火煮沸后转小火，留缝慢煮约 40 分钟并间歇搅拌。",
+      "米粒软烂后加入易熟配料煮熟，少量盐调味后关火。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 40,
+    "nutrition_per_serving": {
+      "energy_kcal": 162,
+      "protein_g": 5.6,
+      "fat_g": 0.8,
+      "carb_g": 33.6
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "南瓜粥",
+    "meal_role": "staple",
+    "visual_key": "staple-10",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "大米",
+        "amount": 180,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "南瓜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将大米、南瓜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "谷物淘洗后加配方清水浸泡 15 分钟，肉类等配料另行切小块。",
+      "大火煮沸后转小火，留缝慢煮约 30 分钟并间歇搅拌。",
+      "米粒软烂后加入易熟配料煮熟，少量盐调味后关火。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 30,
+    "nutrition_per_serving": {
+      "energy_kcal": 146,
+      "protein_g": 3.4,
+      "fat_g": 0.6,
+      "carb_g": 33.6
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 280 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "番茄炒蛋",
+    "meal_role": "main",
+    "visual_key": "main-11",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "番茄",
+        "amount": 220,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "鸡蛋",
+        "amount": 2,
+        "unit": "个",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将番茄、鸡蛋、葱、糖分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 15 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 224,
+      "protein_g": 14.3,
+      "fat_g": 13.0,
+      "carb_g": 11.7
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "宫保鸡丁",
+    "meal_role": "main",
+    "visual_key": "main-12",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "鸡胸肉",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "花生",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "干辣椒",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "花椒",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将鸡胸肉、花生、干辣椒、花椒分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 20 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 20,
+    "nutrition_per_serving": {
+      "energy_kcal": 512,
+      "protein_g": 37.7,
+      "fat_g": 30.7,
+      "carb_g": 16.1
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "清蒸鲈鱼",
+    "meal_role": "main",
+    "visual_key": "main-13",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "鲈鱼",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒸鱼豉油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "料酒",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将鲈鱼、葱、姜、蒸鱼豉油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "主料铺入耐热盘，加入葱姜、料酒等配方调料并腌 5 分钟。",
+      "蒸锅水沸后放入，大火蒸约 15 分钟至中心熟透。",
+      "关火静置 2 分钟，按配方补入豉油或葱花后即可食用。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 273,
+      "protein_g": 48.4,
+      "fat_g": 7.3,
+      "carb_g": 1.3
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "红烧肉",
+    "meal_role": "main",
+    "visual_key": "main-14",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "五花肉",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "冰糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "料酒",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "八角",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将五花肉、冰糖、酱油、料酒分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 60 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 60,
+    "nutrition_per_serving": {
+      "energy_kcal": 928,
+      "protein_g": 32.5,
+      "fat_g": 83.2,
+      "carb_g": 10.9
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "番茄炖牛腩",
+    "meal_role": "main",
+    "visual_key": "main-15",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "牛腩",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "番茄",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "洋葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "土豆",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "胡萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将牛腩、番茄、洋葱、土豆分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 90 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 90,
+    "nutrition_per_serving": {
+      "energy_kcal": 406,
+      "protein_g": 34.3,
+      "fat_g": 19.5,
+      "carb_g": 20.3
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "麻婆豆腐",
+    "meal_role": "main",
+    "visual_key": "main-16",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "嫩豆腐",
+        "amount": 350,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "牛肉末",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "豆瓣酱",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "花椒",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "蒜苗",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "淀粉",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将嫩豆腐、牛肉末、豆瓣酱、花椒分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 15 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 348,
+      "protein_g": 25.5,
+      "fat_g": 18.7,
+      "carb_g": 11.7
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "家常豆腐",
+    "meal_role": "main",
+    "visual_key": "main-17",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "北豆腐",
+        "amount": 350,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "猪肉",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "青椒",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "胡萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "木耳",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将北豆腐、猪肉、青椒、胡萝卜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 20 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 20,
+    "nutrition_per_serving": {
+      "energy_kcal": 322,
+      "protein_g": 27.3,
+      "fat_g": 17.7,
+      "carb_g": 10.9
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "白切鸡",
+    "meal_role": "main",
+    "visual_key": "main-18",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "三黄鸡",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "香油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将三黄鸡、姜、葱、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅中加入配方清水并煮沸，先放入耐煮食材。",
+      "再次沸腾后加入主料，中火煮约 25 分钟至熟透。",
+      "加入剩余易熟食材和调味料，煮 1 至 2 分钟后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 30,
+    "nutrition_per_serving": {
+      "energy_kcal": 434,
+      "protein_g": 49.4,
+      "fat_g": 24.4,
+      "carb_g": 1.3
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "虾仁滑蛋",
+    "meal_role": "main",
+    "visual_key": "main-19",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "虾仁",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "鸡蛋",
+        "amount": 2,
+        "unit": "个",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "料酒",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将虾仁、鸡蛋、葱、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 343,
+      "protein_g": 37.7,
+      "fat_g": 18.2,
+      "carb_g": 3.1
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "鸡蛋羹",
+    "meal_role": "main",
+    "visual_key": "main-20",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "鸡蛋",
+        "amount": 2,
+        "unit": "个",
+        "optional": false
+      },
+      {
+        "name": "温水",
+        "amount": 700,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "香油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将鸡蛋、温水、盐、香油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "主料铺入耐热盘，加入葱姜、料酒等配方调料并腌 5 分钟。",
+      "蒸锅水沸后放入，大火蒸约 15 分钟至中心熟透。",
+      "关火静置 2 分钟，按配方补入豉油或葱花后即可食用。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 195,
+      "protein_g": 17.7,
+      "fat_g": 11.7,
+      "carb_g": 2.6
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "冬瓜排骨汤",
+    "meal_role": "main",
+    "visual_key": "main-21",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "排骨",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "冬瓜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "料酒",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将排骨、冬瓜、姜、葱分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 60 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 60,
+    "nutrition_per_serving": {
+      "energy_kcal": 203,
+      "protein_g": 16.9,
+      "fat_g": 10.9,
+      "carb_g": 7.8
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "酸萝卜老鸭汤",
+    "meal_role": "main",
+    "visual_key": "main-22",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "老鸭",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酸萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "枸杞",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将老鸭、酸萝卜、姜、葱分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 90 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 90,
+    "nutrition_per_serving": {
+      "energy_kcal": 286,
+      "protein_g": 24.7,
+      "fat_g": 17.7,
+      "carb_g": 8.3
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "山药鸡汤",
+    "meal_role": "main",
+    "visual_key": "main-23",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "鸡块",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "山药",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "枸杞",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将鸡块、山药、枸杞、姜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 75 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 75,
+    "nutrition_per_serving": {
+      "energy_kcal": 247,
+      "protein_g": 20.8,
+      "fat_g": 11.7,
+      "carb_g": 14.3
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "红烧带鱼",
+    "meal_role": "main",
+    "visual_key": "main-24",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "带鱼",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将带鱼、葱、姜、蒜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 25 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 25,
+    "nutrition_per_serving": {
+      "energy_kcal": 403,
+      "protein_g": 45.5,
+      "fat_g": 22.1,
+      "carb_g": 9.1
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "糖醋鲤鱼",
+    "meal_role": "main",
+    "visual_key": "main-25",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "鲤鱼",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "面粉",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "淀粉",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "番茄酱",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将鲤鱼、面粉、淀粉、醋分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 30 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 30,
+    "nutrition_per_serving": {
+      "energy_kcal": 377,
+      "protein_g": 31.2,
+      "fat_g": 14.3,
+      "carb_g": 31.2
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "清蒸虾",
+    "meal_role": "main",
+    "visual_key": "main-26",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "鲜虾",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "料酒",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将鲜虾、姜、葱、料酒分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "主料铺入耐热盘，加入葱姜、料酒等配方调料并腌 5 分钟。",
+      "蒸锅水沸后放入，大火蒸约 10 分钟至中心熟透。",
+      "关火静置 2 分钟，按配方补入豉油或葱花后即可食用。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 221,
+      "protein_g": 48.1,
+      "fat_g": 2.1,
+      "carb_g": 0.0
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "油焖大虾",
+    "meal_role": "main",
+    "visual_key": "main-27",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "大虾",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "番茄酱",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "料酒",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将大虾、姜、葱、番茄酱分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 15 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 369,
+      "protein_g": 39.0,
+      "fat_g": 19.5,
+      "carb_g": 9.1
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "回锅肉",
+    "meal_role": "main",
+    "visual_key": "main-28",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "五花肉",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "青蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "豆瓣酱",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "甜面酱",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将五花肉、青蒜、豆瓣酱、甜面酱分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 25 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 25,
+    "nutrition_per_serving": {
+      "energy_kcal": 811,
+      "protein_g": 31.2,
+      "fat_g": 70.2,
+      "carb_g": 11.7
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "鱼香肉丝",
+    "meal_role": "main",
+    "visual_key": "main-29",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "猪里脊",
+        "amount": 220,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "木耳",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "胡萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "笋",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "泡椒",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将猪里脊、木耳、胡萝卜、笋分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 15 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 395,
+      "protein_g": 27.3,
+      "fat_g": 22.1,
+      "carb_g": 18.2
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "糖醋排骨",
+    "meal_role": "main",
+    "visual_key": "main-30",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "猪小排",
+        "amount": 220,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "料酒",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将猪小排、醋、糖、酱油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 45 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 45,
+    "nutrition_per_serving": {
+      "energy_kcal": 671,
+      "protein_g": 36.4,
+      "fat_g": 45.5,
+      "carb_g": 26.0
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "红烧排骨",
+    "meal_role": "main",
+    "visual_key": "main-31",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "猪排骨",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "冰糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "八角",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将猪排骨、冰糖、酱油、姜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 60 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 60,
+    "nutrition_per_serving": {
+      "energy_kcal": 637,
+      "protein_g": 39.0,
+      "fat_g": 46.8,
+      "carb_g": 14.3
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "京酱肉丝",
+    "meal_role": "main",
+    "visual_key": "main-32",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "猪里脊",
+        "amount": 220,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "甜面酱",
+        "amount": 80,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱白",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "豆皮",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将猪里脊、甜面酱、葱白、豆皮分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 15 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 437,
+      "protein_g": 32.5,
+      "fat_g": 23.4,
+      "carb_g": 20.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "青椒炒肉",
+    "meal_role": "main",
+    "visual_key": "main-33",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "猪里脊",
+        "amount": 220,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "青椒",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将猪里脊、青椒、蒜、酱油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 385,
+      "protein_g": 26.0,
+      "fat_g": 22.1,
+      "carb_g": 13.0
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "牛肉炖萝卜",
+    "meal_role": "main",
+    "visual_key": "main-34",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "牛腩",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "白萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将牛腩、白萝卜、姜、葱分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 90 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 90,
+    "nutrition_per_serving": {
+      "energy_kcal": 307,
+      "protein_g": 28.6,
+      "fat_g": 14.3,
+      "carb_g": 13.0
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "咖喱牛肉",
+    "meal_role": "main",
+    "visual_key": "main-35",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "牛腩",
+        "amount": 300,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "咖喱块",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "土豆",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "胡萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "洋葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将牛腩、咖喱块、土豆、胡萝卜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "肉类冷水下锅焯去浮沫；素菜可跳过焯水，沥干备用。",
+      "锅中按配方用油炒香辅料，加入主料和清水，小火加盖煮约 60 分钟。",
+      "确认主料熟透、汤汁达到需要的浓度，少量盐调味后盛出。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 60,
+    "nutrition_per_serving": {
+      "energy_kcal": 411,
+      "protein_g": 31.2,
+      "fat_g": 22.1,
+      "carb_g": 20.8
+    },
+    "difficulty": "medium",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 260 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "蒜蓉西兰花",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-36",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "西兰花",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将西兰花、蒜、盐、油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 108,
+      "protein_g": 7.7,
+      "fat_g": 6.0,
+      "carb_g": 9.6
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "醋溜白菜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-37",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "大白菜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "干辣椒",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将大白菜、干辣椒、醋、糖分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 91,
+      "protein_g": 3.6,
+      "fat_g": 4.3,
+      "carb_g": 12.0
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "干煸四季豆",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-38",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "四季豆",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "猪肉末",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "干辣椒",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将四季豆、猪肉末、蒜、姜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 20 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 20,
+    "nutrition_per_serving": {
+      "energy_kcal": 230,
+      "protein_g": 12.5,
+      "fat_g": 14.4,
+      "carb_g": 15.6
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "地三鲜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-39",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "茄子",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "土豆",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "青椒",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将茄子、土豆、青椒、蒜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 25 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 25,
+    "nutrition_per_serving": {
+      "energy_kcal": 269,
+      "protein_g": 6.0,
+      "fat_g": 15.6,
+      "carb_g": 28.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "香菇青菜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-40",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "上海青",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "香菇",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "蚝油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将上海青、香菇、蒜、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 12 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 12,
+    "nutrition_per_serving": {
+      "energy_kcal": 115,
+      "protein_g": 6.7,
+      "fat_g": 4.8,
+      "carb_g": 13.2
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "凉拌黄瓜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-41",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "黄瓜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "辣椒油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "香油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将黄瓜、蒜、醋、辣椒油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "需要熟制的食材放入沸水中焯熟，立即捞出沥干并放凉。",
+      "将醋、酱油、盐等配方调味料充分混合成料汁。",
+      "食材与料汁拌匀，静置 5 分钟入味后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 77,
+      "protein_g": 2.4,
+      "fat_g": 3.6,
+      "carb_g": 10.1
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "凉拌木耳",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-42",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "黑木耳",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "黄瓜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "胡萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "香油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将黑木耳、黄瓜、胡萝卜、蒜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "需要熟制的食材放入沸水中焯熟，立即捞出沥干并放凉。",
+      "将醋、酱油、盐等配方调味料充分混合成料汁。",
+      "食材与料汁拌匀，静置 5 分钟入味后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 132,
+      "protein_g": 6.0,
+      "fat_g": 4.8,
+      "carb_g": 19.2
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "凉拌西红柿",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-43",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "番茄",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "白糖",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将番茄、白糖分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "需要熟制的食材放入沸水中焯熟，立即捞出沥干并放凉。",
+      "将醋、酱油、盐等配方调味料充分混合成料汁。",
+      "食材与料汁拌匀，静置 5 分钟入味后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 5,
+    "nutrition_per_serving": {
+      "energy_kcal": 91,
+      "protein_g": 2.4,
+      "fat_g": 0.5,
+      "carb_g": 20.4
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "油焖春笋",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-44",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "春笋",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将春笋、酱油、糖、葱分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 15 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 151,
+      "protein_g": 6.0,
+      "fat_g": 7.2,
+      "carb_g": 16.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "酸辣土豆丝",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-45",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "土豆",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "干辣椒",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将土豆、干辣椒、醋、姜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 197,
+      "protein_g": 4.8,
+      "fat_g": 8.4,
+      "carb_g": 28.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "炝炒圆白菜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-46",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "圆白菜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "干辣椒",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "花椒",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将圆白菜、干辣椒、花椒、蒜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 8,
+    "nutrition_per_serving": {
+      "energy_kcal": 101,
+      "protein_g": 3.6,
+      "fat_g": 4.8,
+      "carb_g": 12.0
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "清炒豆苗",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-47",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "豆苗",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将豆苗、蒜、盐、油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 5,
+    "nutrition_per_serving": {
+      "energy_kcal": 84,
+      "protein_g": 6.7,
+      "fat_g": 3.6,
+      "carb_g": 8.4
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "蒜蓉生菜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-48",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "生菜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蚝油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将生菜、蒜、蚝油、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 5,
+    "nutrition_per_serving": {
+      "energy_kcal": 77,
+      "protein_g": 3.6,
+      "fat_g": 4.3,
+      "carb_g": 7.2
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "清蒸茄子",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-49",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "茄子",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "香油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将茄子、蒜、酱油、香油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "主料铺入耐热盘，加入葱姜、料酒等配方调料并腌 5 分钟。",
+      "蒸锅水沸后放入，大火蒸约 15 分钟至中心熟透。",
+      "关火静置 2 分钟，按配方补入豉油或葱花后即可食用。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 91,
+      "protein_g": 2.4,
+      "fat_g": 3.6,
+      "carb_g": 13.2
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "干煸花菜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-50",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "花菜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "五花肉",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "干辣椒",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将花菜、五花肉、蒜、酱油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 15 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 228,
+      "protein_g": 12.0,
+      "fat_g": 13.2,
+      "carb_g": 16.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "酸辣大白菜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-51",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "大白菜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "干辣椒",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将大白菜、干辣椒、醋、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 8,
+    "nutrition_per_serving": {
+      "energy_kcal": 84,
+      "protein_g": 3.1,
+      "fat_g": 4.3,
+      "carb_g": 10.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "素炒芥兰",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-52",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "芥兰",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "姜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将芥兰、姜、盐、油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 5,
+    "nutrition_per_serving": {
+      "energy_kcal": 72,
+      "protein_g": 4.8,
+      "fat_g": 3.6,
+      "carb_g": 8.4
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "糖醋藕丁",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-53",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "莲藕",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "醋",
+        "amount": 12,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "糖",
+        "amount": 8,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "葱",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将莲藕、醋、糖、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 163,
+      "protein_g": 3.6,
+      "fat_g": 4.8,
+      "carb_g": 28.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "清炒菠菜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-54",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "菠菜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将菠菜、蒜、盐、油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 5,
+    "nutrition_per_serving": {
+      "energy_kcal": 67,
+      "protein_g": 6.0,
+      "fat_g": 2.9,
+      "carb_g": 8.4
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "虾皮炒丝瓜",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-55",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "丝瓜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "虾皮",
+        "amount": 120,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将丝瓜、虾皮、蒜、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 8,
+    "nutrition_per_serving": {
+      "energy_kcal": 91,
+      "protein_g": 6.0,
+      "fat_g": 3.6,
+      "carb_g": 10.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "苦瓜炒蛋",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-56",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "苦瓜",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "鸡蛋",
+        "amount": 2,
+        "unit": "个",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将苦瓜、鸡蛋、盐、油分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 187,
+      "protein_g": 12.0,
+      "fat_g": 13.2,
+      "carb_g": 8.4
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "荷塘小炒",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-57",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "莲藕",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "荷兰豆",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "黑木耳",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "胡萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "将莲藕、荷兰豆、黑木耳、胡萝卜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 8,
+    "nutrition_per_serving": {
+      "energy_kcal": 125,
+      "protein_g": 4.8,
+      "fat_g": 3.6,
+      "carb_g": 20.4
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "木耳炒山药",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-58",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "山药",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "黑木耳",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "青椒",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "胡萝卜",
+        "amount": 100,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将山药、黑木耳、青椒、胡萝卜分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 10 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 10,
+    "nutrition_per_serving": {
+      "energy_kcal": 163,
+      "protein_g": 4.8,
+      "fat_g": 6.0,
+      "carb_g": 26.4
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "蒜蓉秋葵",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-59",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "秋葵",
+        "amount": 320,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "蒜",
+        "amount": 12,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "酱油",
+        "amount": 10,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      }
+    ],
+    "steps": [
+      "将秋葵、蒜、酱油、盐分别洗净，按易熟程度切成均匀大小，调味料称量备用。",
+      "锅烧热后加入配方食用油，先下葱姜蒜等辅料炒出香味。",
+      "按先难熟后易熟的顺序加入主料，中大火翻炒并保持受热均匀。",
+      "加入配方调味料，继续翻炒至主料熟透，全程约 8 分钟后装盘。"
+    ],
+    "prep_time_min": 10,
+    "cook_time_min": 8,
+    "nutrition_per_serving": {
+      "energy_kcal": 106,
+      "protein_g": 4.8,
+      "fat_g": 4.8,
+      "carb_g": 10.8
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "基于现有食物库每 100 克营养数据，按每人约 240 克成品估算；实际品牌、吸油量和调味用量会造成偏差。",
+    "version": 1
+  },
+  {
+    "food_name": "冬瓜香菜汤",
+    "meal_role": "vegetable",
+    "visual_key": "vegetable-winter-melon-coriander-soup",
+    "servings": 2,
+    "ingredients": [
+      {
+        "name": "冬瓜",
+        "amount": 400,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "香菜",
+        "amount": 20,
+        "unit": "g",
+        "optional": false
+      },
+      {
+        "name": "食用油",
+        "amount": 5,
+        "unit": "ml",
+        "optional": false
+      },
+      {
+        "name": "盐",
+        "amount": null,
+        "unit": "适量",
+        "optional": true
+      },
+      {
+        "name": "清水",
+        "amount": 700,
+        "unit": "ml",
+        "optional": false
+      }
+    ],
+    "steps": [
+      "冬瓜去皮去瓤切片，香菜洗净切段。",
+      "锅中放油，小火将冬瓜两面煎至微黄。",
+      "加入 700 毫升清水煮开，中小火煮 8 至 10 分钟。",
+      "冬瓜变软后少量加盐，关火放入香菜。"
+    ],
+    "prep_time_min": 8,
+    "cook_time_min": 15,
+    "nutrition_per_serving": {
+      "energy_kcal": 78,
+      "protein_g": 2.0,
+      "fat_g": 2.8,
+      "carb_g": 11.5
+    },
+    "difficulty": "easy",
+    "source_url": null,
+    "nutrition_basis": "按主要食材、用油和 2 人份估算；盐为适量。",
+    "version": 1
+  }
+]
