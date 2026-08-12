@@ -11,7 +11,10 @@ from typing import Any
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
+from app.core.cloud_context import read_cloud_identity
+from app.core.config import get_settings
 from app.core.deps import get_db
+from app.core.errors import AppError
 from app.core.security import create_access_token
 from app.schemas.auth import AuthUserRead, GuestLoginRequest, WxLoginRequest
 from app.services.user_service import get_or_create_guest, upsert_by_openid
@@ -21,6 +24,32 @@ from app.utils.response import success
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+@router.post("/cloud-login", response_model=dict[str, Any])
+def cloud_login(
+    request: Request,
+    session: Session = Depends(get_db),
+) -> dict[str, object]:
+    """使用 CloudBase 私有链路注入的 openid 登录。"""
+
+    identity = read_cloud_identity(request, get_settings())
+    user = upsert_by_openid(
+        session,
+        openid=identity.openid,
+        unionid=None,
+        nickname=None,
+        avatar_url=None,
+    )
+    if user.id is None:
+        raise RuntimeError("upsert 后 user.id 不应为 None")
+    token = create_access_token(user.id)
+    return success(
+        data={
+            "token": token,
+            "user": AuthUserRead.model_validate(user).model_dump(),
+        }
+    )
+
+
 @router.post("/wx-login", response_model=dict[str, Any])
 async def wx_login(req: WxLoginRequest, request: Request, session: Session = Depends(get_db)) -> dict[str, object]:
     """小程序登录入口。
@@ -28,6 +57,9 @@ async def wx_login(req: WxLoginRequest, request: Request, session: Session = Dep
     Body: {"code": "...", "nickname"?: "...", "avatar_url"?: "..."}
     Returns: {"ok": true, "data": {"token": "...", "user": {...}}}
     """
+    if not get_settings().enable_code2session:
+        raise AppError("兼容登录未启用", "CODE2SESSION_DISABLED", 404)
+
     # 1. 拿 code 换 openid（异步调微信服务器）
     wx_data = await wx_client.code2session(req.code)
 

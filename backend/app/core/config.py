@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # 微信小程序
     wx_appid: str = ""
     wx_secret: str = ""
+    cloudbase_env_id: str = ""
+    enable_code2session: bool = False
+    port: int = 8080
 
     # 和风天气（已弃用 - T09 切换到 Open-Meteo，保留字段以便回退）
     hefeng_key: str = ""
@@ -40,13 +43,15 @@ class Settings(BaseSettings):
     amap_key: str = ""
 
     def validate_required(self) -> list[str]:
-        """返回缺失的关键字段名列表。启动时调用，缺失则 raise。"""
-        missing = []
-        if not self.jwt_secret:
+        """返回缺失或不安全的关键配置名。"""
+        missing: list[str] = []
+        if len(self.jwt_secret) < 32:
             missing.append("JWT_SECRET")
         if not self.wx_appid:
             missing.append("WX_APPID")
-        if not self.wx_secret:
+        if not self.cloudbase_env_id:
+            missing.append("CLOUDBASE_ENV_ID")
+        if self.enable_code2session and not self.wx_secret:
             missing.append("WX_SECRET")
         return missing
 

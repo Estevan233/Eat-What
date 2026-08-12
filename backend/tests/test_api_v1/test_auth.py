@@ -20,8 +20,13 @@ from app.services.wx_client import Code2SessionResult
 
 
 @pytest.fixture
-def mock_wx_success():
-    """构造一个成功的 code2session 返回。"""
+def mock_wx_success(monkeypatch):
+    """为兼容端点显式开闸，并构造成功的 code2session 返回。"""
+    monkeypatch.setenv("ENABLE_CODE2SESSION", "true")
+    from app.core.config import get_settings
+
+    get_settings.cache_clear()
+
     def _mock(openid: str = "test_openid_001", unionid: str | None = None) -> None:
         from app.services import wx_client as mod
         result: Code2SessionResult = {

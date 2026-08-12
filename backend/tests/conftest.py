@@ -73,6 +73,8 @@ def client_fixture(monkeypatch, test_engine):
     monkeypatch.setenv("JWT_SECRET", "test-secret-for-pytest-only-32chars")
     monkeypatch.setenv("WX_APPID", "wx-test")
     monkeypatch.setenv("WX_SECRET", "test-secret")
+    monkeypatch.setenv("CLOUDBASE_ENV_ID", "cloud-test")
+    monkeypatch.setenv("ENABLE_CODE2SESSION", "true")
 
     # 让 lru_cache 的 get_settings 读到上面的 env
     from app.core.config import get_settings
