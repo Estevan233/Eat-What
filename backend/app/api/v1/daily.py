@@ -61,15 +61,24 @@ def choose_route(
     if user.id is None:  # pragma: no cover
         raise RuntimeError("user.id 不应为 None")
 
-    # 校验 food_id 存在
-    food = session.get(Food, body.food_id)
-    if food is None:
-        raise NotFoundError("food", body.food_id)
-
-    # 必须先有今天的推荐记录
-    log = daily_service.append_chosen_food_id(session, user.id, body.food_id)
-    if log is None:
-        raise ValidationError("今天还没有推荐记录，请先获取推荐")
+    if body.food_id is not None:
+        # 兼容旧版小程序的单菜追加协议，待客户端全量升级后再移除。
+        food = session.get(Food, body.food_id)
+        if food is None:
+            raise NotFoundError("food", body.food_id)
+        log = daily_service.append_chosen_food_id(session, user.id, body.food_id)
+        if log is None:
+            raise ValidationError("今天还没有推荐记录，请先获取推荐")
+    else:
+        if body.recommendation_id is None or body.selected_food_ids is None:  # pragma: no cover
+            raise RuntimeError("ChooseRequest 已保证完整餐字段存在")
+        log = daily_service.choose_complete_meal(
+            session,
+            user.id,
+            recommendation_id=body.recommendation_id,
+            selected_food_ids=body.selected_food_ids,
+            substitutions=[item.model_dump(mode="json") for item in body.substitutions],
+        )
 
     return success(data=_to_log_read(log))
 
@@ -116,6 +125,10 @@ def _to_log_read(log: DailyLog) -> DailyLogRead:
         log_date=log.log_date.isoformat() if isinstance(log.log_date, date) else str(log.log_date),
         recommended_food_ids=list(log.recommended_food_ids_json),
         chosen_food_ids=list(log.chosen_food_ids_json),
+        recommendation_id=log.recommendation_event_id,
+        recommended_meal=log.recommended_meal_json,
+        chosen_meal=log.chosen_meal_json,
+        chosen_total_nutrition=log.chosen_total_nutrition_json,
         mood=log.mood,
         activity_level=log.activity_level,
         weather_tag=log.weather_tag,

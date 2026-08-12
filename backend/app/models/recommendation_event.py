@@ -1,5 +1,6 @@
 """推荐曝光事件：一次成功推荐对应一行。"""
 from datetime import date, datetime
+from typing import Any
 
 from sqlalchemy import Column, Index
 from sqlalchemy.types import JSON
@@ -21,8 +22,24 @@ class RecommendationEvent(SQLModel, table=True):
         default_factory=list,
         sa_column=Column(JSON),
     )
+    primary_food_ids_json: list[int] = Field(default_factory=list, sa_column=Column(JSON))
+    substitution_options_json: list[dict[str, Any]] = Field(
+        default_factory=list,
+        sa_column=Column(JSON),
+    )
+    primary_meal_json: dict[str, Any] | None = Field(
+        default=None,
+        sa_column=Column(JSON, nullable=True),
+    )
     mood: str = Field(default="neutral", max_length=16)
     activity_level: str = Field(default="normal", max_length=8)
     weather_tag: str | None = Field(default=None, max_length=16)
     engine: str = Field(default="rules_v2", max_length=32)
+    scorer_version: str = Field(default="rules_v2", max_length=32)
+    builder_version: str = Field(default="legacy", max_length=32)
+    agent_name: str | None = Field(default=None, max_length=64)
+    summary_json: dict[str, Any] | None = Field(
+        default=None,
+        sa_column=Column(JSON, nullable=True),
+    )
     created_at: datetime = Field(default_factory=datetime.utcnow)

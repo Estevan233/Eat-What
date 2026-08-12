@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 
 import pytest
+from sqlmodel import select
 
 from app.models.food import Food
 from app.models.recipe import Recipe
@@ -539,6 +540,202 @@ def test_choose_multiple_foods(
     )
     assert res.status_code == 200
     assert res.json()["data"]["chosen_food_ids"] == [f1, f2]
+
+
+def test_choose_complete_meal_is_idempotent(
+    client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch
+):
+    """完整餐重复提交必须返回同一份不可变快照。"""
+    from datetime import date
+
+    from app.schemas.today_context import TodayContext
+
+    monkeypatch.setattr(
+        recommender,
+        "get_today_context_cached",
+        lambda: TodayContext(
+            date=date.today(),
+            solar_term_current="",
+            solar_term_next_name="立秋",
+            solar_term_next_date="2026-08-07",
+            zodiac_sign="leo",
+            animal="马",
+            lunar_month=7,
+            lunar_day=15,
+            is_leap_month=False,
+        ),
+    )
+    recommendation = client.post(
+        "/api/v1/daily/recommend",
+        json={"mood": "neutral"},
+        headers=auth_token,
+    ).json()["data"]
+    body = {
+        "recommendation_id": recommendation["recommendation_id"],
+        "selected_food_ids": [
+            item["food_id"] for item in recommendation["primary_meal"]["items"]
+        ],
+        "substitutions": [],
+    }
+
+    first = client.post("/api/v1/daily/choose", json=body, headers=auth_token)
+    second = client.post("/api/v1/daily/choose", json=body, headers=auth_token)
+
+    assert first.status_code == second.status_code == 200
+    assert first.json()["data"] == second.json()["data"]
+    assert len(first.json()["data"]["chosen_meal"]["items"]) == 3
+    assert first.json()["data"]["chosen_total_nutrition"] == (
+        first.json()["data"]["chosen_meal"]["total_nutrition"]
+    )
+
+
+def test_choose_complete_meal_rejects_unknown_id(
+    client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch
+):
+    """不属于该次推荐主餐或换菜池的 ID 不能混进选择。"""
+    from datetime import date
+
+    from app.schemas.today_context import TodayContext
+
+    monkeypatch.setattr(
+        recommender,
+        "get_today_context_cached",
+        lambda: TodayContext(
+            date=date.today(),
+            solar_term_current="",
+            solar_term_next_name="立秋",
+            solar_term_next_date="2026-08-07",
+            zodiac_sign="leo",
+            animal="马",
+            lunar_month=7,
+            lunar_day=15,
+            is_leap_month=False,
+        ),
+    )
+    recommendation = client.post(
+        "/api/v1/daily/recommend",
+        json={"mood": "neutral"},
+        headers=auth_token,
+    ).json()["data"]
+    selected = [item["food_id"] for item in recommendation["primary_meal"]["items"]]
+    selected[0] = 99999
+
+    response = client.post(
+        "/api/v1/daily/choose",
+        json={
+            "recommendation_id": recommendation["recommendation_id"],
+            "selected_food_ids": selected,
+            "substitutions": [],
+        },
+        headers=auth_token,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["code"] == "INVALID_MEAL_CHOICE"
+
+
+def test_choose_complete_meal_rejects_conflicting_second_choice(
+    client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch
+):
+    """当日完整餐一旦确认，第二份不同选择必须显式冲突。"""
+    from datetime import date
+
+    from app.schemas.today_context import TodayContext
+
+    monkeypatch.setattr(
+        recommender,
+        "get_today_context_cached",
+        lambda: TodayContext(
+            date=date.today(),
+            solar_term_current="",
+            solar_term_next_name="立秋",
+            solar_term_next_date="2026-08-07",
+            zodiac_sign="leo",
+            animal="马",
+            lunar_month=7,
+            lunar_day=15,
+            is_leap_month=False,
+        ),
+    )
+    recommendation = client.post(
+        "/api/v1/daily/recommend",
+        json={"mood": "neutral"},
+        headers=auth_token,
+    ).json()["data"]
+    selected = [item["food_id"] for item in recommendation["primary_meal"]["items"]]
+    body = {
+        "recommendation_id": recommendation["recommendation_id"],
+        "selected_food_ids": selected,
+        "substitutions": [],
+    }
+    assert client.post("/api/v1/daily/choose", json=body, headers=auth_token).status_code == 200
+
+    response = client.post(
+        "/api/v1/daily/choose",
+        json={**body, "selected_food_ids": list(reversed(selected))},
+        headers=auth_token,
+    )
+
+    assert response.status_code == 409
+    assert response.json()["code"] == "MEAL_ALREADY_CHOSEN"
+
+
+def test_today_uses_stored_meal_snapshot(
+    client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch
+):
+    """修改当前 Recipe 后，today 仍返回用户确认当时的营养快照。"""
+    from datetime import date
+
+    from app.db import SessionLocal
+    from app.schemas.today_context import TodayContext
+
+    monkeypatch.setattr(
+        recommender,
+        "get_today_context_cached",
+        lambda: TodayContext(
+            date=date.today(),
+            solar_term_current="",
+            solar_term_next_name="立秋",
+            solar_term_next_date="2026-08-07",
+            zodiac_sign="leo",
+            animal="马",
+            lunar_month=7,
+            lunar_day=15,
+            is_leap_month=False,
+        ),
+    )
+    recommendation = client.post(
+        "/api/v1/daily/recommend",
+        json={"mood": "neutral"},
+        headers=auth_token,
+    ).json()["data"]
+    body = {
+        "recommendation_id": recommendation["recommendation_id"],
+        "selected_food_ids": [
+            item["food_id"] for item in recommendation["primary_meal"]["items"]
+        ],
+        "substitutions": [],
+    }
+    chosen = client.post("/api/v1/daily/choose", json=body, headers=auth_token).json()["data"]
+    original = chosen["chosen_total_nutrition"]
+
+    session = SessionLocal()
+    try:
+        recipe = session.exec(select(Recipe).where(Recipe.food_id == body["selected_food_ids"][0])).one()
+        recipe.nutrition_per_serving_json = {
+            "energy_kcal": 9999,
+            "protein_g": 0,
+            "fat_g": 0,
+            "carb_g": 0,
+        }
+        session.add(recipe)
+        session.commit()
+    finally:
+        session.close()
+
+    today = client.get("/api/v1/daily/today", headers=auth_token)
+    assert today.status_code == 200
+    assert today.json()["data"]["chosen_total_nutrition"] == original
 
 
 def test_today_unauthenticated_returns_401(client):

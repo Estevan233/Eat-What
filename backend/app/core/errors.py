@@ -32,6 +32,16 @@ class ValidationError(AppError):
         super().__init__(message, "VALIDATION_ERROR", 422)
 
 
+class InvalidMealChoiceError(AppError):
+    def __init__(self, message: str):
+        super().__init__(message, "INVALID_MEAL_CHOICE", 422)
+
+
+class MealAlreadyChosenError(AppError):
+    def __init__(self, message: str = "今日餐单已经确认，不能改成另一份餐单"):
+        super().__init__(message, "MEAL_ALREADY_CHOSEN", 409)
+
+
 class ExternalAPIError(AppError):
     def __init__(self, service: str, detail: str):
         super().__init__(f"{service} 调用失败: {detail}", "EXTERNAL_API", 502)

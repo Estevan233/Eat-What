@@ -13,7 +13,7 @@ from sqlmodel import Session
 
 from app.core.deps import get_db
 from app.core.errors import NotFoundError
-from app.services import food_service
+from app.services import food_service, recipe_service
 from app.utils.response import success
 
 router = APIRouter(prefix="/food", tags=["food"])
@@ -78,3 +78,15 @@ def get_food_route(
     if food is None:
         raise NotFoundError("food", food_id)
     return success(data=food.to_read_dict())
+
+
+@router.get("/{food_id}/recipe", response_model=dict[str, Any])
+def get_food_recipe_route(
+    food_id: int,
+    session: Session = Depends(get_db),
+) -> dict[str, object]:
+    """返回稳定的结构化菜谱；没有菜谱的 Food 明确返回 404。"""
+    recipe = recipe_service.get_by_food_id(session, food_id)
+    if recipe is None:
+        raise NotFoundError("recipe", food_id)
+    return success(data=recipe.model_dump(mode="json"))

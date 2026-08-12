@@ -17,6 +17,7 @@
 import pytest
 
 from app.services.food_seed import DEFAULT_SEED_PATH, import_seed
+from app.services.recipe_seed import import_recipe_seed
 
 
 @pytest.fixture
@@ -27,6 +28,7 @@ def seeded_session(session):
     这样 client 调 API 时能看到 seed 的数据。
     """
     import_seed(session, DEFAULT_SEED_PATH)
+    import_recipe_seed(session)
     return session
 
 
@@ -121,3 +123,29 @@ def test_food_endpoints_no_auth_needed(client, seeded_session):
     assert res.status_code == 200
     # 不应返回 401
     assert res.json().get("code") != "AUTH_ERROR"
+
+
+def test_get_food_recipe(client, seeded_session):
+    """结构化菜谱包含量化食材、4-6 步和每份营养。"""
+    listing = client.get("/api/v1/food?size=50").json()["data"]["items"]
+    seeded_recipe = next(item for item in listing if item["recipe_ready"])
+
+    response = client.get(f"/api/v1/food/{seeded_recipe['id']}/recipe")
+
+    assert response.status_code == 200
+    recipe = response.json()["data"]
+    assert recipe["food_id"] == seeded_recipe["id"]
+    assert 4 <= len(recipe["steps"]) <= 6
+    assert recipe["nutrition_per_serving"]["energy_kcal"] > 0
+    assert all(ingredient["unit"] for ingredient in recipe["ingredients"])
+
+
+def test_get_food_recipe_not_found(client, seeded_session):
+    """存在但没有结构化菜谱的 Food 返回 404。"""
+    listing = client.get("/api/v1/food?size=50").json()["data"]["items"]
+    food_without_recipe = next(item for item in listing if not item["recipe_ready"])
+
+    response = client.get(f"/api/v1/food/{food_without_recipe['id']}/recipe")
+
+    assert response.status_code == 404
+    assert response.json()["code"] == "NOT_FOUND"

@@ -8,11 +8,16 @@
 """
 from collections.abc import Iterable
 from datetime import date, datetime, timedelta
+from typing import Any
 
 from sqlmodel import Session, select
 
+from app.core.errors import InvalidMealChoiceError, MealAlreadyChosenError
 from app.models.daily_log import DailyLog
 from app.models.recommendation_event import RecommendationEvent
+from app.schemas.meal import MealItem, MealNutrition, MealRole, MealSnapshot, MealSubstitution
+
+MEAL_ROLE_ORDER: tuple[MealRole, ...] = ("main", "vegetable", "staple")
 
 
 def get_recent(session: Session, user_id: int, *, days: int = 3) -> list[DailyLog]:
@@ -90,6 +95,11 @@ def record_recommendation(
     activity_level: str,
     weather_tag: str | None,
     engine: str,
+    recommended_meal: dict[str, Any] | None = None,
+    substitutions: list[dict[str, Any]] | None = None,
+    scorer_version: str | None = None,
+    builder_version: str = "legacy",
+    agent_name: str | None = None,
     event_date: date | None = None,
 ) -> tuple[DailyLog, RecommendationEvent]:
     """原子更新当天日志并追加一次推荐曝光事件。"""
@@ -108,14 +118,24 @@ def record_recommendation(
         user_id=user_id,
         event_date=target_date,
         recommended_food_ids_json=ids,
+        primary_food_ids_json=ids,
+        substitution_options_json=list(substitutions or []),
+        primary_meal_json=recommended_meal,
         mood=mood,
         activity_level=activity_level,
         weather_tag=weather_tag,
         engine=engine,
+        scorer_version=scorer_version or engine,
+        builder_version=builder_version,
+        agent_name=agent_name,
+        summary_json=_recommendation_summary(recommended_meal, substitutions or []),
     )
-    session.add(log_record)
     session.add(event)
     try:
+        session.flush()
+        log_record.recommendation_event_id = event.id
+        log_record.recommended_meal_json = recommended_meal
+        session.add(log_record)
         session.commit()
     except Exception:
         session.rollback()
@@ -123,6 +143,164 @@ def record_recommendation(
     session.refresh(log_record)
     session.refresh(event)
     return log_record, event
+
+
+def _recommendation_summary(
+    recommended_meal: dict[str, Any] | None,
+    substitutions: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if recommended_meal is None:
+        return None
+    return {
+        "total_nutrition": recommended_meal.get("total_nutrition"),
+        "estimated_time_min": recommended_meal.get("estimated_time_min"),
+        "substitution_count": len(substitutions),
+    }
+
+
+def choose_complete_meal(
+    session: Session,
+    user_id: int,
+    *,
+    recommendation_id: int,
+    selected_food_ids: Iterable[int],
+    substitutions: list[dict[str, Any]],
+) -> DailyLog:
+    """Validate one complete meal against an owned event and persist it once."""
+    event, record = _load_choice_context(session, user_id, recommendation_id)
+    selected = list(selected_food_ids)
+    if record.chosen_meal_json is not None:
+        if record.chosen_food_ids_json == selected:
+            return record
+        raise MealAlreadyChosenError()
+
+    chosen = _build_chosen_snapshot(event, selected, substitutions)
+    record.chosen_food_ids_json = selected
+    record.chosen_meal_json = chosen.model_dump(mode="json")
+    record.chosen_total_nutrition_json = chosen.total_nutrition.model_dump(mode="json")
+    record.updated_at = datetime.utcnow()
+    session.add(record)
+    try:
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    session.refresh(record)
+    return record
+
+
+def _load_choice_context(
+    session: Session,
+    user_id: int,
+    recommendation_id: int,
+) -> tuple[RecommendationEvent, DailyLog]:
+    event = session.exec(
+        select(RecommendationEvent)
+        .where(RecommendationEvent.id == recommendation_id)
+        .where(RecommendationEvent.user_id == user_id)
+    ).first()
+    if event is None or event.primary_meal_json is None:
+        raise InvalidMealChoiceError("推荐记录不存在、已失效或不属于当前用户")
+
+    record = get_today(session, user_id, log_date=event.event_date)
+    if record is None or record.recommendation_event_id != event.id:
+        raise InvalidMealChoiceError("这不是当前可确认的推荐，请刷新后重试")
+    return event, record
+
+
+def _build_chosen_snapshot(
+    event: RecommendationEvent,
+    selected: list[int],
+    substitutions: list[dict[str, Any]],
+) -> MealSnapshot:
+    if len(selected) != 3 or len(set(selected)) != 3:
+        raise InvalidMealChoiceError("必须且只能选择主菜、蔬菜、主食各一项")
+
+    if event.primary_meal_json is None:  # pragma: no cover - load 已校验
+        raise RuntimeError("推荐事件缺少主餐快照")
+    primary = MealSnapshot.model_validate(event.primary_meal_json)
+    primary_by_role = {item.meal_role: item for item in primary.items}
+    allowed_by_role = _allowed_items_by_role(event, primary_by_role)
+    chosen_by_role = _resolve_selected_items(selected, allowed_by_role)
+    _validate_declared_substitutions(
+        primary_by_role,
+        chosen_by_role,
+        substitutions,
+    )
+
+    items = [chosen_by_role[role] for role in MEAL_ROLE_ORDER]
+    return MealSnapshot(
+        items=items,
+        total_nutrition=_sum_nutrition(items),
+        estimated_time_min=sum(item.prep_time_min for item in items)
+        + max(item.cook_time_min for item in items),
+        reason=primary.reason,
+    )
+
+
+def _allowed_items_by_role(
+    event: RecommendationEvent,
+    primary_by_role: dict[MealRole, MealItem],
+) -> dict[MealRole, dict[int, MealItem]]:
+    allowed: dict[MealRole, dict[int, MealItem]] = {
+        role: {item.food_id: item}
+        for role, item in primary_by_role.items()
+    }
+    for raw in event.substitution_options_json:
+        option = MealSubstitution.model_validate(raw)
+        allowed.setdefault(option.target_role, {})[option.replacement.food_id] = option.replacement
+    return allowed
+
+
+def _resolve_selected_items(
+    selected: list[int],
+    allowed_by_role: dict[MealRole, dict[int, MealItem]],
+) -> dict[MealRole, MealItem]:
+    chosen_by_role: dict[MealRole, MealItem] = {}
+    for food_id in selected:
+        matching_roles = [
+            role for role, items in allowed_by_role.items() if food_id in items
+        ]
+        if len(matching_roles) != 1:
+            raise InvalidMealChoiceError(f"菜品 {food_id} 不在本次推荐或换菜范围内")
+        role = matching_roles[0]
+        if role in chosen_by_role:
+            raise InvalidMealChoiceError(f"餐单包含重复角色: {role}")
+        chosen_by_role[role] = allowed_by_role[role][food_id]
+
+    if set(chosen_by_role) != set(MEAL_ROLE_ORDER):
+        raise InvalidMealChoiceError("必须选择主菜、蔬菜、主食各一项")
+    return chosen_by_role
+
+
+def _validate_declared_substitutions(
+    primary_by_role: dict[MealRole, MealItem],
+    chosen_by_role: dict[MealRole, MealItem],
+    substitutions: list[dict[str, Any]],
+) -> None:
+    actual_substitutions = {
+        (role, item.food_id)
+        for role, item in chosen_by_role.items()
+        if primary_by_role[role].food_id != item.food_id
+    }
+    declared_substitutions = {
+        (str(item["target_role"]), int(item["replacement_food_id"]))
+        for item in substitutions
+    }
+    if actual_substitutions != declared_substitutions:
+        raise InvalidMealChoiceError("换菜声明与最终餐单不一致")
+
+
+def _sum_nutrition(items: list[MealItem]) -> MealNutrition:
+    fields = ("energy_kcal", "protein_g", "fat_g", "carb_g")
+    values = {
+        field: round(
+            sum(float(getattr(item.nutrition_per_serving, field)) for item in items),
+            1,
+        )
+        for field in fields
+    }
+    return MealNutrition(**values)
 
 
 def upsert_today_log(

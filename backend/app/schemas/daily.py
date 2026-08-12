@@ -7,9 +7,9 @@
 """
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.schemas.meal import MealSnapshot, MealSubstitution
+from app.schemas.meal import MealNutrition, MealRole, MealSnapshot, MealSubstitution
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 
@@ -80,7 +80,24 @@ class RecommendResponse(BaseModel):
 class ChooseRequest(BaseModel):
     """POST /daily/choose 请求体。"""
 
-    food_id: int = Field(description="用户选择的菜 id")
+    # food_id 保留给已发布旧版；新客户端按推荐事件一次确认完整餐。
+    food_id: int | None = Field(default=None, description="旧版单菜选择 id")
+    recommendation_id: int | None = None
+    selected_food_ids: list[int] | None = None
+    substitutions: list["ChoiceSubstitution"] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_choice_mode(self) -> "ChooseRequest":
+        legacy = self.food_id is not None
+        complete = self.recommendation_id is not None and self.selected_food_ids is not None
+        if legacy == complete:
+            raise ValueError("请提交 food_id，或 recommendation_id + selected_food_ids")
+        return self
+
+
+class ChoiceSubstitution(BaseModel):
+    target_role: MealRole
+    replacement_food_id: int
 
 
 class DailyLogRead(BaseModel):
@@ -93,6 +110,10 @@ class DailyLogRead(BaseModel):
     log_date: str
     recommended_food_ids: list[int]
     chosen_food_ids: list[int]
+    recommendation_id: int | None = None
+    recommended_meal: MealSnapshot | None = None
+    chosen_meal: MealSnapshot | None = None
+    chosen_total_nutrition: MealNutrition | None = None
     mood: str
     activity_level: str
     weather_tag: str | None = None

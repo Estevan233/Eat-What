@@ -583,6 +583,10 @@ async def recommend(
         activity_level=req.activity_level,
         weather_tag=weather.weather_tag,
         engine=engine_name,
+        recommended_meal=meal.primary_meal.model_dump(mode="json"),
+        substitutions=[item.model_dump(mode="json") for item in meal.substitutions],
+        scorer_version=engine_name,
+        builder_version="meal_builder_v1",
         event_date=today,
     )
 

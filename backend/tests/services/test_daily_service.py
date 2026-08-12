@@ -59,6 +59,42 @@ def test_record_recommendation_keeps_events_and_latest_daily_log(session):
     assert sensitive_fields.isdisjoint(RecommendationEvent.model_fields)
 
 
+def test_record_recommendation_persists_immutable_meal_payload(session):
+    user = _create_user(session)
+    assert user.id is not None
+    meal = {
+        "items": [
+            {"food_id": 1, "meal_role": "main"},
+            {"food_id": 2, "meal_role": "vegetable"},
+            {"food_id": 3, "meal_role": "staple"},
+        ],
+        "total_nutrition": {"energy_kcal": 600},
+        "estimated_time_min": 30,
+        "reason": "测试",
+    }
+
+    log, event = daily_service.record_recommendation(
+        session,
+        user.id,
+        recommended_food_ids=[1, 2, 3],
+        recommended_meal=meal,
+        substitutions=[],
+        mood="neutral",
+        activity_level="normal",
+        weather_tag="mild",
+        engine="rules_v3",
+        scorer_version="rules_v3",
+        builder_version="meal_builder_v1",
+    )
+
+    assert log.recommendation_event_id == event.id
+    assert log.recommended_meal_json == meal
+    assert event.primary_food_ids_json == [1, 2, 3]
+    assert event.primary_meal_json == meal
+    assert event.scorer_version == "rules_v3"
+    assert event.builder_version == "meal_builder_v1"
+
+
 def test_get_recent_recommendation_events_respects_seven_day_window(session):
     user = _create_user(session)
     assert user.id is not None

@@ -6,6 +6,7 @@
 - mood/activity_level 落库便于事后做反馈分析（T10 只写不读，T11 后续读）
 """
 from datetime import date, datetime
+from typing import Any
 
 from sqlalchemy import Column, UniqueConstraint
 from sqlalchemy.types import JSON
@@ -27,10 +28,28 @@ class DailyLog(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id", index=True)
     log_date: date = Field(index=True)
+    recommendation_event_id: int | None = Field(
+        default=None,
+        foreign_key="recommendation_events.id",
+        index=True,
+    )
     # 推荐时写入：这次推荐的 3 道菜的 id（顺序即排名）
     recommended_food_ids_json: list[int] = Field(default=[], sa_column=Column(JSON))
     # 用户实际选择的子集；T10 推荐时为空，T11 选择后更新
     chosen_food_ids_json: list[int] = Field(default=[], sa_column=Column(JSON))
+    # 历史必须读取当时的快照，不能反查后来可能已更新的 Recipe。
+    recommended_meal_json: dict[str, Any] | None = Field(
+        default=None,
+        sa_column=Column(JSON, nullable=True),
+    )
+    chosen_meal_json: dict[str, Any] | None = Field(
+        default=None,
+        sa_column=Column(JSON, nullable=True),
+    )
+    chosen_total_nutrition_json: dict[str, Any] | None = Field(
+        default=None,
+        sa_column=Column(JSON, nullable=True),
+    )
     # 用户当时输入
     mood: str = Field(default="neutral", max_length=16)
     activity_level: str = Field(default="normal", max_length=8)
