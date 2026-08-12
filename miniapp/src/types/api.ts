@@ -230,8 +230,89 @@ export interface RecommendRequest {
   lng?: number
 }
 
-/** POST /daily/recommend 成功响应的 data。 */
-export interface RecommendResponse {
+export type MealRole = 'main' | 'vegetable' | 'staple'
+
+export interface NutritionTotal {
+  energyKcal: number
+  proteinG: number
+  fatG: number
+  carbG: number
+}
+
+export type NutritionPerServing = NutritionTotal
+
+export interface MealItem {
+  foodId: number
+  name: string
+  mealRole: MealRole
+  category: string
+  cookingMethod: string
+  visualKey: string
+  prepTimeMin: number
+  cookTimeMin: number
+  nutritionPerServing: NutritionPerServing
+  reason: string
+  score: number
+}
+
+export interface MealSnapshot {
+  items: MealItem[]
+  totalNutrition: NutritionTotal
+  estimatedTimeMin: number
+  reason: string
+}
+
+export interface MealSubstitution {
+  targetRole: MealRole
+  replacement: MealItem
+  resultingTotal: NutritionTotal
+  reason: string
+}
+
+/** POST /daily/recommend 成功响应中的完整餐数据。 */
+export interface MealRecommendation {
   foods: FoodWithReason[]
+  recommendationId: number
+  primaryMeal: MealSnapshot
+  substitutions: MealSubstitution[]
+  substitutionNotice?: string | null
+  engine: string
   context: RecommendContext
+}
+
+export type RecommendResponse = MealRecommendation
+
+export interface MealChoiceSubstitution {
+  targetRole: MealRole
+  replacementFoodId: number
+}
+
+export interface ChooseMealRequest {
+  recommendationId: number
+  selectedFoodIds: number[]
+  substitutions: MealChoiceSubstitution[]
+}
+
+export interface RecipeIngredient {
+  name: string
+  amount?: number | null
+  unit: string
+  optional: boolean
+}
+
+export interface RecipeRead {
+  foodId: number
+  foodName: string
+  mealRole: MealRole
+  visualKey: string
+  servings: number
+  ingredients: RecipeIngredient[]
+  steps: string[]
+  prepTimeMin: number
+  cookTimeMin: number
+  nutritionPerServing: NutritionPerServing
+  difficulty: string
+  sourceUrl?: string | null
+  nutritionBasis: string
+  version: number
 }

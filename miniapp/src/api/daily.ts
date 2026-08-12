@@ -7,6 +7,9 @@
  */
 import { request } from './request'
 import type {
+  ChooseMealRequest,
+  MealSnapshot,
+  NutritionTotal,
   RecommendRequest,
   RecommendResponse,
 } from '@/types/api'
@@ -18,6 +21,10 @@ export type DailyLogRead = {
   logDate: string
   recommendedFoodIds: number[]
   chosenFoodIds: number[]
+  recommendationId?: number | null
+  recommendedMeal?: MealSnapshot | null
+  chosenMeal?: MealSnapshot | null
+  chosenTotalNutrition?: NutritionTotal | null
   mood: string
   activityLevel: string
   weatherTag?: string | null
@@ -46,6 +53,14 @@ export const chooseFood = (foodId: number): Promise<DailyLogRead> =>
     url: '/api/v1/daily/choose',
     method: 'POST',
     data: { foodId },
+  })
+
+/** POST /daily/choose - 一次确认主菜、蔬菜、主食和已应用换菜。 */
+export const chooseMeal = (data: ChooseMealRequest): Promise<DailyLogRead> =>
+  request<DailyLogRead, ChooseMealRequest>({
+    url: '/api/v1/daily/choose',
+    method: 'POST',
+    data,
   })
 
 /** GET /daily/today - 取今天的 DailyLog，不存在返回 null。 */
