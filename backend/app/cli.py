@@ -12,15 +12,22 @@ def main() -> int:
     if len(sys.argv) < 2:
         print("Usage: eat-what <command>")
         print("Commands:")
-        print("  seed-food   导入食物库冷启动数据（清表后从 data/food_seed.json 灌入）")
+        print("  seed-food     幂等导入食物库冷启动数据")
+        print("  seed-recipes  幂等导入结构化菜谱")
+        print("  seed-all      先导入食物，再导入结构化菜谱")
         return 1
 
     cmd = sys.argv[1]
     if cmd == "seed-food":
         return _run_seed_food()
+    if cmd == "seed-recipes":
+        return _run_seed_recipes()
+    if cmd == "seed-all":
+        food_result = _run_seed_food()
+        return food_result if food_result else _run_seed_recipes()
     else:
         print(f"Unknown command: {cmd}")
-        print("Available: seed-food")
+        print("Available: seed-food, seed-recipes, seed-all")
         return 1
 
 
@@ -48,6 +55,28 @@ def _run_seed_food() -> int:
         return 2
     except Exception as e:
         print(f"[ERR] 导入失败: {e}")
+        return 3
+    finally:
+        session.close()
+
+
+def _run_seed_recipes() -> int:
+    """幂等 upsert 结构化菜谱；必须在食物种子之后执行。"""
+    from app.db import SessionLocal, init_db
+    from app.services.recipe_seed import DEFAULT_RECIPE_SEED_PATH, import_recipe_seed
+
+    init_db()
+    session = SessionLocal()
+    try:
+        count = import_recipe_seed(session, DEFAULT_RECIPE_SEED_PATH)
+        print(f"[OK] 导入结构化菜谱完成：{count} 条")
+        print(f"     数据源: {DEFAULT_RECIPE_SEED_PATH}")
+        return 0
+    except FileNotFoundError as error:
+        print(f"[ERR] {error}")
+        return 2
+    except Exception as error:
+        print(f"[ERR] 菜谱导入失败: {error}")
         return 3
     finally:
         session.close()
