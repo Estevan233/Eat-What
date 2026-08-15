@@ -6,13 +6,14 @@
 - 相同状态下排序确定；同日再次请求会根据新增曝光记录主动轮换
 - 可选 Agent 只能调整已通过硬筛的候选，异常时回退规则排序
 """
+import asyncio
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import structlog
 from sqlmodel import Session, select
 
-from app.core.errors import NotFoundError, ValidationError
+from app.core.errors import ExternalAPIError, NotFoundError, RateLimitError, ValidationError
 from app.models.daily_log import DailyLog
 from app.models.food import Food
 from app.models.recipe import Recipe
@@ -47,6 +48,9 @@ from app.services.solar_terms import get_today_context_cached
 from app.services.weather_client import weather_client
 
 log = structlog.get_logger()
+
+# 小程序请求层默认 10 秒超时。天气只是软信号，最多占用其中 2 秒。
+RECOMMEND_WEATHER_TIMEOUT_SECONDS = 2.0
 
 # ---- 常量 ----
 
@@ -99,10 +103,10 @@ RECENT_HIGH_FAT_TOTAL = 60.0  # 近 3 天选过的菜脂肪总和 ≥ 60g 视为
 
 # ---- Weather fallback ----
 
-def _fallback_weather() -> WeatherData:
-    """用户未授权位置时的占位天气：温和，不打外部 HTTP。"""
+def _fallback_weather(*, provider_unavailable: bool = False) -> WeatherData:
+    """返回不偏向任何菜品的中性天气，不伪造实时观测。"""
     return WeatherData(
-        location_name="未知位置",
+        location_name="天气暂不可用" if provider_unavailable else "未知位置",
         temp_c=22.0,
         feels_like_c=22.0,
         text="温和",
@@ -113,6 +117,26 @@ def _fallback_weather() -> WeatherData:
         weather_tag="mild",
         fetched_at=datetime.now(timezone.utc),
     )
+
+
+async def _resolve_weather(req: RecommendRequest) -> WeatherData:
+    """为推荐解析天气；软依赖失败或超时后使用中性权重继续。"""
+    if req.lat is None or req.lng is None:
+        return _fallback_weather()
+
+    try:
+        return await asyncio.wait_for(
+            weather_client.get_current(req.lat, req.lng),
+            timeout=RECOMMEND_WEATHER_TIMEOUT_SECONDS,
+        )
+    except (ExternalAPIError, RateLimitError, asyncio.TimeoutError) as exc:
+        log.warning(
+            "recommend_weather_fallback",
+            error_type=type(exc).__name__,
+            lat=req.lat,
+            lng=req.lng,
+        )
+        return _fallback_weather(provider_unavailable=True)
 
 
 # ---- 硬筛 ----
@@ -501,11 +525,7 @@ async def recommend(
     if profile is None:  # pragma: no cover
         raise NotFoundError("user_profile", user.id)
 
-    weather = (
-        await weather_client.get_current(req.lat, req.lng)
-        if req.lat is not None and req.lng is not None
-        else _fallback_weather()
-    )
+    weather = await _resolve_weather(req)
     today_context = get_today_context_cached()
     today = date.today()
     history_7d = daily_service.get_recent(session, user.id, days=7)

@@ -227,6 +227,21 @@ async def test_get_current_network_error_raises_external_api():
 
 
 @pytest.mark.asyncio
+async def test_get_current_blank_timeout_reports_exception_type():
+    """httpx 超时常没有 message，错误信息仍应保留异常类型。"""
+    client = OpenMeteoClient()
+    client.cache_clear()
+
+    async_cm = MagicMock()
+    async_cm.__aenter__ = AsyncMock(side_effect=httpx.ConnectTimeout(""))
+
+    with patch("app.services.weather_client.httpx.AsyncClient", return_value=async_cm):
+        with pytest.raises(ExternalAPIError) as exc_info:
+            await client.get_current(39.92, 116.41)
+        assert "ConnectTimeout" in exc_info.value.message
+
+
+@pytest.mark.asyncio
 async def test_get_current_missing_current_field_raises_external_api():
     """响应缺 current 字段 → ExternalAPIError。"""
     client = OpenMeteoClient()

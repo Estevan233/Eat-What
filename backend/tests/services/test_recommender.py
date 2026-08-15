@@ -21,6 +21,7 @@
 - 直接在 in-memory session 里建 Food + UserProfile + DailyLog
 - 不调 API 路由，直接调 service 函数，便于断言内部细节
 """
+import asyncio
 from datetime import date, datetime, timedelta, timezone
 from time import perf_counter
 from typing import Any
@@ -29,7 +30,7 @@ from unittest.mock import AsyncMock
 import pytest
 from sqlmodel import select
 
-from app.core.errors import NotFoundError
+from app.core.errors import ExternalAPIError, NotFoundError
 from app.models.daily_log import DailyLog
 from app.models.food import Food
 from app.models.recipe import Recipe
@@ -545,6 +546,61 @@ async def test_fallback_weather_when_no_coords(session, seeded_session, monkeypa
     assert resp.context.weather.text == "温和"
     # get_current 未被调用
     mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_fallback_weather_when_provider_is_unavailable(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    """天气服务不可用时仍返回完整餐，避免软依赖拖垮核心推荐。"""
+    user, _ = seeded_session
+    mock = AsyncMock(
+        side_effect=ExternalAPIError("open-meteo", "网络异常: ConnectTimeout"),
+    )
+    monkeypatch.setattr(recommender.weather_client, "get_current", mock)
+    monkeypatch.setattr(
+        recommender,
+        "get_today_context_cached",
+        lambda: _make_today(),
+    )
+
+    req = RecommendRequest(mood="neutral", lat=28.00708, lng=120.63768)
+    resp = await recommender.recommend(session, user, req)
+
+    mock.assert_awaited_once_with(28.00708, 120.63768)
+    assert resp.context.weather.weather_tag == "mild"
+    assert resp.context.weather.location_name == "天气暂不可用"
+    assert len(resp.primary_meal.items) == 3
+
+
+@pytest.mark.asyncio
+async def test_fallback_weather_when_provider_exceeds_recommend_deadline(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    """天气端点迟迟不响应时快速降级，不能吃掉小程序的请求时限。"""
+    user, _ = seeded_session
+
+    async def never_returns(_lat: float, _lng: float) -> WeatherData:
+        await asyncio.sleep(60)
+        raise AssertionError("wait_for should cancel the weather request")
+
+    monkeypatch.setattr(recommender.weather_client, "get_current", never_returns)
+    monkeypatch.setattr(recommender, "RECOMMEND_WEATHER_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr(
+        recommender,
+        "get_today_context_cached",
+        lambda: _make_today(),
+    )
+
+    req = RecommendRequest(mood="neutral", lat=28.00708, lng=120.63768)
+    resp = await recommender.recommend(session, user, req)
+
+    assert resp.context.weather.weather_tag == "mild"
+    assert resp.context.weather.location_name == "天气暂不可用"
 
 
 @pytest.mark.asyncio

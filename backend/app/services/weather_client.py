@@ -181,8 +181,17 @@ class OpenMeteoClient:
             async with httpx.AsyncClient(timeout=self._timeout) as client:
                 resp = await client.get(self._base_url, params=params)
         except httpx.HTTPError as e:
-            log.warning("weather_network_error", error=str(e))
-            raise ExternalAPIError("open-meteo", f"网络异常: {e}") from None
+            error_type = type(e).__name__
+            error_detail = str(e).strip() or error_type
+            log.warning(
+                "weather_network_error",
+                error_type=error_type,
+                error=error_detail,
+            )
+            raise ExternalAPIError(
+                "open-meteo",
+                f"网络异常({error_type}): {error_detail}",
+            ) from None
 
         if resp.status_code == 429:
             raise RateLimitError("open-meteo")
