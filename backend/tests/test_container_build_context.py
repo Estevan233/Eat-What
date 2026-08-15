@@ -33,3 +33,9 @@ def test_pyproject_readme_exists() -> None:
     readme = match.group(1)
 
     assert (BACKEND_ROOT / readme).is_file(), f"project.readme is missing: {readme}"
+
+
+def test_dockerfile_configures_runtime_seed_directory() -> None:
+    dockerfile = (BACKEND_ROOT / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "EAT_WHAT_DATA_DIR=/app/data" in dockerfile

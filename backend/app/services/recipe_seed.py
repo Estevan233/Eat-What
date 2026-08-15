@@ -9,10 +9,9 @@ from sqlmodel import Session, select
 
 from app.models.food import Food
 from app.models.recipe import Recipe
+from app.services.food_seed import resolve_seed_path
 
-DEFAULT_RECIPE_SEED_PATH = (
-    Path(__file__).resolve().parent.parent.parent / 'data' / 'recipe_seed.json'
-)
+DEFAULT_RECIPE_SEED_PATH = resolve_seed_path("recipe_seed.json", module_file=__file__)
 
 
 def import_recipe_seed(

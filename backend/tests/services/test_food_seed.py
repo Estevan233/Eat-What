@@ -9,11 +9,23 @@
 6. import_seed 文件不存在 → FileNotFoundError
 """
 import json
+from pathlib import Path
 
 import pytest
 
-from app.services import food_service
+from app.services import food_seed, food_service
 from app.services.food_seed import DEFAULT_SEED_PATH, import_seed
+
+
+def test_resolve_seed_path_uses_configured_runtime_directory(tmp_path, monkeypatch):
+    runtime_data = tmp_path / "runtime-data"
+    expected = runtime_data / "food_seed.json"
+    runtime_data.mkdir()
+    expected.write_text("[]", encoding="utf-8")
+    installed_module = Path("/usr/local/lib/python3.10/site-packages/app/services/food_seed.py")
+    monkeypatch.setenv("EAT_WHAT_DATA_DIR", str(runtime_data))
+
+    assert food_seed.resolve_seed_path("food_seed.json", module_file=installed_module) == expected
 
 
 def test_import_seed_from_default_json(session):

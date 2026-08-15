@@ -1,6 +1,7 @@
 """Non-destructive Food seed upsert service."""
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -8,7 +9,17 @@ from sqlmodel import Session, select
 
 from app.models.food import Food
 
-DEFAULT_SEED_PATH = Path(__file__).resolve().parent.parent.parent / 'data' / 'food_seed.json'
+
+def resolve_seed_path(filename: str, *, module_file: Path | str = __file__) -> Path:
+    """Resolve seed data outside site-packages when running an installed CLI."""
+    runtime_data_dir = os.getenv("EAT_WHAT_DATA_DIR")
+    if runtime_data_dir:
+        return Path(runtime_data_dir) / filename
+
+    return Path(module_file).resolve().parent.parent.parent / "data" / filename
+
+
+DEFAULT_SEED_PATH = resolve_seed_path("food_seed.json")
 
 
 def import_seed(session: Session, json_path: Path | str = DEFAULT_SEED_PATH) -> int:
