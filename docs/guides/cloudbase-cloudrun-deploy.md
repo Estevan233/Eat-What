@@ -235,13 +235,13 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 本次验证产物：
 
 ```text
-后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v6.zip
+后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v7.zip
 微信工具目录：/root/miniapp-trellis/miniapp/dist/build/mp-weixin
 ```
 
 上传后端包时选择“压缩包”，目标目录留空，Dockerfile 选择“有”；压缩包根目录应直接看到 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。
 
-2026-08-20 本地校验记录：后端 331 个测试、前端 44 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建和无 AppSecret 容器启动烟测全部通过。上传包 SHA-256 为 6f1b405296d0338f0b5086dc257e11b19fe15f055b158883fe498e03c9c929ff。
+2026-08-20 本地校验记录：后端 331 个测试、前端 44 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建和无 AppSecret 容器启动烟测全部通过。上传包 SHA-256 为 badf26b6e131fad324ce3d1b0cc3595716bb4d7b7cae22d546761e411bd120d9。
 
 ## 9. 回滚
 
