@@ -34,7 +34,7 @@ def test_cloudbase_rest_mode_requires_server_api_key_not_database_url() -> None:
 
     missing = settings.validate_required()
 
-    assert "CLOUDBASE_DB_API_KEY" in missing
+    assert "CLOUDBASE_APIKEY" in missing
     assert "DATABASE_URL" not in missing
 
 
@@ -53,6 +53,17 @@ def test_cloudbase_rest_mode_stays_gated_until_runtime_repositories_are_complete
     )
 
     assert settings.validate_required() == ["DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY"]
+
+
+def test_cloudbase_server_api_key_accepts_platform_injected_name(monkeypatch) -> None:
+    monkeypatch.delenv("CLOUDBASE_DB_API_KEY", raising=False)
+    monkeypatch.setenv("CLOUDBASE_APIKEY", "platform-injected-key")
+
+    settings = Settings(_env_file=None)
+
+    api_key = settings.cloudbase_server_api_key
+    assert api_key is not None
+    assert api_key.get_secret_value() == "platform-injected-key"
 
 
 def test_cloudbase_standard_mysql_url_uses_installed_pymysql_driver() -> None:

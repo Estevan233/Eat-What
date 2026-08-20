@@ -60,4 +60,30 @@ describe('CloudTransport', () => {
       code: 'NETWORK_ERROR',
     })
   })
+
+  it('maps a missing CloudBase access token to an actionable auth error', async () => {
+    const callContainer = vi.fn((options: CloudContainerOptions) => {
+      options.fail?.({
+        errMsg: 'cloud.callContainer:fail Error: access_token missing (trace: system error)',
+      })
+    })
+    vi.stubGlobal('wx', { cloud: { callContainer } })
+    const transport = new CloudTransport({
+      environmentId: 'cloud-test',
+      serviceName: 'api-service',
+    })
+
+    await expect(
+      transport.execute({
+        path: '/api/v1/auth/cloud-login',
+        method: 'POST',
+        data: {},
+        headers: {},
+        timeout: 10_000,
+      }),
+    ).rejects.toMatchObject({
+      code: 'CLOUDBASE_AUTH_ERROR',
+      message: '云开发登录态缺失，请重新进入小程序',
+    })
+  })
 })

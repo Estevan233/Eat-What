@@ -43,7 +43,7 @@
 
 ## 云端切换门槛
 
-- [ ] 控制台创建 Server API Key，并仅写入 `CLOUDBASE_DB_API_KEY` 服务端变量。
+- [x] 控制台创建 Server API Key，开启云托管“API Key 设置”，由平台自动注入 `CLOUDBASE_APIKEY`；不在普通 Key-Value 环境变量中重复粘贴明文。
 - [ ] Webshell 运行 `python /app/scripts/verify_cloudbase_rdb.py`，只读通过且日志无密钥。
 - [ ] 真实验证 `eq/in/order/limit/count` 与 400/401/403/404/500/503 错误语义。
 - [ ] 在预发环境验证唯一键 Upsert、并发冲突、事件重放和用户隔离。

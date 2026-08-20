@@ -118,12 +118,19 @@ JWT_SECRET=<至少 32 字节的随机值>
 
 ```dotenv
 DATABASE_BACKEND=cloudbase_rest
-CLOUDBASE_DB_API_KEY=<CloudBase Server API Key>
 CLOUDBASE_DB_TIMEOUT_SECONDS=5
 CLOUDBASE_DB_READ_RETRIES=1
 ```
 
-`CLOUDBASE_DB_API_KEY` 是 CloudBase 服务端管理密钥，不是微信 AppSecret。它只允许出现在云托管服务端版本环境变量；不得发送到小程序、写入 `VITE_*`、提交 Git 或粘贴到调试日志。切换前先在 Webshell 执行只读验证：
+在部署版本页面打开“API Key 设置”，选择已创建的 `Eat-What` Server API Key。平台会自动注入标准环境变量 `CLOUDBASE_APIKEY`，不需要也不应在普通 Key-Value 环境变量中再复制一份明文。代码也兼容显式变量 `CLOUDBASE_DB_API_KEY`，但它只用于本地验证或平台自动注入不可用时的回退。
+
+Server API Key 不是微信 AppSecret。它只允许出现在云托管服务端运行环境；不得发送到小程序、写入 `VITE_*`、提交 Git 或粘贴到调试日志。切换前先在 Webshell 只检查变量是否存在，不要打印变量值：
+
+```sh
+python -c "import os; print('CLOUDBASE_APIKEY=' + ('SET' if os.getenv('CLOUDBASE_APIKEY') else 'MISSING'))"
+```
+
+预期输出 `CLOUDBASE_APIKEY=SET`。随后执行只读验证：
 
 ```sh
 python /app/scripts/verify_cloudbase_rdb.py
@@ -132,6 +139,8 @@ python /app/scripts/verify_cloudbase_rdb.py
 脚本只读取一行菜品，并只输出状态、行数、总数和请求号，不打印响应正文或密钥。只有返回 `cloudbase_rdb_read_ok`，且用户隔离、过滤、Upsert、异常和修复流程均验收后，才允许切换生产 Repository 并关闭 MySQL 公网连接。
 
 当前代码会以 `DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY` 拒绝直接启动 REST 生产模式。这是刻意的安全闸门，不是配置故障。
+
+因此当前正式版本继续保持 `DATABASE_BACKEND=sqlalchemy` 和有效的 `DATABASE_URL`。只读验证脚本可在该模式下独立运行；不要为了跑脚本提前切成 `cloudbase_rest`。
 
 本项目不允许小程序直接读写 MySQL，所有数据都经 FastAPI。生产表的 CloudBase 客户端基础权限应统一设为“无权限”，服务端再按 JWT 用户强制追加 `user_id` 过滤；`foods`、`recipes` 即使是公开数据也先保持服务端代理，避免形成两套访问规则。Server API Key 具备管理员权限，因此代码层用户隔离测试属于上线阻断项。
 
@@ -153,6 +162,26 @@ python /app/scripts/verify_cloudbase_rdb.py
 ```dotenv
 JWT_ALGORITHM=HS256
 ```
+
+### `callContainer` 报 `access_token missing`
+
+这类错误由微信/CloudBase 网关在请求进入 FastAPI 前返回。先在微信开发者工具 Console 直接执行：
+
+```js
+wx.cloud.callContainer({
+  config: { env: 'cloud1-d8gz4jm8vb964a1c9' },
+  path: '/health',
+  method: 'GET',
+  header: { 'X-WX-SERVICE': 'eat-what-api' },
+  success: console.log,
+  fail: console.error,
+})
+```
+
+- 如果仍为 `access_token missing`，不要重部署 FastAPI。确认开发者工具登录的是该小程序开发者账号，在“云开发控制台 → 设置 → 环境设置 → 管理我的环境”中导入/关联 `cloud1-d8gz4jm8vb964a1c9`，然后“清缓存 → 全部清除”、退出并重新登录开发者工具，再重新编译。
+- 如果 `/health` 返回 2xx，再检查 `/api/v1/auth/cloud-login` 和云托管日志；这才属于后端登录链路。
+
+构建产物必须从 `miniapp/dist/build/mp-weixin` 导入，`project.config.json` 的 AppID 应为 `wx59c5620b7a894f8e`。重置微信 AppSecret 后仍保持 `ENABLE_CODE2SESSION=false`、`WX_SECRET` 为空；当前可信身份头登录不读取 AppSecret。
 
 服务会在 `ENVIRONMENT=prod` 时拒绝 SQLite、`DEBUG=true`、`ENABLE_CODE2SESSION=true` 和非 HS256 配置，避免部署页面显示绿色，数据却悄悄写进一次性容器。
 
@@ -235,13 +264,13 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 本次验证产物：
 
 ```text
-后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v7.zip
+后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v8.zip
 微信工具目录：/root/miniapp-trellis/miniapp/dist/build/mp-weixin
 ```
 
 上传后端包时选择“压缩包”，目标目录留空，Dockerfile 选择“有”；压缩包根目录应直接看到 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。
 
-2026-08-20 本地校验记录：后端 331 个测试、前端 44 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建和无 AppSecret 容器启动烟测全部通过。上传包 SHA-256 为 badf26b6e131fad324ce3d1b0cc3595716bb4d7b7cae22d546761e411bd120d9。
+2026-08-20 本地校验记录：后端 332 个测试、前端 45 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建和无 AppSecret 容器启动烟测全部通过。上传包 SHA-256 为 c21565741ff16a17728b80aa9674c5dc5a3415c8744cf8340547fe2dd05c12a9。
 
 ## 9. 回滚
 

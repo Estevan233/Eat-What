@@ -1,6 +1,6 @@
 """Read-only smoke test for CloudBase MySQL HTTPS REST.
 
-Run inside the CloudRun container after setting CLOUDBASE_DB_API_KEY.
+Run inside the CloudRun container after enabling CloudBase API Key injection.
 The script deliberately prints neither the key nor response rows.
 """
 
@@ -10,9 +10,12 @@ from app.repositories.cloudbase_rdb import CloudBaseRdbClient
 
 def main() -> None:
     settings = get_settings()
-    api_key = settings.cloudbase_db_api_key
+    api_key = settings.cloudbase_server_api_key
     if api_key is None or not api_key.get_secret_value():
-        raise SystemExit("CLOUDBASE_DB_API_KEY is not configured")
+        raise SystemExit(
+            "CloudBase Server API Key is not configured "
+            "(expected injected CLOUDBASE_APIKEY or explicit CLOUDBASE_DB_API_KEY)"
+        )
 
     client = CloudBaseRdbClient(
         env_id=settings.cloudbase_env_id,

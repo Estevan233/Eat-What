@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./dev.db"
     database_backend: Literal["sqlalchemy", "cloudbase_rest"] = "sqlalchemy"
     cloudbase_db_api_key: SecretStr | None = None
+    cloudbase_apikey: SecretStr | None = None
     cloudbase_db_timeout_seconds: float = 5.0
     cloudbase_db_read_retries: int = 1
 
@@ -80,18 +81,23 @@ class Settings(BaseSettings):
                 missing.append("JWT_ALGORITHM")
         return missing
 
+    @property
+    def cloudbase_server_api_key(self) -> SecretStr | None:
+        """Resolve the explicit app setting before CloudBase's injected standard name."""
+        for candidate in (self.cloudbase_db_api_key, self.cloudbase_apikey):
+            if candidate is not None and candidate.get_secret_value():
+                return candidate
+        return None
+
     def _production_database_requirement(self) -> str | None:
         if self.database_backend == "sqlalchemy":
             if not self.database_url.startswith("mysql+pymysql://"):
                 return "DATABASE_URL"
             return None
-        api_key = (
-            self.cloudbase_db_api_key.get_secret_value()
-            if self.cloudbase_db_api_key is not None
-            else ""
-        )
+        resolved_api_key = self.cloudbase_server_api_key
+        api_key = resolved_api_key.get_secret_value() if resolved_api_key is not None else ""
         if not api_key:
-            return "CLOUDBASE_DB_API_KEY"
+            return "CLOUDBASE_APIKEY"
         # REST 客户端已可做独立只读验证，但业务 service 尚未全部切换 Repository。
         # 在迁移完成前 fail closed，防止生产误落到默认 SQLite。
         return "DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY"

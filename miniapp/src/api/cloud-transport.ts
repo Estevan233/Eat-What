@@ -41,6 +41,15 @@ export class CloudTransport implements Transport {
         },
         fail: (error) => {
           const message = error.errMsg || 'CloudBase 网络异常'
+          if (/access[_ ]?token\s+missing/i.test(message)) {
+            reject(
+              new ApiError(
+                '云开发登录态缺失，请重新进入小程序',
+                'CLOUDBASE_AUTH_ERROR',
+              ),
+            )
+            return
+          }
           if (/service|env|environment/i.test(message)) {
             reject(
               new ApiError(
