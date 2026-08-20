@@ -58,7 +58,13 @@ def _clean_tables(test_engine):
 @pytest.fixture(name="session")
 def session_fixture(test_engine):
     """每个测试函数一个独立 Session（与 TestClient 共享同一个 in-memory 库）。"""
-    TestSessionLocal = sessionmaker(bind=test_engine, class_=Session, autocommit=False, autoflush=False)
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        class_=Session,
+        autocommit=False,
+        autoflush=False,
+        expire_on_commit=False,
+    )
     session = TestSessionLocal()
     try:
         yield session
@@ -84,7 +90,13 @@ def client_fixture(monkeypatch, test_engine):
     import app.db as db_module
 
     # 替换 deps.get_db / 路由里用的 SessionLocal 为测试 engine 的工厂
-    TestSessionLocal = sessionmaker(bind=test_engine, class_=Session, autocommit=False, autoflush=False)
+    TestSessionLocal = sessionmaker(
+        bind=test_engine,
+        class_=Session,
+        autocommit=False,
+        autoflush=False,
+        expire_on_commit=False,
+    )
     monkeypatch.setattr(deps_module, "SessionLocal", TestSessionLocal)
     monkeypatch.setattr(db_module, "SessionLocal", TestSessionLocal)
 

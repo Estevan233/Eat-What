@@ -34,9 +34,9 @@ def create_app() -> FastAPI:
     init_db()
 
     app = FastAPI(
-        title="今天吃啥 API",
+        title="饭卜卜 API",
         version="0.1.0",
-        description="结合星座、节气、天气、心情、体质与忌口，给出今天该吃什么的决策建议",
+        description="今天吃啥嘞？Eat-What，卜一卜 → 补一补。结合营养、节气食养、偏好与可执行性给出饮食决策。",
     )
     app.add_middleware(RequestContextMiddleware)
     # 允许微信小程序请求（无 Origin，不严格 CORS 也能 work，但显式声明更安全）

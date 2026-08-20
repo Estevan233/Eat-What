@@ -28,6 +28,9 @@ export type DailyLogRead = {
   mood: string
   activityLevel: string
   weatherTag?: string | null
+  diningMode: 'cook' | 'eat_out'
+  audience: 'personal' | 'family'
+  partySize: number
 }
 
 /** GET /daily/history 响应 data。 */
@@ -38,7 +41,7 @@ export type HistoryResponse = {
 
 /**
  * POST /daily/recommend - 获取今天 3 道菜推荐。
- * Body: RecommendRequest (mood/activityLevel/lat/lng)
+ * Body: RecommendRequest (mood/activityLevel/location/diningMode/audience/partySize)
  */
 export const recommend = (data: RecommendRequest): Promise<RecommendResponse> =>
   request<RecommendResponse, RecommendRequest>({

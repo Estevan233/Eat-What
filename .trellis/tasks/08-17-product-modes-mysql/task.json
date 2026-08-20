@@ -1,0 +1,28 @@
+{
+  "id": "product-modes-mysql",
+  "name": "product-modes-mysql",
+  "title": "完善用餐模式并完成 CloudBase MySQL 落地",
+  "description": "修复生产 MySQL 兼容性，新增自炊/外食、个人/家庭与店铺菜品记忆闭环",
+  "status": "in_progress",
+  "dev_type": "feature",
+  "scope": "backend,miniapp,docs",
+  "package": "fullstack",
+  "priority": "P1",
+  "creator": "dev",
+  "assignee": "dev",
+  "createdAt": "2026-08-17",
+  "completedAt": null,
+  "branch": "feat/recommendation-diversity",
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "recommendation-diversity",
+  "relatedFiles": [
+    "docs/superpowers/plans/2026-08-17-product-modes-mysql.md"
+  ],
+  "notes": "代码与本地验证已完成；等待用户在 cloud1 创建 MySQL、部署新镜像并执行 release.sh，再完成微信开发者工具/真机验收。两个 CloudBase 环境已设为手动续费。",
+  "meta": {}
+}

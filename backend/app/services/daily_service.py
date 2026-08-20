@@ -53,6 +53,9 @@ def _prepare_today_log(
     mood: str,
     activity_level: str,
     weather_tag: str | None,
+    dining_mode: str = "cook",
+    audience: str = "personal",
+    party_size: int = 1,
 ) -> DailyLog:
     """准备当天日志但不提交，供单表与事件原子写入复用。"""
     stmt = (
@@ -74,6 +77,9 @@ def _prepare_today_log(
             mood=mood,
             activity_level=activity_level,
             weather_tag=weather_tag,
+            dining_mode=dining_mode,
+            audience=audience,
+            party_size=party_size,
             created_at=now,
             updated_at=now,
         )
@@ -82,6 +88,9 @@ def _prepare_today_log(
     record.mood = mood
     record.activity_level = activity_level
     record.weather_tag = weather_tag
+    record.dining_mode = dining_mode
+    record.audience = audience
+    record.party_size = party_size
     record.updated_at = now
     return record
 
@@ -101,6 +110,9 @@ def record_recommendation(
     builder_version: str = "legacy",
     agent_name: str | None = None,
     event_date: date | None = None,
+    dining_mode: str = "cook",
+    audience: str = "personal",
+    party_size: int = 1,
 ) -> tuple[DailyLog, RecommendationEvent]:
     """原子更新当天日志并追加一次推荐曝光事件。"""
     target_date = event_date or date.today()
@@ -113,6 +125,9 @@ def record_recommendation(
         mood=mood,
         activity_level=activity_level,
         weather_tag=weather_tag,
+        dining_mode=dining_mode,
+        audience=audience,
+        party_size=party_size,
     )
     event = RecommendationEvent(
         user_id=user_id,
@@ -124,6 +139,9 @@ def record_recommendation(
         mood=mood,
         activity_level=activity_level,
         weather_tag=weather_tag,
+        dining_mode=dining_mode,
+        audience=audience,
+        party_size=party_size,
         engine=engine,
         scorer_version=scorer_version or engine,
         builder_version=builder_version,
@@ -140,8 +158,6 @@ def record_recommendation(
     except Exception:
         session.rollback()
         raise
-    session.refresh(log_record)
-    session.refresh(event)
     return log_record, event
 
 
@@ -213,12 +229,21 @@ def _build_chosen_snapshot(
     selected: list[int],
     substitutions: list[dict[str, Any]],
 ) -> MealSnapshot:
-    if len(selected) != 3 or len(set(selected)) != 3:
-        raise InvalidMealChoiceError("必须且只能选择主菜、蔬菜、主食各一项")
-
     if event.primary_meal_json is None:  # pragma: no cover - load 已校验
         raise RuntimeError("推荐事件缺少主餐快照")
     primary = MealSnapshot.model_validate(event.primary_meal_json)
+    primary_ids = [item.food_id for item in primary.items]
+    primary_roles = [item.meal_role for item in primary.items]
+    if len(set(primary_roles)) != len(primary_roles):
+        if substitutions:
+            raise InvalidMealChoiceError("多人套餐暂不支持单道替换，请整体换一套")
+        if selected != primary_ids or len(set(selected)) != len(selected):
+            raise InvalidMealChoiceError("多人套餐必须完整确认本次推荐的全部菜品")
+        return primary
+
+    if len(selected) != 3 or len(set(selected)) != 3:
+        raise InvalidMealChoiceError("必须且只能选择主菜、蔬菜、主食各一项")
+
     primary_by_role = {item.meal_role: item for item in primary.items}
     allowed_by_role = _allowed_items_by_role(event, primary_by_role)
     chosen_by_role = _resolve_selected_items(selected, allowed_by_role)

@@ -1,7 +1,7 @@
 {
-  "name": "今天吃啥",
+  "name": "饭卜卜",
   "appid": "wx59c5620b7a894f8e",
-  "description": "结合星座、节气、天气、心情、体质与忌口，告诉你今天吃啥",
+  "description": "今天吃啥嘞？Eat-What，卜一卜 → 补一补",
   "versionName": "0.1.0",
   "versionCode": "100",
   "uniStatistics": {
@@ -49,7 +49,7 @@
   },
   "vueVersion": "3",
   "h5": {
-    "title": "今天吃啥",
+    "title": "饭卜卜",
     "router": { "mode": "hash", "base": "./" }
   }
 }

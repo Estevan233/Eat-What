@@ -55,5 +55,8 @@ class DailyLog(SQLModel, table=True):
     activity_level: str = Field(default="normal", max_length=8)
     # 推荐时的天气标签，便于事后按场景回看
     weather_tag: str | None = Field(default=None, max_length=16)
+    dining_mode: str = Field(default="cook", max_length=16)
+    audience: str = Field(default="personal", max_length=16)
+    party_size: int = Field(default=1)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)

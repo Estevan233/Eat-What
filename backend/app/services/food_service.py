@@ -8,6 +8,27 @@
 from sqlmodel import Session, col, select
 
 from app.models.food import Food
+from app.models.recipe import Recipe
+
+
+def get_recommendation_catalog(
+    session: Session,
+) -> tuple[list[Food], dict[int, Recipe]]:
+    """一次查询取齐可推荐食物及其菜谱，避免分页统计和全表菜谱查询。"""
+    rows = session.exec(
+        select(Food, Recipe)
+        .join(Recipe, col(Recipe.food_id) == col(Food.id))
+        .where(col(Food.recipe_ready).is_(True))
+        .order_by(col(Food.id))
+    ).all()
+    foods: list[Food] = []
+    recipes_by_food_id: dict[int, Recipe] = {}
+    for food, recipe in rows:
+        if food.id is None:
+            continue
+        foods.append(food)
+        recipes_by_food_id[food.id] = recipe
+    return foods, recipes_by_food_id
 
 
 def get_all(

@@ -1,11 +1,23 @@
+import pytest
+
 from app.models.recipe import Recipe
-from app.services.meal_builder import MealCandidate, build_meal
+from app.services.meal_builder import MealCandidate, build_meal, meal_role_targets
 from app.services.recommendation_ranking import RankedCandidate, ScoreBreakdown
 from tests.services.test_recommender import _make_food
 
 
-def _candidate(food_id: int, role: str, energy: float, score: float) -> MealCandidate:
-    food = _make_food(f'{role}-{food_id}')
+def _candidate(
+    food_id: int,
+    role: str,
+    energy: float,
+    score: float,
+    *,
+    cooking_method: str | None = None,
+) -> MealCandidate:
+    food = _make_food(
+        f'{role}-{food_id}',
+        cooking_method=cooking_method or f'method-{food_id}',
+    )
     food.id = food_id
     food.meal_role = role
     food.recipe_ready = True
@@ -14,14 +26,12 @@ def _candidate(food_id: int, role: str, energy: float, score: float) -> MealCand
         food=food,
         base_score=score,
         breakdown=ScoreBreakdown(
-            weather=0,
-            solar_term=0,
-            mood=0,
             nutrition=0,
-            constitution=0,
-            activity=0,
-            method_time=0,
-            zodiac=0,
+            seasonal_wellness=0,
+            personal_family=0,
+            preference_history=0,
+            feasibility=0,
+            diversity=0,
         ),
         reason_phrases={},
     )
@@ -74,3 +84,42 @@ def test_sparse_candidates_never_create_unsafe_substitution() -> None:
 
     assert result.substitutions == []
     assert result.substitution_notice
+
+
+@pytest.mark.parametrize(
+    ("audience", "party_size", "expected"),
+    [
+        ("personal", 1, ("main", "vegetable", "staple")),
+        ("family", 2, ("main", "vegetable", "staple")),
+        ("family", 3, ("main", "main", "vegetable", "staple")),
+        ("family", 4, ("main", "main", "vegetable", "staple")),
+        ("family", 5, ("main", "main", "vegetable", "vegetable", "staple")),
+        ("family", 6, ("main", "main", "vegetable", "vegetable", "staple")),
+        ("family", 7, ("main", "main", "main", "vegetable", "vegetable", "staple")),
+        ("family", 8, ("main", "main", "main", "vegetable", "vegetable", "staple")),
+    ],
+)
+def test_meal_role_targets_scale_with_party_size(
+    audience: str,
+    party_size: int,
+    expected: tuple[str, ...],
+) -> None:
+    assert meal_role_targets(audience, party_size) == expected
+
+
+def test_family_meal_supports_repeated_roles_with_distinct_foods() -> None:
+    candidates = [
+        _candidate(1, 'main', 300, 90),
+        _candidate(2, 'main', 280, 80),
+        _candidate(3, 'main', 260, 70),
+        _candidate(4, 'vegetable', 100, 85),
+        _candidate(5, 'vegetable', 120, 75),
+        _candidate(6, 'staple', 250, 65),
+    ]
+    targets = meal_role_targets('family', 8)
+
+    result = build_meal(candidates, role_targets=targets)
+
+    assert [item.meal_role for item in result.primary_meal.items] == list(targets)
+    assert len({item.food_id for item in result.primary_meal.items}) == 6
+    assert result.substitutions == []

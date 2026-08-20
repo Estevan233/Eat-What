@@ -181,10 +181,10 @@ async function ensureProfile() {
 
 async function ensureConstitution() {
   try {
-    await userStore.fetchConstitution()
-    view.value = 'result'
+    const existing = await userStore.fetchConstitution()
+    view.value = existing ? 'result' : 'form'
   } catch {
-    // 404 = 还没测过，留在问卷视图；其它错误 request 层已 toast
+    // 真实请求错误由 request 层提示；仍保留可答问卷，不让网络故障锁死页面。
     view.value = 'form'
   }
 }

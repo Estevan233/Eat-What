@@ -283,10 +283,12 @@ async function onSubmit() {
 }
 
 .input {
+  height: 76rpx;
+  line-height: 76rpx;
   font-size: 30rpx;
   border: 1rpx solid $line;
   border-radius: $radius-sm;
-  padding: 16rpx 20rpx;
+  padding: 0 20rpx;
   width: 100%;
   box-sizing: border-box;
   background: $bg;

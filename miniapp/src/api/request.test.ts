@@ -123,4 +123,38 @@ describe('request', () => {
     expect(navigateTo).toHaveBeenCalledTimes(1)
     expect(removeStorageSync).not.toHaveBeenCalledWith('eat_what_guest_id')
   })
+
+  it('can silence an expected 404 without swallowing the rejection', async () => {
+    const showToast = vi.fn()
+    vi.stubGlobal('uni', {
+      getStorageSync: vi.fn(() => 'stored-token'),
+      request: vi.fn((options: UniApp.RequestOptions) => {
+        options.success?.({
+          data: {
+            ok: false,
+            code: 'NOT_FOUND',
+            message: 'constitution 不存在',
+            data: null,
+          },
+          statusCode: 404,
+          header: {},
+          cookies: [],
+          errMsg: 'request:ok',
+        })
+        options.complete?.({ errMsg: 'request:ok' })
+        return {} as UniApp.RequestTask
+      }),
+      showLoading: vi.fn(),
+      hideLoading: vi.fn(),
+      showToast,
+      navigateTo: vi.fn(),
+    })
+
+    await expect(request({
+      url: '/profile/constitution',
+      loading: false,
+      silentErrorStatuses: [404],
+    })).rejects.toMatchObject({ statusCode: 404, code: 'NOT_FOUND' })
+    expect(showToast).not.toHaveBeenCalled()
+  })
 })

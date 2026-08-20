@@ -6,6 +6,7 @@
 """
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -42,6 +43,14 @@ class Settings(BaseSettings):
     # 高德
     amap_key: str = ""
 
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def use_installed_mysql_driver(cls, value: object) -> object:
+        """Accept CloudBase's standard mysql:// URI and select PyMySQL explicitly."""
+        if isinstance(value, str) and value.startswith("mysql://"):
+            return value.replace("mysql://", "mysql+pymysql://", 1)
+        return value
+
     def validate_required(self) -> list[str]:
         """返回缺失或不安全的关键配置名。"""
         missing: list[str] = []
@@ -53,6 +62,15 @@ class Settings(BaseSettings):
             missing.append("CLOUDBASE_ENV_ID")
         if self.enable_code2session and not self.wx_secret:
             missing.append("WX_SECRET")
+        if self.environment.lower() in {"prod", "production"}:
+            if not self.database_url.startswith("mysql+pymysql://"):
+                missing.append("DATABASE_URL")
+            if self.debug:
+                missing.append("DEBUG")
+            if self.enable_code2session:
+                missing.append("ENABLE_CODE2SESSION")
+            if self.jwt_algorithm != "HS256":
+                missing.append("JWT_ALGORITHM")
         return missing
 
 

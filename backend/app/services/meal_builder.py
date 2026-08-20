@@ -20,6 +20,26 @@ class MealCandidate:
     reason: str
 
 
+DEFAULT_ROLE_TARGETS: tuple[MealRole, ...] = ('main', 'vegetable', 'staple')
+
+
+def meal_role_targets(audience: str, party_size: int) -> tuple[MealRole, ...]:
+    """Return the bounded home-cooking template for the selected party size."""
+    if audience == 'personal':
+        if party_size != 1:
+            raise ValueError('个人模式人数必须为 1')
+        return DEFAULT_ROLE_TARGETS
+    if audience != 'family' or not 2 <= party_size <= 8:
+        raise ValueError('家庭模式人数必须为 2-8')
+    if party_size == 2:
+        return DEFAULT_ROLE_TARGETS
+    if party_size <= 4:
+        return ('main', 'main', 'vegetable', 'staple')
+    if party_size <= 6:
+        return ('main', 'main', 'vegetable', 'vegetable', 'staple')
+    return ('main', 'main', 'main', 'vegetable', 'vegetable', 'staple')
+
+
 def _nutrition(recipe: Recipe) -> NutritionPerServing:
     values = recipe.nutrition_per_serving_json
     return NutritionPerServing(
@@ -58,7 +78,10 @@ def _sum_nutrition(items: list[MealItem]) -> MealNutrition:
     )
 
 
-def _choose_primary(candidates: list[MealCandidate]) -> list[MealCandidate]:
+def _choose_primary(
+    candidates: list[MealCandidate],
+    role_targets: tuple[MealRole, ...],
+) -> list[MealCandidate]:
     ordered = sorted(
         candidates,
         key=lambda candidate: (-candidate.ranked.final_raw_score, candidate.ranked.food.id or 0),
@@ -66,7 +89,7 @@ def _choose_primary(candidates: list[MealCandidate]) -> list[MealCandidate]:
     selected: list[MealCandidate] = []
     used_ids: set[int] = set()
     used_methods: set[str] = set()
-    for role in ('main', 'vegetable', 'staple'):
+    for role in role_targets:
         matching = [candidate for candidate in ordered if candidate.ranked.food.meal_role == role]
         if not matching:
             raise ValueError(f'安全候选不足，缺少 {role} 槽位')
@@ -75,7 +98,10 @@ def _choose_primary(candidates: list[MealCandidate]) -> list[MealCandidate]:
             if candidate.ranked.food.id not in used_ids
             and candidate.ranked.food.cooking_method not in used_methods
         ]
-        chosen = (diverse or [c for c in matching if c.ranked.food.id not in used_ids])[0]
+        available = [c for c in matching if c.ranked.food.id not in used_ids]
+        if not available:
+            raise ValueError(f'安全候选不足，缺少额外 {role} 槽位')
+        chosen = (diverse or available)[0]
         selected.append(chosen)
         if chosen.ranked.food.id is not None:
             used_ids.add(chosen.ranked.food.id)
@@ -84,6 +110,14 @@ def _choose_primary(candidates: list[MealCandidate]) -> list[MealCandidate]:
 
 
 def _meal_snapshot(items: list[MealItem]) -> MealSnapshot:
+    role_counts = {
+        role: sum(item.meal_role == role for item in items)
+        for role in DEFAULT_ROLE_TARGETS
+    }
+    reason = (
+        f"{role_counts['main']} 份主菜、{role_counts['vegetable']} 份蔬菜和"
+        f"{role_counts['staple']} 份主食，按人数兼顾营养与做法多样性。"
+    )
     return MealSnapshot(
         items=items,
         total_nutrition=_sum_nutrition(items),
@@ -91,7 +125,7 @@ def _meal_snapshot(items: list[MealItem]) -> MealSnapshot:
             sum(item.prep_time_min for item in items)
             + max(item.cook_time_min for item in items)
         ),
-        reason='主菜、蔬菜和主食各一份，兼顾营养与做法多样性。',
+        reason=reason,
     )
 
 
@@ -109,9 +143,19 @@ def _substitution(
     )
 
 
-def build_meal(candidates: list[MealCandidate]) -> MealBuildResult:
-    selected = _choose_primary(candidates)
+def build_meal(
+    candidates: list[MealCandidate],
+    *,
+    role_targets: tuple[MealRole, ...] = DEFAULT_ROLE_TARGETS,
+) -> MealBuildResult:
+    selected = _choose_primary(candidates, role_targets)
     primary_items = [_to_item(candidate) for candidate in selected]
+    if len(set(role_targets)) != len(role_targets):
+        return MealBuildResult(
+            primary_meal=_meal_snapshot(primary_items),
+            substitutions=[],
+            substitution_notice='多人套餐请用“换一套”整体轮换，单道换菜将在稳定餐位后开放。',
+        )
     primary_ids = {item.food_id for item in primary_items}
     substitutions: list[MealSubstitution] = []
     for role in ('main', 'vegetable'):

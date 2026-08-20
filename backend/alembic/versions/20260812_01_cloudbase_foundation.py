@@ -32,7 +32,7 @@ def upgrade() -> None:
         sa.Column('cooking_time_min', sa.Integer(), nullable=True),
         sa.Column('image_url', sa.String(length=512), nullable=True),
         sa.Column('seasonal_solar_terms_json', sa.JSON(), nullable=True),
-        sa.Column('description', sa.String(), nullable=True),
+        sa.Column('description', sa.Text(), nullable=True),
         sa.Column('created_at', sa.DateTime(), nullable=False),
         sa.Column('updated_at', sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint('id'),

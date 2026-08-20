@@ -52,6 +52,13 @@
           </view>
           <text class="menu-action">›</text>
         </view>
+        <view class="menu-item" @click="goDiningMemory">
+          <view class="menu-left">
+            <text class="menu-icon">🧾</text>
+            <text class="menu-label">外食记录</text>
+          </view>
+          <text class="menu-action">›</text>
+        </view>
       </view>
 
       <!-- 操作 -->
@@ -94,6 +101,10 @@ function goProfile() {
 
 function goFavorite() {
   uni.navigateTo({ url: '/pages/favorite/favorite' })
+}
+
+function goDiningMemory() {
+  uni.navigateTo({ url: '/pages/dining-memory/dining-memory' })
 }
 
 function onLogout() {

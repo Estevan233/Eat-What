@@ -95,6 +95,27 @@ def test_record_recommendation_persists_immutable_meal_payload(session):
     assert event.builder_version == "meal_builder_v1"
 
 
+def test_record_recommendation_persists_decision_context(session):
+    user = _create_user(session)
+    assert user.id is not None
+
+    log, event = daily_service.record_recommendation(
+        session,
+        user.id,
+        recommended_food_ids=[1, 2, 3],
+        mood="neutral",
+        activity_level="normal",
+        weather_tag="mild",
+        engine="rules_v4",
+        dining_mode="cook",
+        audience="family",
+        party_size=4,
+    )
+
+    assert (log.dining_mode, log.audience, log.party_size) == ("cook", "family", 4)
+    assert (event.dining_mode, event.audience, event.party_size) == ("cook", "family", 4)
+
+
 def test_get_recent_recommendation_events_respects_seven_day_window(session):
     user = _create_user(session)
     assert user.id is not None

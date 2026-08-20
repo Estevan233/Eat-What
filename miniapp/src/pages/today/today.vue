@@ -3,13 +3,39 @@
     <view class="hero">
       <image class="hero-avatar" src="/static/brand-avatar.png" mode="aspectFill" />
       <view class="hero-text">
-        <text class="hero-title">今天吃啥</text>
-        <text class="hero-sub">天气只是小参考，均衡与口味才是正餐</text>
+        <text class="hero-title">{{ APP_NAME }}</text>
+        <text class="hero-kicker">{{ HERO_TITLE }}</text>
+        <text class="hero-sub">{{ BRAND_SUBTITLE }}</text>
       </view>
     </view>
     <WeatherBadge ref="badgeRef" class="context-badge" />
 
-    <view v-if="chosenMealNames" class="chosen-banner">
+    <view class="mode-switch" aria-label="用餐方式">
+      <view
+        class="mode-option"
+        :class="{ 'mode-on': dailyStore.diningMode === 'cook' }"
+        @click="selectMode('cook')"
+      >
+        <text class="mode-icon">🍳</text>
+        <view class="mode-copy">
+          <text class="mode-title">自己做</text>
+          <text class="mode-sub">搭配一套家常餐</text>
+        </view>
+      </view>
+      <view
+        class="mode-option"
+        :class="{ 'mode-on': dailyStore.diningMode === 'eat_out' }"
+        @click="selectMode('eat_out')"
+      >
+        <text class="mode-icon">🥡</text>
+        <view class="mode-copy">
+          <text class="mode-title">点外卖 / 到店吃</text>
+          <text class="mode-sub">先选菜，再搜附近店</text>
+        </view>
+      </view>
+    </view>
+
+    <view v-if="dailyStore.diningMode === 'cook' && chosenMealNames" class="chosen-banner">
       <text class="chosen-mark">✓</text>
       <view class="chosen-copy">
         <text class="chosen-title">今天就吃这套</text>
@@ -19,6 +45,48 @@
     </view>
 
     <view class="panel">
+      <view class="panel-row">
+        <text class="panel-label">为谁吃</text>
+        <view class="chip-row">
+          <text
+            class="chip"
+            :class="{ 'chip-on': dailyStore.audience === 'personal' }"
+            @click="selectAudience('personal')"
+          >👤 个人</text>
+          <text
+            class="chip"
+            :class="{ 'chip-on': dailyStore.audience === 'family' }"
+            @click="selectAudience('family')"
+          >👨‍👩‍👧 家庭</text>
+        </view>
+      </view>
+      <view v-if="dailyStore.audience === 'family'" class="panel-row">
+        <text class="panel-label">几个人</text>
+        <view class="chip-row">
+          <text
+            v-for="size in PARTY_SIZES"
+            :key="size"
+            class="chip party-chip"
+            :class="{ 'chip-on': dailyStore.partySize === size }"
+            @click="selectPartySize(size)"
+          >{{ size }} 人</text>
+        </view>
+      </view>
+      <view v-if="dailyStore.diningMode === 'eat_out'" class="city-field">
+        <view class="city-head">
+          <text class="panel-label">所在城市</text>
+          <text class="city-note">不授权定位也能用</text>
+        </view>
+        <input
+          class="city-input"
+          :value="dailyStore.city"
+          maxlength="64"
+          placeholder="例如：杭州（可不填）"
+          confirm-type="done"
+          @blur="onCityInput"
+          @confirm="onCityInput"
+        />
+      </view>
       <view class="panel-row">
         <text class="panel-label">心情</text>
         <view class="chip-row">
@@ -43,79 +111,130 @@
           >{{ ACTIVITY_EMOJI[a] }} {{ ACTIVITY_LABELS[a] }}</text>
         </view>
       </view>
-      <button class="cta" :disabled="dailyStore.loading" @click="onRecommend">
-        {{ dailyStore.loading ? '正在为你搭配…' : '🍽 换一套完整餐' }}
+      <text v-if="dailyStore.audience === 'family'" class="family-hint">
+        家庭模式优先考虑共享、少折腾；能量仍按每人估算，不拿锅的大小装科学。
+      </text>
+      <button class="cta" :disabled="isLoading" @click="onRecommend">
+        {{ ctaText }}
       </button>
     </view>
 
     <view v-if="pageError" class="error-banner">
       <text class="error-title">这次没有拿到新推荐</text>
       <text class="error-copy">{{ pageError }}</text>
-      <text v-if="dailyStore.lastRequestId" class="request-id">请求编号：{{ dailyStore.lastRequestId }}</text>
+      <text v-if="requestId" class="request-id">请求编号：{{ requestId }}</text>
     </view>
 
-    <view v-if="dailyStore.loading" class="skeleton-card" />
+    <view v-if="isLoading" class="skeleton-card" />
 
-    <view v-else-if="dailyStore.currentMeal" class="result">
-      <view v-if="dailyStore.stale || dailyStore.offline" class="cache-banner">
-        <text class="cache-title">{{ dailyStore.offline ? '当前离线 · 展示上次推荐' : '上次推荐' }}</text>
-        <text class="cache-copy">可以查看菜谱；刷新成功前不能换菜或确认。</text>
-      </view>
-
-      <MealPlateCard
-        :meal="dailyStore.currentMeal"
-        :readonly="dailyStore.stale || dailyStore.offline"
-        @open-recipe="openRecipe"
-        @choose="chooseCurrentMeal"
-      />
-
-      <view v-if="dailyStore.availableSubstitutions.length" class="substitutions">
-        <view class="section-head">
-          <text class="section-title">想换个口味？</text>
-          <text class="section-tip">热量尽量控制在相近范围</text>
+    <template v-else-if="dailyStore.diningMode === 'cook'">
+      <view v-if="dailyStore.currentMeal" class="result">
+        <view v-if="dailyStore.stale || dailyStore.offline" class="cache-banner">
+          <text class="cache-title">{{ dailyStore.offline ? '当前离线 · 展示上次推荐' : '上次推荐' }}</text>
+          <text class="cache-copy">可以查看菜谱；刷新成功前不能换菜或确认。</text>
         </view>
-        <MealSubstitution
-          v-for="item in dailyStore.availableSubstitutions"
-          :key="`${item.targetRole}-${item.replacement.foodId}`"
-          :substitution="item"
+
+        <MealPlateCard
+          :meal="dailyStore.currentMeal"
+          :party-size="dailyStore.partySize"
           :readonly="dailyStore.stale || dailyStore.offline"
-          @apply="dailyStore.applySubstitution(item)"
+          @open-recipe="openRecipe"
+          @choose="chooseCurrentMeal"
+        />
+
+        <view v-if="dailyStore.availableSubstitutions.length" class="substitutions">
+          <view class="section-head">
+            <text class="section-title">想换个口味？</text>
+            <text class="section-tip">热量尽量控制在相近范围</text>
+          </view>
+          <MealSubstitution
+            v-for="item in dailyStore.availableSubstitutions"
+            :key="`${item.targetRole}-${item.replacement.foodId}`"
+            :substitution="item"
+            :readonly="dailyStore.stale || dailyStore.offline"
+            @apply="dailyStore.applySubstitution(item)"
+          />
+        </view>
+        <text v-else-if="dailyStore.serverRecommendation?.substitutionNotice" class="notice">
+          {{ dailyStore.serverRecommendation.substitutionNotice }}
+        </text>
+
+        <RecommendationBasis
+          v-if="dailyStore.serverRecommendation"
+          :profile="dailyStore.serverRecommendation.weightProfile"
+          :disclaimer="dailyStore.serverRecommendation.wellnessDisclaimer"
         />
       </view>
-      <text v-else-if="dailyStore.serverRecommendation?.substitutionNotice" class="notice">
-        {{ dailyStore.serverRecommendation.substitutionNotice }}
-      </text>
-    </view>
 
-    <view v-else class="empty">
-      <text class="empty-emoji">🍚</text>
-      <text class="empty-title">还没有今天的完整餐</text>
-      <text class="empty-text">点击上方按钮，会搭配主菜、蔬菜和主食，并标出每份估算能量。</text>
-      <button v-if="pageError" class="empty-retry" @click="onRecommend">重新获取</button>
-    </view>
+      <view v-else class="empty">
+        <text class="empty-emoji">🍚</text>
+        <text class="empty-title">还没有今天的完整餐</text>
+        <text class="empty-text">点击上方按钮，会搭配主菜、蔬菜和主食，并标出每份估算能量。</text>
+        <button v-if="pageError" class="empty-retry" @click="onRecommend">重新获取</button>
+      </view>
+    </template>
+
+    <template v-else>
+      <view v-if="diningStore.recommendation" class="external-result">
+        <view class="external-head">
+          <view>
+            <text class="section-title">先选吃什么，再去搜店</text>
+            <text class="external-place">{{ diningStore.recommendation.cityLabel }} · {{ dailyStore.partySize }} 人</text>
+          </view>
+          <navigator class="memory-link" url="/pages/dining-memory/dining-memory">我的记录 ›</navigator>
+        </view>
+        <ExternalDiningCard
+          v-for="suggestion in diningStore.recommendation.suggestions"
+          :key="suggestion.key"
+          :suggestion="suggestion"
+          @remember="openMemory"
+        />
+        <text class="external-disclaimer">{{ diningStore.recommendation.disclaimer }}</text>
+      </view>
+
+      <view v-else class="empty">
+        <text class="empty-emoji">🥡</text>
+        <text class="empty-title">不想做饭，也不用瞎点</text>
+        <text class="empty-text">先给出菜品类型、能量区间和下单提醒；不接商家、不替你下单，也不假装知道实时价格。</text>
+        <button v-if="pageError" class="empty-retry" @click="onRecommend">重新获取</button>
+      </view>
+    </template>
   </view>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import ExternalDiningCard from '@/components/ExternalDiningCard.vue'
 import MealPlateCard from '@/components/MealPlateCard.vue'
 import MealSubstitution from '@/components/MealSubstitution.vue'
+import RecommendationBasis from '@/components/RecommendationBasis.vue'
 import WeatherBadge from '@/components/WeatherBadge.vue'
+import { useLocation, type Coords } from '@/composables/useLocation'
+import { APP_NAME, BRAND_SUBTITLE, HERO_TITLE } from '@/config/brand'
+import { ACTIVITY_LABELS, ACTIVITY_LIST, MOOD_LABELS, MOOD_LIST } from '@/constants/daily'
 import { useDailyStore } from '@/stores/daily'
+import { useDiningStore } from '@/stores/dining'
 import { useFavoriteStore } from '@/stores/favorite'
 import { useUserStore } from '@/stores/user'
-import { useLocation, type Coords } from '@/composables/useLocation'
-import { MOOD_LABELS, MOOD_LIST, ACTIVITY_LABELS, ACTIVITY_LIST } from '@/constants/daily'
 import { ApiError } from '@/types/api'
-import type { ActivityLevel, MealItem, Mood } from '@/types/api'
+import type {
+  ActivityLevel,
+  Audience,
+  DiningMode,
+  ExternalDiningSuggestion,
+  MealItem,
+  Mood,
+} from '@/types/api'
 
 const dailyStore = useDailyStore()
+const diningStore = useDiningStore()
 const favoriteStore = useFavoriteStore()
 const userStore = useUserStore()
 const { getLocation } = useLocation()
 const badgeRef = ref<InstanceType<typeof WeatherBadge> | null>(null)
 const pageError = ref('')
+const PARTY_SIZES = [2, 3, 4, 5, 6, 8]
 
 const MOOD_EMOJI: Record<Mood, string> = {
   happy: '😄', neutral: '😌', tired: '😪', stressed: '😣', anxious: '😰',
@@ -123,34 +242,88 @@ const MOOD_EMOJI: Record<Mood, string> = {
 const ACTIVITY_EMOJI: Record<ActivityLevel, string> = {
   light: '🚶', normal: '🚶‍♂️', high: '🏃',
 }
+const isLoading = computed(() => dailyStore.diningMode === 'cook'
+  ? dailyStore.loading
+  : diningStore.loading)
+const requestId = computed(() => dailyStore.diningMode === 'cook'
+  ? dailyStore.lastRequestId
+  : diningStore.lastRequestId)
+const ctaText = computed(() => {
+  if (isLoading.value) return '正在帮你取舍…'
+  if (dailyStore.diningMode === 'eat_out') return '🥡 给我 3 个外食方向'
+  return dailyStore.audience === 'family'
+    ? `🍽 给 ${dailyStore.partySize} 人选一套菜`
+    : '🍽 换一套完整餐'
+})
 const chosenMealNames = computed(() => {
   const items = dailyStore.todayLog?.chosenMeal?.items
-  if (items?.length) return items.map((item) => item.name).join(' · ')
-  return ''
+  return items?.length ? items.map((item) => item.name).join(' · ') : ''
 })
 
+function selectMode(mode: DiningMode): void {
+  dailyStore.setDiningMode(mode)
+  if (mode === 'cook') diningStore.clearRecommendation()
+  else dailyStore.clearMealRecommendation()
+  pageError.value = ''
+}
+
+function selectAudience(audience: Audience): void {
+  dailyStore.setAudience(audience)
+  diningStore.clearRecommendation()
+  pageError.value = ''
+}
+
+function selectPartySize(size: number): void {
+  dailyStore.setPartySize(size)
+  diningStore.clearRecommendation()
+  pageError.value = ''
+}
+
+function onCityInput(event: Event): void {
+  const inputEvent = event as unknown as { detail?: { value?: string } }
+  dailyStore.setCity(inputEvent.detail?.value || '')
+  diningStore.clearRecommendation()
+}
+
 async function onRecommend(): Promise<void> {
-  if (dailyStore.loading) return
+  if (isLoading.value) return
   pageError.value = ''
   if (!userStore.isLoggedIn) {
     uni.navigateTo({ url: '/pages/auth/auth' })
     return
   }
-  if (!userStore.hasProfile) {
+  if (dailyStore.diningMode === 'cook' && !userStore.hasProfile) {
     uni.showToast({ title: '请先填写健康档案', icon: 'none' })
     uni.switchTab({ url: '/pages/profile/profile' })
     return
   }
+
   let coords: Coords | null = null
-  try {
-    coords = await getLocation()
-  } catch {
-    // 拒绝定位仍使用后端通用天气，不阻断推荐。
+  if (!(dailyStore.diningMode === 'eat_out' && dailyStore.city)) {
+    try {
+      coords = await getLocation()
+    } catch {
+      // 拒绝定位不会阻断：自己做使用通用上下文，外食可手填城市。
+    }
   }
+
   try {
-    await dailyStore.fetchRecommend(coords?.lat, coords?.lng)
+    if (dailyStore.diningMode === 'eat_out') {
+      await diningStore.fetchRecommendation({
+        mood: dailyStore.mood,
+        activityLevel: dailyStore.activityLevel,
+        audience: dailyStore.audience,
+        partySize: dailyStore.partySize,
+        city: dailyStore.city || undefined,
+        lat: coords?.lat,
+        lng: coords?.lng,
+      })
+      uni.showToast({ title: '外食方向已整理', icon: 'none' })
+    } else {
+      await dailyStore.fetchRecommend(coords?.lat, coords?.lng)
+      uni.showToast({ title: dailyStore.offline ? '已展示上次推荐' : '完整餐已搭配', icon: 'none' })
+    }
     if (coords) badgeRef.value?.refreshWeather?.()
-    uni.showToast({ title: dailyStore.offline ? '已展示上次推荐' : '完整餐已搭配', icon: 'none' })
   } catch (error) {
     const apiError = error instanceof ApiError ? error : null
     pageError.value = apiError?.code === 'SERVICE_CONFIG_ERROR'
@@ -161,6 +334,14 @@ async function onRecommend(): Promise<void> {
 
 function openRecipe(item: MealItem): void {
   uni.navigateTo({ url: `/pages/recipe/recipe?foodId=${item.foodId}` })
+}
+
+function openMemory(suggestion: ExternalDiningSuggestion): void {
+  const params = [
+    `dishName=${encodeURIComponent(suggestion.dishName)}`,
+    `shopName=${encodeURIComponent(suggestion.shopName || '')}`,
+  ].join('&')
+  uni.navigateTo({ url: `/pages/dining-memory/dining-memory?${params}` })
 }
 
 async function chooseCurrentMeal(): Promise<void> {
@@ -185,11 +366,20 @@ onShow(() => {
 .page { min-height: 100vh; background: $bg; padding: 22rpx 32rpx 70rpx; box-sizing: border-box; }
 .hero { display: flex; align-items: center; gap: 20rpx; padding: 32rpx 6rpx 26rpx; }
 .hero-avatar { width: 100rpx; height: 100rpx; flex: 0 0 100rpx; border-radius: 30rpx; box-shadow: $shadow-card; }
-.hero-text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 5rpx; }
+.hero-text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3rpx; }
 .hero-title { color: $ink; font-size: 48rpx; font-weight: 800; letter-spacing: 1rpx; }
+.hero-kicker { color: $brand-deep; font-size: 23rpx; font-weight: 700; }
 .hero-sub { color: $ink-2; font-size: 21rpx; line-height: 1.4; }
-.context-badge { margin: 0 6rpx 22rpx; max-width: calc(100% - 12rpx); box-sizing: border-box; }
-.chosen-banner { display: flex; align-items: center; gap: 14rpx; margin-bottom: 22rpx; padding: 20rpx 22rpx; border: 1rpx solid #bfe8c8; border-radius: $radius-md; background: $fresh-light; }
+.context-badge { margin: 0 6rpx 18rpx; max-width: calc(100% - 12rpx); box-sizing: border-box; }
+.mode-switch { display: flex; gap: 12rpx; margin-bottom: 20rpx; padding: 10rpx; border: 1rpx solid $line; border-radius: 28rpx; background: rgba(255, 255, 255, .72); }
+.mode-option { min-width: 0; flex: 1; display: flex; align-items: center; gap: 12rpx; padding: 19rpx 18rpx; border-radius: 21rpx; color: $ink-2; transition: transform .18s ease, background-color .18s ease; }
+.mode-option:active { transform: scale(.98); }
+.mode-on { color: $brand-deep; background: $brand-light; box-shadow: inset 0 0 0 1rpx $brand-soft; }
+.mode-icon { flex: 0 0 auto; font-size: 32rpx; }
+.mode-copy { min-width: 0; display: flex; flex-direction: column; gap: 3rpx; }
+.mode-title { font-size: 23rpx; font-weight: 800; }
+.mode-sub { font-size: 17rpx; white-space: nowrap; }
+.chosen-banner { display: flex; align-items: center; gap: 14rpx; margin-bottom: 20rpx; padding: 20rpx 22rpx; border: 1rpx solid #bfe8c8; border-radius: $radius-md; background: $fresh-light; }
 .chosen-mark { width: 42rpx; height: 42rpx; flex: 0 0 42rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background: $fresh; font-size: 23rpx; font-weight: 800; }
 .chosen-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4rpx; }
 .chosen-title { color: #1d6e2e; font-size: 24rpx; font-weight: 700; }
@@ -197,10 +387,17 @@ onShow(() => {
 .history-link { color: $fresh; font-size: 22rpx; }
 .panel { margin-bottom: 26rpx; padding: 28rpx; border-radius: $radius-lg; background: $card; box-shadow: $shadow-card; }
 .panel-row { display: flex; align-items: flex-start; gap: 14rpx; margin-bottom: 22rpx; }
-.panel-label { width: 88rpx; flex: 0 0 88rpx; padding-top: 10rpx; color: $ink-2; font-size: 24rpx; font-weight: 650; }
+.panel-label { width: 104rpx; flex: 0 0 104rpx; padding-top: 10rpx; color: $ink-2; font-size: 24rpx; font-weight: 650; }
 .chip-row { flex: 1; display: flex; flex-wrap: wrap; gap: 10rpx; }
 .chip { padding: 9rpx 18rpx; border: 1rpx solid $line; border-radius: 999rpx; color: $ink-2; background: $bg; font-size: 22rpx; }
 .chip-on { color: $brand-dark; border-color: $brand-soft; background: $brand-light; font-weight: 650; }
+.party-chip { min-width: 58rpx; text-align: center; }
+.city-field { margin-bottom: 22rpx; }
+.city-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10rpx; }
+.city-head .panel-label { width: auto; flex: initial; padding: 0; }
+.city-note { color: $fresh; font-size: 19rpx; }
+.city-input { height: 76rpx; padding: 0 22rpx; border: 1rpx solid $line; border-radius: 20rpx; color: $ink; background: $bg; font-size: 23rpx; }
+.family-hint { display: block; margin: -2rpx 0 18rpx 118rpx; color: $ink-3; font-size: 18rpx; line-height: 1.5; }
 .cta { height: 94rpx; line-height: 94rpx; margin-top: 8rpx; border: none; border-radius: 999rpx; color: #fff; background: $grad-brand; box-shadow: $shadow-cta; font-size: 29rpx; font-weight: 750; }
 .cta::after { border: none; }
 .cta[disabled] { color: #fff; opacity: .65; }
@@ -212,7 +409,12 @@ onShow(() => {
 .request-id { word-break: break-all; opacity: .75; }
 .skeleton-card { height: 720rpx; border-radius: 36rpx; background: linear-gradient(100deg, #f0e9e0 20%, #faf6f1 50%, #f0e9e0 80%); background-size: 220% 100%; animation: shimmer 1.4s infinite; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-.result { display: flex; flex-direction: column; gap: 22rpx; }
+.result, .external-result { display: flex; flex-direction: column; gap: 22rpx; }
+.external-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20rpx; padding: 4rpx 4rpx 0; }
+.external-head > view { display: flex; flex-direction: column; gap: 5rpx; }
+.external-place { color: $ink-3; font-size: 20rpx; }
+.memory-link { flex: 0 0 auto; color: $brand; font-size: 21rpx; }
+.external-disclaimer { padding: 0 10rpx; color: $ink-3; font-size: 18rpx; line-height: 1.55; text-align: center; }
 .substitutions { display: flex; flex-direction: column; gap: 12rpx; padding: 24rpx; border-radius: 28rpx; background: rgba(255, 255, 255, .72); border: 1rpx solid $line; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20rpx; padding: 0 4rpx 8rpx; }
 .section-title { color: $ink; font-size: 28rpx; font-weight: 750; }
@@ -230,5 +432,9 @@ onShow(() => {
   .hero-avatar { width: 88rpx; height: 88rpx; flex-basis: 88rpx; }
   .hero-title { font-size: 42rpx; }
   .panel { padding: 24rpx; }
+  .mode-option { padding: 16rpx 13rpx; }
+  .mode-icon { display: none; }
+  .panel-label { width: 92rpx; flex-basis: 92rpx; }
+  .family-hint { margin-left: 106rpx; }
 }
 </style>

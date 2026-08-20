@@ -14,6 +14,8 @@ import { applySubstitution as replaceMealSlot } from '@/domain/meal'
 import { ApiError } from '@/types/api'
 import type {
   ActivityLevel,
+  Audience,
+  DiningMode,
   MealRecommendation,
   MealSnapshot,
   MealSubstitution,
@@ -27,8 +29,15 @@ const WEATHER_KEY = 'eat_what_weather'
 const TODAY_CTX_KEY = 'eat_what_today_ctx'
 const MOOD_KEY = 'eat_what_mood'
 const ACTIVITY_KEY = 'eat_what_activity'
-const MEAL_CACHE_KEY = 'eat_what_meal_recommendation_v1'
-const MEAL_CACHE_VERSION = 1
+const DINING_MODE_KEY = 'eat_what_dining_mode'
+const AUDIENCE_KEY = 'eat_what_audience'
+const PARTY_SIZE_KEY = 'eat_what_party_size'
+const CITY_KEY = 'eat_what_city'
+const MEAL_CACHE_KEY = 'eat_what_meal_recommendation_v2'
+const RECENT_COOK_IDS_KEY = 'eat_what_recent_cook_ids_v1'
+const MEAL_CACHE_VERSION = 2
+const MAX_RECENT_RESULT_IDS = 12
+const WEATHER_SNAPSHOT_TTL_MS = 2 * 60 * 60 * 1000
 
 interface MealCache {
   version: number
@@ -55,6 +64,27 @@ function readMealCache(): MealCache | null {
   return cache
 }
 
+function appendRecentIds(existing: number[], latest: number[]): number[] {
+  const uniqueNewest: number[] = []
+  const seen = new Set<number>()
+  for (const value of [...existing, ...latest].reverse()) {
+    if (seen.has(value)) continue
+    seen.add(value)
+    uniqueNewest.unshift(value)
+  }
+  return uniqueNewest.slice(-MAX_RECENT_RESULT_IDS)
+}
+
+function freshWeatherSnapshot(value: WeatherData | null): WeatherData | undefined {
+  if (!value) return undefined
+  const fetchedAt = Date.parse(value.fetchedAt)
+  if (!Number.isFinite(fetchedAt)) return undefined
+  const age = Date.now() - fetchedAt
+  return age >= -5 * 60 * 1000 && age <= WEATHER_SNAPSHOT_TTL_MS
+    ? value
+    : undefined
+}
+
 function isTransient(error: unknown): boolean {
   return error instanceof ApiError && (
     error.code === 'NETWORK_ERROR'
@@ -75,6 +105,17 @@ export const useDailyStore = defineStore('daily', () => {
   const activityLevel = ref<ActivityLevel>(
     (uni.getStorageSync(ACTIVITY_KEY) as ActivityLevel) || 'normal',
   )
+  const storedMode = uni.getStorageSync(DINING_MODE_KEY)
+  const diningMode = ref<DiningMode>(storedMode === 'eat_out' ? 'eat_out' : 'cook')
+  const storedAudience = uni.getStorageSync(AUDIENCE_KEY)
+  const audience = ref<Audience>(storedAudience === 'family' ? 'family' : 'personal')
+  const storedPartySize = Number(uni.getStorageSync(PARTY_SIZE_KEY))
+  const partySize = ref(
+    audience.value === 'family'
+      ? Math.min(8, Math.max(2, storedPartySize || 2))
+      : 1,
+  )
+  const city = ref(String(uni.getStorageSync(CITY_KEY) || ''))
   const loading = ref(false)
   const todayLog = ref<DailyLogRead | null>(null)
 
@@ -85,6 +126,7 @@ export const useDailyStore = defineStore('daily', () => {
   const stale = ref(cached !== null)
   const offline = ref(false)
   const lastRequestId = ref<string | null>(null)
+  const recentCookIds = ref<number[]>(parseStorage<number[]>(RECENT_COOK_IDS_KEY) || [])
 
   // The old homepage reads recommendation.foods until the plate UI commit lands.
   const recommendation = computed(() => serverRecommendation.value)
@@ -139,6 +181,11 @@ export const useDailyStore = defineStore('daily', () => {
         activityLevel: activityLevel.value,
         lat,
         lng,
+        diningMode: diningMode.value,
+        audience: audience.value,
+        partySize: partySize.value,
+        excludeFoodIds: [...recentCookIds.value],
+        weatherSnapshot: freshWeatherSnapshot(weather.value),
       }
       const data = await apiRecommend(body)
       serverRecommendation.value = data
@@ -147,7 +194,11 @@ export const useDailyStore = defineStore('daily', () => {
       stale.value = false
       offline.value = false
       persistMealCache()
-      await fetchTodayLog()
+      recentCookIds.value = appendRecentIds(
+        recentCookIds.value,
+        data.primaryMeal.items.map((item) => item.foodId),
+      )
+      uni.setStorageSync(RECENT_COOK_IDS_KEY, JSON.stringify(recentCookIds.value))
       return data
     } catch (error) {
       if (error instanceof ApiError) lastRequestId.value = error.requestId || null
@@ -234,6 +285,46 @@ export const useDailyStore = defineStore('daily', () => {
     uni.setStorageSync(ACTIVITY_KEY, value)
   }
 
+  function clearMealRecommendation(): void {
+    serverRecommendation.value = null
+    currentMeal.value = null
+    appliedSubstitutions.value = []
+    stale.value = false
+    offline.value = false
+    uni.removeStorageSync(MEAL_CACHE_KEY)
+  }
+
+  function setDiningMode(value: DiningMode): void {
+    if (diningMode.value === value) return
+    diningMode.value = value
+    uni.setStorageSync(DINING_MODE_KEY, value)
+    clearMealRecommendation()
+  }
+
+  function setAudience(value: Audience): void {
+    if (audience.value === value) return
+    audience.value = value
+    uni.setStorageSync(AUDIENCE_KEY, value)
+    partySize.value = value === 'personal' ? 1 : Math.max(2, partySize.value)
+    uni.setStorageSync(PARTY_SIZE_KEY, partySize.value)
+    clearMealRecommendation()
+  }
+
+  function setPartySize(value: number): void {
+    const nextValue = audience.value === 'personal'
+      ? 1
+      : Math.min(8, Math.max(2, Math.round(value)))
+    if (partySize.value === nextValue) return
+    partySize.value = nextValue
+    uni.setStorageSync(PARTY_SIZE_KEY, partySize.value)
+    clearMealRecommendation()
+  }
+
+  function setCity(value: string): void {
+    city.value = value.trim()
+    uni.setStorageSync(CITY_KEY, city.value)
+  }
+
   return {
     todayContext,
     weather,
@@ -248,6 +339,10 @@ export const useDailyStore = defineStore('daily', () => {
     todayLog,
     mood,
     activityLevel,
+    diningMode,
+    audience,
+    partySize,
+    city,
     loading,
     fetchTodayContext,
     fetchWeather,
@@ -260,5 +355,10 @@ export const useDailyStore = defineStore('daily', () => {
     fetchHistory,
     setMood,
     setActivityLevel,
+    setDiningMode,
+    setAudience,
+    setPartySize,
+    setCity,
+    clearMealRecommendation,
   }
 })

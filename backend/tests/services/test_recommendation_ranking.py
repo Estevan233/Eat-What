@@ -6,15 +6,17 @@ from app.models.daily_log import DailyLog
 from app.models.recommendation_event import RecommendationEvent
 from app.services.recommendation_ranking import (
     MAX_RULE_SCORE,
-    RULE_V3_WEIGHTS,
+    RULE_V4_WEIGHTS,
     IdentityReranker,
     RankedCandidate,
+    RecommendationHistory,
     RerankAdjustment,
     ScoreBreakdown,
     apply_novelty,
     apply_rerank_adjustments,
     build_recommendation_history,
     select_diverse,
+    with_client_exclusions,
 )
 from tests.services.test_recommender import _make_food
 
@@ -26,31 +28,28 @@ def _candidate(food_id: int, *, score: float = 30.0) -> RankedCandidate:
         food=food,
         base_score=score,
         breakdown=ScoreBreakdown(
-            weather=0,
-            solar_term=0,
-            mood=0,
             nutrition=0,
-            constitution=0,
-            activity=0,
-            zodiac=0,
+            seasonal_wellness=0,
+            personal_family=0,
+            preference_history=0,
+            feasibility=0,
+            diversity=0,
         ),
         reason_phrases={},
     )
 
 
-def test_rule_v3_weights_make_weather_a_minor_signal() -> None:
-    assert RULE_V3_WEIGHTS == {
-        "nutrition": 20,
-        "constitution": 12,
-        "mood": 10,
-        "activity": 8,
-        "method_time": 13,
-        "weather": 6,
-        "solar_term": 5,
-        "zodiac": 1,
+def test_rule_v4_weights_match_the_confirmed_product_model() -> None:
+    assert RULE_V4_WEIGHTS == {
+        "nutrition": 22,
+        "seasonal_wellness": 18,
+        "personal_family": 20,
+        "preference_history": 15,
+        "feasibility": 15,
+        "diversity": 10,
     }
-    assert sum(RULE_V3_WEIGHTS.values()) == 75
-    assert RULE_V3_WEIGHTS["weather"] < RULE_V3_WEIGHTS["nutrition"]
+    assert sum(RULE_V4_WEIGHTS.values()) == 100
+    assert MAX_RULE_SCORE == 100.0
 
 
 def test_normalized_score_is_clamped_to_zero_and_one_hundred():
@@ -96,7 +95,7 @@ def test_duplicate_rerank_adjustments_are_rejected():
 
 async def test_identity_reranker_returns_no_adjustments():
     reranker = IdentityReranker()
-    assert reranker.engine_name == "rules_v3"
+    assert reranker.engine_name == "rules_v4"
     assert await reranker.rerank([], None) == ()
 
 
@@ -115,6 +114,21 @@ def test_today_seen_foods_are_excluded_when_three_unseen_exist():
     )
     result = apply_novelty(candidates, history, top_n=3)
     assert [candidate.food.id for candidate in result] == [4, 5, 6]
+
+
+def test_client_exclusions_extend_seen_without_mutating_other_history() -> None:
+    history = RecommendationHistory(
+        seen_today=frozenset({1}),
+        chosen_days_ago={2: 1},
+        exposed_days_ago={3: 2},
+    )
+
+    merged = with_client_exclusions(history, [4, 5, 5])
+
+    assert merged.seen_today == frozenset({1, 4, 5})
+    assert merged.chosen_days_ago == {2: 1}
+    assert merged.exposed_days_ago == {3: 2}
+    assert history.seen_today == frozenset({1})
 
 
 def test_chosen_penalty_wins_over_exposure_penalty():
@@ -208,6 +222,43 @@ def test_exposure_penalty_decays_across_seven_days(days_ago, expected):
     )
     result = apply_novelty([_candidate(1)], history, top_n=3)
     assert result[0].novelty_penalty == expected
+
+
+def test_repeated_exposure_adds_a_bounded_freshness_penalty() -> None:
+    today = date(2026, 8, 11)
+    once = build_recommendation_history(
+        [],
+        [
+            RecommendationEvent(
+                user_id=1,
+                event_date=today - timedelta(days=2),
+                recommended_food_ids_json=[1],
+            )
+        ],
+        as_of=today,
+    )
+    repeated = build_recommendation_history(
+        [],
+        [
+            RecommendationEvent(
+                user_id=1,
+                event_date=today - timedelta(days=2),
+                recommended_food_ids_json=[1],
+            ),
+            RecommendationEvent(
+                user_id=1,
+                event_date=today - timedelta(days=4),
+                recommended_food_ids_json=[1],
+            ),
+        ],
+        as_of=today,
+    )
+
+    once_ranked = apply_novelty([_candidate(1)], once, top_n=3)[0]
+    repeated_ranked = apply_novelty([_candidate(1)], repeated, top_n=3)[0]
+
+    assert repeated.exposure_counts[1] == 2
+    assert repeated_ranked.novelty_penalty < once_ranked.novelty_penalty
 
 
 def test_select_diverse_prefers_distinct_category_and_method():

@@ -1,6 +1,6 @@
 """推荐排序领域类型与纯函数。"""
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import date
 from typing import Protocol
 
@@ -8,17 +8,15 @@ from app.models.daily_log import DailyLog
 from app.models.food import Food
 from app.models.recommendation_event import RecommendationEvent
 
-RULE_V3_WEIGHTS = {
-    "nutrition": 20,
-    "constitution": 12,
-    "mood": 10,
-    "activity": 8,
-    "method_time": 13,
-    "weather": 6,
-    "solar_term": 5,
-    "zodiac": 1,
+RULE_V4_WEIGHTS = {
+    "nutrition": 22,
+    "seasonal_wellness": 18,
+    "personal_family": 20,
+    "preference_history": 15,
+    "feasibility": 15,
+    "diversity": 10,
 }
-MAX_RULE_SCORE = 75.0
+MAX_RULE_SCORE = 100.0
 MAX_RERANK_DELTA = 10.0
 CHOSEN_PENALTIES = (-30.0, -24.0, -18.0, -12.0, -8.0, -5.0, -3.0)
 EXPOSED_PENALTIES = (-12.0, -10.0, -8.0, -6.0, -4.0, -3.0, -2.0)
@@ -27,26 +25,23 @@ SEEN_TODAY_PENALTY = -30.0
 
 @dataclass(frozen=True)
 class ScoreBreakdown:
-    weather: float
-    solar_term: float
-    mood: float
     nutrition: float
-    constitution: float
-    activity: float
-    zodiac: float
-    method_time: float = 0.0
+    seasonal_wellness: float
+    personal_family: float
+    preference_history: float
+    feasibility: float
+    diversity: float
+    weather_modifier: float = 0.0
 
     @property
     def total(self) -> float:
         return (
-            self.weather
-            + self.solar_term
-            + self.mood
-            + self.nutrition
-            + self.constitution
-            + self.activity
-            + self.method_time
-            + self.zodiac
+            self.nutrition
+            + self.seasonal_wellness
+            + self.personal_family
+            + self.preference_history
+            + self.feasibility
+            + self.diversity
         )
 
 
@@ -84,6 +79,7 @@ class RecommendationHistory:
     seen_today: frozenset[int]
     chosen_days_ago: Mapping[int, int]
     exposed_days_ago: Mapping[int, int]
+    exposure_counts: Mapping[int, int] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -104,7 +100,7 @@ class CandidateReranker(Protocol):
 
 
 class IdentityReranker:
-    engine_name = "rules_v3"
+    engine_name = "rules_v4"
 
     async def rerank(
         self,
@@ -165,6 +161,7 @@ def build_recommendation_history(
     """把七天日志压缩成每道菜距今最近的选择与曝光天数。"""
     chosen: dict[int, int] = {}
     exposed: dict[int, int] = {}
+    exposure_counts: dict[int, int] = {}
     seen_today: set[int] = set()
     for log_record in logs:
         days_ago = (as_of - log_record.log_date).days
@@ -175,14 +172,27 @@ def build_recommendation_history(
         days_ago = (as_of - event.event_date).days
         if not 0 <= days_ago < len(EXPOSED_PENALTIES):
             continue
-        for food_id in event.recommended_food_ids_json or []:
+        for food_id in set(event.recommended_food_ids_json or []):
             _remember_nearest(exposed, food_id, days_ago)
+            exposure_counts[food_id] = exposure_counts.get(food_id, 0) + 1
             if days_ago == 0:
                 seen_today.add(food_id)
     return RecommendationHistory(
         seen_today=frozenset(seen_today),
         chosen_days_ago=chosen,
         exposed_days_ago=exposed,
+        exposure_counts=exposure_counts,
+    )
+
+
+def with_client_exclusions(
+    history: RecommendationHistory,
+    food_ids: Sequence[int],
+) -> RecommendationHistory:
+    """Merge untrusted client hints into soft exposure history only."""
+    return replace(
+        history,
+        seen_today=history.seen_today | frozenset(food_ids),
     )
 
 
@@ -212,7 +222,9 @@ def apply_novelty(
         else:
             exposed_days = history.exposed_days_ago.get(food_id)
             if exposed_days is not None:
-                penalties.append(EXPOSED_PENALTIES[exposed_days])
+                repeat_count = max(1, history.exposure_counts.get(food_id, 1))
+                repeat_penalty = min(12.0, float((repeat_count - 1) * 4))
+                penalties.append(EXPOSED_PENALTIES[exposed_days] - repeat_penalty)
         if food_id in history.seen_today:
             penalties.append(SEEN_TODAY_PENALTY)
         penalty = min(penalties, default=0.0)

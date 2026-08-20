@@ -13,4 +13,10 @@ def test_mysql_options() -> None:
 
     assert options['pool_pre_ping'] is True
     assert options['pool_recycle'] == 300
-    assert 'connect_args' not in options
+    assert options['pool_size'] == 3
+    assert options['max_overflow'] == 2
+    assert options['pool_timeout'] == 10
+    assert options['connect_args'] == {
+        'connect_timeout': 5,
+        'charset': 'utf8mb4',
+    }

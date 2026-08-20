@@ -2,7 +2,7 @@
 
 日期：2026-08-11
 
-状态：待规格审查
+状态：规格已确认
 
 范围：后端推荐算法、推荐事件与测试；不接入实际 Agent
 
@@ -207,9 +207,10 @@ class CandidateReranker(Protocol):
         self,
         candidates: Sequence[RankedCandidate],
         context: RecommendationRankingContext,
-    ) -> Mapping[int, RerankAdjustment]: ...
+    ) -> Sequence[RerankAdjustment]: ...
 
-class RerankAdjustment(BaseModel):
+@dataclass(frozen=True)
+class RerankAdjustment:
     food_id: int
     score_delta: float  # 后端强制截断到 [-15, 15]
     reason: str | None = None

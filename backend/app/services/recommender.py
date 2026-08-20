@@ -7,13 +7,15 @@
 - 可选 Agent 只能调整已通过硬筛的候选，异常时回退规则排序
 """
 import asyncio
+from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import structlog
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.core.errors import ExternalAPIError, NotFoundError, RateLimitError, ValidationError
+from app.core.timing import TimingTrace
 from app.models.daily_log import DailyLog
 from app.models.food import Food
 from app.models.recipe import Recipe
@@ -23,6 +25,7 @@ from app.schemas.daily import (
     ActivityLevel,
     FoodWithReason,
     Mood,
+    RecommendationWeightProfile,
     RecommendContext,
     RecommendRequest,
     RecommendResponse,
@@ -31,9 +34,9 @@ from app.schemas.meal import MealBuildResult
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData, WeatherTag
 from app.services import daily_service, food_service, profile_service
-from app.services.meal_builder import MealCandidate, build_meal
+from app.services.meal_builder import MealCandidate, build_meal, meal_role_targets
 from app.services.recommendation_ranking import (
-    RULE_V3_WEIGHTS,
+    RULE_V4_WEIGHTS,
     CandidateReranker,
     IdentityReranker,
     RankedCandidate,
@@ -43,6 +46,7 @@ from app.services.recommendation_ranking import (
     apply_novelty,
     apply_rerank_adjustments,
     build_recommendation_history,
+    with_client_exclusions,
 )
 from app.services.solar_terms import get_today_context_cached
 from app.services.weather_client import weather_client
@@ -51,6 +55,8 @@ log = structlog.get_logger()
 
 # 小程序请求层默认 10 秒超时。天气只是软信号，最多占用其中 2 秒。
 RECOMMEND_WEATHER_TIMEOUT_SECONDS = 2.0
+WEATHER_SNAPSHOT_TTL = timedelta(hours=2)
+WEATHER_SNAPSHOT_CLOCK_SKEW = timedelta(minutes=5)
 
 # ---- 常量 ----
 
@@ -121,6 +127,14 @@ def _fallback_weather(*, provider_unavailable: bool = False) -> WeatherData:
 
 async def _resolve_weather(req: RecommendRequest) -> WeatherData:
     """为推荐解析天气；软依赖失败或超时后使用中性权重继续。"""
+    if req.weather_snapshot is not None:
+        fetched_at = req.weather_snapshot.fetched_at
+        if fetched_at.tzinfo is None:
+            fetched_at = fetched_at.replace(tzinfo=timezone.utc)
+        age = datetime.now(timezone.utc) - fetched_at.astimezone(timezone.utc)
+        if -WEATHER_SNAPSHOT_CLOCK_SKEW <= age <= WEATHER_SNAPSHOT_TTL:
+            return req.weather_snapshot
+
     if req.lat is None or req.lng is None:
         return _fallback_weather()
 
@@ -283,12 +297,23 @@ def _score_method_time(food: Food) -> float:
         time_score = 4.0
     else:
         time_score = 2.0
-    return min(float(RULE_V3_WEIGHTS["method_time"]), method_score + time_score)
+    return min(13.0, method_score + time_score)
 
 
-def _scale_score(raw: float, raw_max: float, dimension: str) -> float:
-    cap = float(RULE_V3_WEIGHTS[dimension])
+def _scale_score(raw: float, raw_max: float, cap: float) -> float:
     return round(max(0.0, min(raw_max, raw)) / raw_max * cap, 2)
+
+
+def _seasonal_wellness_score(solar_score: float, weather_score: float) -> tuple[float, float]:
+    """Combine seasonal food and a bounded weather modifier into one 18-point signal."""
+    seasonal_base = 4.0 + max(0.0, min(15.0, solar_score)) / 15.0 * 11.0
+    if weather_score >= 8.0:
+        modifier = (min(15.0, weather_score) - 8.0) / 7.0 * 3.0
+    else:
+        modifier = (max(3.0, weather_score) - 8.0) / 5.0 * 3.0
+    modifier = round(max(-3.0, min(3.0, modifier)), 2)
+    combined = round(max(0.0, min(18.0, seasonal_base + modifier)), 2)
+    return combined, modifier
 
 
 def _score_solar_term(food: Food, today: TodayContext) -> tuple[float, str]:
@@ -402,20 +427,29 @@ def _score_food(
     """计算单道菜的 75 分规则分项和解释短语。"""
     w_score, w_phrase = _score_weather(food, weather)
     s_score, s_phrase = _score_solar_term(food, today)
-    z_score, z_phrase = _score_zodiac(food, today)
     m_score, m_phrase = _score_mood(food, mood)
     n_score, n_phrase = _score_nutrition_balance_with_foods(food, history, all_foods)
     c_score, c_phrase = _score_constitution(food, profile)
     a_score = _score_activity(food, activity_level)
+    seasonal_wellness, weather_modifier = _seasonal_wellness_score(s_score, w_score)
+    personal_family = round(
+        _scale_score(c_score, 10.0, 10.0)
+        + _scale_score(m_score, 12.0, 6.0)
+        + _scale_score(a_score, 5.0, 4.0),
+        2,
+    )
     breakdown = ScoreBreakdown(
-        weather=_scale_score(w_score, 15.0, "weather"),
-        solar_term=_scale_score(s_score, 15.0, "solar_term"),
-        mood=_scale_score(m_score, 12.0, "mood"),
-        nutrition=_scale_score(n_score, 15.0, "nutrition"),
-        constitution=_scale_score(c_score, 10.0, "constitution"),
-        activity=_scale_score(a_score, 5.0, "activity"),
-        zodiac=_scale_score(z_score, 3.0, "zodiac"),
-        method_time=_score_method_time(food),
+        nutrition=_scale_score(n_score, 15.0, float(RULE_V4_WEIGHTS["nutrition"])),
+        seasonal_wellness=seasonal_wellness,
+        personal_family=min(float(RULE_V4_WEIGHTS["personal_family"]), personal_family),
+        preference_history=float(RULE_V4_WEIGHTS["preference_history"]),
+        feasibility=_scale_score(
+            _score_method_time(food),
+            13.0,
+            float(RULE_V4_WEIGHTS["feasibility"]),
+        ),
+        diversity=float(RULE_V4_WEIGHTS["diversity"]),
+        weather_modifier=weather_modifier,
     )
     return RankedCandidate(
         food=food,
@@ -424,7 +458,6 @@ def _score_food(
         reason_phrases={
             "weather": w_phrase,
             "solar_term": s_phrase,
-            "zodiac": z_phrase,
             "mood": m_phrase,
             "nutrition": n_phrase,
             "constitution": c_phrase,
@@ -466,25 +499,22 @@ def _make_reason(phrases: dict[str, str], food: Food, mood: Mood) -> str:
 
 
 def _build_complete_meal(
-    session: Session,
     candidates: list[RankedCandidate],
+    recipes_by_food_id: dict[int, Recipe],
     ranking_history: RecommendationHistory,
     mood: Mood,
+    role_targets: tuple[str, ...],
 ) -> tuple[MealBuildResult, list[RankedCandidate]]:
     fresh_candidates: list[RankedCandidate] = []
-    for meal_role in ("main", "vegetable", "staple"):
+    for meal_role, required_count in Counter(role_targets).items():
         role_candidates = [
             candidate for candidate in candidates
             if candidate.food.meal_role == meal_role
         ]
         fresh_candidates.extend(
-            apply_novelty(role_candidates, ranking_history, top_n=1)
+            apply_novelty(role_candidates, ranking_history, top_n=required_count)
         )
 
-    recipes_by_food_id = {
-        recipe.food_id: recipe
-        for recipe in session.exec(select(Recipe)).all()
-    }
     meal_candidates = [
         MealCandidate(
             ranked=candidate,
@@ -499,7 +529,10 @@ def _build_complete_meal(
         if candidate.food.id in recipes_by_food_id
     ]
     try:
-        return build_meal(meal_candidates), fresh_candidates
+        return build_meal(
+            meal_candidates,
+            role_targets=role_targets,
+        ), fresh_candidates
     except ValueError as exc:
         raise ValidationError(str(exc)) from exc
 
@@ -512,20 +545,24 @@ async def recommend(
     req: RecommendRequest,
     *,
     reranker: CandidateReranker | None = None,
+    timing: TimingTrace | None = None,
 ) -> RecommendResponse:
     """硬过滤后依次执行规则评分、有界重排、新鲜度和多样性选择。"""
+    trace = timing or TimingTrace()
     if user.id is None:  # pragma: no cover
         raise RuntimeError("user.id 不应为 None")
 
-    if profile_service.get_profile(session, user.id) is None:
+    stage_started = trace.start()
+    profile = profile_service.get_profile_record(session, user.id)
+    if profile is None:
         raise NotFoundError("user_profile", user.id)
-    profile = session.exec(
-        select(UserProfile).where(UserProfile.user_id == user.id)
-    ).first()
-    if profile is None:  # pragma: no cover
-        raise NotFoundError("user_profile", user.id)
+    trace.stop("profile", stage_started)
 
+    stage_started = trace.start()
     weather = await _resolve_weather(req)
+    trace.stop("weather", stage_started)
+
+    stage_started = trace.start()
     today_context = get_today_context_cached()
     today = date.today()
     history_7d = daily_service.get_recent(session, user.id, days=7)
@@ -540,7 +577,13 @@ async def recommend(
         days=7,
         as_of=today,
     )
-    foods, _ = food_service.get_all(session, page=1, size=500)
+    trace.stop("history", stage_started)
+
+    stage_started = trace.start()
+    foods, recipes_by_food_id = food_service.get_recommendation_catalog(session)
+    trace.stop("catalog", stage_started)
+
+    stage_started = trace.start()
     kept = hard_filter(foods, profile, req)
     if not kept:
         raise ValidationError("没有可选菜（全部被忌口/体质禁忌过滤）")
@@ -580,21 +623,29 @@ async def recommend(
             reranker=active_reranker.engine_name,
             error_type=type(exc).__name__,
         )
-        engine_name = "rules_v3"
+        engine_name = "rules_v4"
 
     ranking_history = build_recommendation_history(
         history_7d,
         events_7d,
         as_of=today,
     )
+    ranking_history = with_client_exclusions(
+        ranking_history,
+        req.exclude_food_ids,
+    )
+    targets = meal_role_targets(req.audience, req.party_size)
     meal, fresh_candidates = _build_complete_meal(
-        session,
         candidates,
+        recipes_by_food_id,
         ranking_history,
         req.mood,
+        targets,
     )
+    trace.stop("rank", stage_started)
 
     rec_ids = [item.food_id for item in meal.primary_meal.items]
+    stage_started = trace.start()
     _, event = daily_service.record_recommendation(
         session,
         user.id,
@@ -606,9 +657,13 @@ async def recommend(
         recommended_meal=meal.primary_meal.model_dump(mode="json"),
         substitutions=[item.model_dump(mode="json") for item in meal.substitutions],
         scorer_version=engine_name,
-        builder_version="meal_builder_v1",
+        builder_version="meal_builder_v2",
         event_date=today,
+        dining_mode=req.dining_mode,
+        audience=req.audience,
+        party_size=req.party_size,
     )
+    trace.stop("write", stage_started)
 
     candidates_by_id = {
         candidate.food.id: candidate
@@ -636,6 +691,7 @@ async def recommend(
         seen_today_count=len(ranking_history.seen_today),
         history_chosen_count=len(ranking_history.chosen_days_ago),
         recommended_food_ids=rec_ids,
+        **trace.log_fields(),
     )
     return RecommendResponse(
         foods=response_foods,
@@ -645,6 +701,10 @@ async def recommend(
         substitution_notice=meal.substitution_notice,
         engine=engine_name,
         context=RecommendContext(weather=weather, today=today_context),
+        weight_profile=RecommendationWeightProfile(),
+        wellness_disclaimer=(
+            "节气、性味与体质仅作一般饮食参考，不构成医疗诊断、治疗或疗效承诺。"
+        ),
     )
 
 

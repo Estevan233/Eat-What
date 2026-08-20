@@ -16,5 +16,9 @@ COPY scripts ./scripts
 
 RUN pip install --no-cache-dir .
 
+RUN useradd --create-home --uid 10001 appuser \
+    && chown -R appuser:appuser /app
+
 EXPOSE 8080
-CMD ["sh", "-c", "alembic upgrade head && eat-what seed-all && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
+USER appuser
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}"]

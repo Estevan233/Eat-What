@@ -24,6 +24,7 @@ export interface RequestOptions<TData = Record<string, unknown>> {
   header?: Record<string, string>
   loading?: boolean
   timeout?: number
+  silentErrorStatuses?: number[]
 }
 
 const DEFAULT_TIMEOUT = 10_000
@@ -68,9 +69,10 @@ function redirectToLoginOnce(): void {
   }, 0)
 }
 
-function showRequestError(error: ApiError): void {
+function showRequestError(error: ApiError, silentStatuses: number[] = []): void {
   if (error.statusCode === 401) return
   if ((error.statusCode ?? 0) >= 500) return
+  if (error.statusCode !== undefined && silentStatuses.includes(error.statusCode)) return
   uni.showToast({ title: error.message, icon: 'none' })
 }
 
@@ -114,7 +116,7 @@ export async function request<T, TData = Record<string, unknown>>(
         apiError.requestId,
       )
     }
-    showRequestError(apiError)
+    showRequestError(apiError, options.silentErrorStatuses)
     throw apiError
   } finally {
     stopLoading(loadingEnabled)

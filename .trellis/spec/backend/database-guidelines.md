@@ -1,6 +1,6 @@
 # Database Guidelines
 
-> SQLModel + SQLite（开发）/ PostgreSQL（生产）。
+> SQLModel + SQLite（开发/测试）/ CloudBase MySQL（生产）。
 
 ---
 
@@ -8,7 +8,9 @@
 
 - ORM: **SQLModel**（FastAPI 作者出品，Pydantic v2 + SQLAlchemy 2.0）
 - 迁移：开发期用 `SQLModel.metadata.create_all` 直接建表；上线前引入 Alembic
-- 数据库切换：开发用 `sqlite:///./dev.db`，生产用 `postgresql+psycopg://...`，通过 `Settings.database_url` 切换，代码无需改
+- 数据库切换：开发用 `sqlite:///./dev.db`，生产用 `mysql+pymysql://...`，通过 `Settings.database_url` 切换，代码无需改
+- 生产启动必须拒绝 SQLite，避免云托管缩容或重部署后丢失容器内数据
+- 生产 schema 只由 Alembic 管理；应用实例不得在启动时并发执行迁移
 
 ---
 

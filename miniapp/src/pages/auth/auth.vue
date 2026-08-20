@@ -3,8 +3,8 @@
     <!-- 品牌区 -->
     <view class="brand">
       <image class="logo" src="/static/brand-avatar.png" mode="aspectFill" />
-      <text class="title">今天吃啥</text>
-      <text class="subtitle">每天 3 道菜，结合天气 · 节气 · 心情 · 体质</text>
+      <text class="title">{{ APP_NAME }}</text>
+      <text class="subtitle">{{ HERO_TITLE }} · {{ BRAND_SUBTITLE }}</text>
     </view>
 
     <!-- 按钮区 -->
@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { shouldShowAuthErrorToast, toAuthErrorMessage } from '@/auth/error'
+import { APP_NAME, BRAND_SUBTITLE, HERO_TITLE } from '@/config/brand'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()

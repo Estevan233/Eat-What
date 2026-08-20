@@ -13,10 +13,15 @@ from app.models.user_profile import UserProfile
 from app.schemas.profile import ProfileRead, ProfileUpsert
 
 
+def get_profile_record(session: Session, user_id: int) -> UserProfile | None:
+    """读取档案模型，供推荐等服务复用，避免同一请求重复查询。"""
+    stmt = select(UserProfile).where(UserProfile.user_id == user_id)
+    return session.exec(stmt).first()
+
+
 def get_profile(session: Session, user_id: int) -> ProfileRead | None:
     """读用户档案。不存在返回 None。"""
-    stmt = select(UserProfile).where(UserProfile.user_id == user_id)
-    record = session.exec(stmt).first()
+    record = get_profile_record(session, user_id)
     if record is None:
         return None
     return ProfileRead.model_validate(record.to_read_dict())

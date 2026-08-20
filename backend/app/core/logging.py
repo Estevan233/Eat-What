@@ -8,6 +8,7 @@
 import logging
 import uuid
 from collections.abc import Awaitable, Callable
+from time import perf_counter
 
 import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -53,6 +54,20 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(request_id=request_id)
 
+        started = perf_counter()
         response = await call_next(request)
+        duration_ms = (perf_counter() - started) * 1000
         response.headers["X-Request-ID"] = request_id
+        app_timing = f"app;dur={duration_ms:.1f}"
+        existing_timing = response.headers.get("Server-Timing")
+        response.headers["Server-Timing"] = (
+            f"{existing_timing}, {app_timing}" if existing_timing else app_timing
+        )
+        structlog.get_logger().info(
+            "request_complete",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=round(duration_ms, 1),
+        )
         return response

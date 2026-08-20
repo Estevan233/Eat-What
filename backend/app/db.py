@@ -21,6 +21,13 @@ def build_engine_options(database_url: str, *, debug: bool) -> dict[str, Any]:
     elif database_url.startswith("mysql"):
         options["pool_pre_ping"] = True
         options["pool_recycle"] = 300
+        options["pool_size"] = 3
+        options["max_overflow"] = 2
+        options["pool_timeout"] = 10
+        options["connect_args"] = {
+            "connect_timeout": 5,
+            "charset": "utf8mb4",
+        }
     return options
 
 
@@ -29,7 +36,13 @@ engine = create_engine(
     **build_engine_options(settings.database_url, debug=settings.debug),
 )
 
-SessionLocal = sessionmaker(bind=engine, class_=Session, autocommit=False, autoflush=False)
+SessionLocal = sessionmaker(
+    bind=engine,
+    class_=Session,
+    autocommit=False,
+    autoflush=False,
+    expire_on_commit=False,
+)
 
 
 def init_db() -> None:

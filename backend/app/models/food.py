@@ -8,7 +8,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Column
+from sqlalchemy import Column, Text
 from sqlalchemy.types import JSON
 from sqlmodel import Field, SQLModel
 
@@ -40,7 +40,7 @@ class Food(SQLModel, table=True):
     cooking_time_min: int | None = Field(default=None)
     image_url: str | None = Field(default=None, max_length=512)
     seasonal_solar_terms_json: list[str] = Field(default=[], sa_column=Column(JSON))
-    description: str | None = Field(default=None)
+    description: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
     meal_role: str | None = Field(default=None, max_length=16, index=True)
     recipe_ready: bool = Field(default=False, index=True)
     visual_key: str | None = Field(default=None, max_length=64)

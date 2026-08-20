@@ -43,6 +43,8 @@
 - `POST /api/v1/daily/recommend` 的请求和响应 JSON 结构保持兼容，前端无需同步修改。
 - `GET /daily/today`、`GET /daily/history` 和 `POST /daily/choose` 行为保持兼容。
 - 新表通过 MVP 现有 `SQLModel.metadata.create_all` 创建，不修改已有表结构。
+- 小程序 API 基址支持由 VITE_API_BASE_URL 配置；未配置时继续使用本地 http://localhost:8000。
+- 提供 Windows 微信开发者工具连接 WSL 构建目录、模拟器调试、真机调试和扫码预览的操作文档。
 
 ## Acceptance Criteria
 
@@ -58,6 +60,8 @@
 - [ ] 现有 API 响应结构保持不变，既有后端测试与新增回归测试全部通过。
 - [ ] 200 道菜规模下，纯规则推荐服务耗时继续小于 500ms（不含天气 HTTP 请求）。
 - [ ] 当前依赖中不新增 Agent/LLM SDK。
+- [ ] 微信开发者工具导入 miniapp/dist/dev/mp-weixin 后项目根目录存在 app.json，本地模拟器可请求 WSL 后端。
+- [ ] 文档明确说明手机扫码预览不能访问电脑的 localhost，完整真机预览需要 HTTPS API 与微信公众平台 request 合法域名。
 
 ## Out of Scope
 

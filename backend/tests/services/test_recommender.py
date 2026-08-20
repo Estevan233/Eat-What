@@ -28,6 +28,7 @@ from typing import Any
 from unittest.mock import AsyncMock
 
 import pytest
+from sqlalchemy import event
 from sqlmodel import select
 
 from app.core.errors import ExternalAPIError, NotFoundError
@@ -41,7 +42,7 @@ from app.schemas.daily import RecommendRequest
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 from app.services import recommender
-from app.services.recommendation_ranking import RULE_V3_WEIGHTS, RerankAdjustment
+from app.services.recommendation_ranking import RULE_V4_WEIGHTS, RerankAdjustment
 
 # ---- Fixtures ----
 
@@ -257,7 +258,7 @@ def seeded_session(session):
 # ---- 测试 ----
 
 
-def test_score_food_uses_exact_v3_caps() -> None:
+def test_score_food_uses_exact_v4_caps() -> None:
     food = _make_food(
         'v3满分菜',
         cooking_method='steam',
@@ -294,15 +295,14 @@ def test_score_food_uses_exact_v3_caps() -> None:
         'high',
     )
 
-    assert ranked.breakdown.weather == RULE_V3_WEIGHTS['weather']
-    assert ranked.breakdown.solar_term == RULE_V3_WEIGHTS['solar_term']
-    assert ranked.breakdown.mood == RULE_V3_WEIGHTS['mood']
-    assert ranked.breakdown.nutrition == RULE_V3_WEIGHTS['nutrition']
-    assert ranked.breakdown.constitution == RULE_V3_WEIGHTS['constitution']
-    assert ranked.breakdown.activity == RULE_V3_WEIGHTS['activity']
-    assert ranked.breakdown.method_time == RULE_V3_WEIGHTS['method_time']
-    assert ranked.breakdown.zodiac == RULE_V3_WEIGHTS['zodiac']
-    assert ranked.breakdown.total == 75
+    assert ranked.breakdown.nutrition == RULE_V4_WEIGHTS['nutrition']
+    assert ranked.breakdown.seasonal_wellness == RULE_V4_WEIGHTS['seasonal_wellness']
+    assert ranked.breakdown.personal_family == RULE_V4_WEIGHTS['personal_family']
+    assert ranked.breakdown.preference_history == RULE_V4_WEIGHTS['preference_history']
+    assert ranked.breakdown.feasibility == RULE_V4_WEIGHTS['feasibility']
+    assert ranked.breakdown.diversity == RULE_V4_WEIGHTS['diversity']
+    assert ranked.breakdown.weather_modifier == 3.0
+    assert ranked.breakdown.total == 100
 
 
 def test_hard_filter_only_keeps_recipe_ready_safe_foods() -> None:
@@ -335,6 +335,68 @@ async def test_returns_three_foods(session, seeded_session, monkeypatch):
     for f in resp.foods:
         assert f.reason
         assert 0.0 <= f.score <= 100.0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("party_size", "expected_roles"),
+    [
+        (2, ['main', 'vegetable', 'staple']),
+        (4, ['main', 'main', 'vegetable', 'staple']),
+        (6, ['main', 'main', 'vegetable', 'vegetable', 'staple']),
+        (8, ['main', 'main', 'main', 'vegetable', 'vegetable', 'staple']),
+    ],
+)
+async def test_family_recommendation_scales_menu_with_party_size(
+    session,
+    seeded_session,
+    monkeypatch,
+    party_size,
+    expected_roles,
+):
+    user, _ = seeded_session
+    _patch_external(monkeypatch)
+
+    response = await recommender.recommend(
+        session,
+        user,
+        RecommendRequest(
+            mood="neutral",
+            audience="family",
+            party_size=party_size,
+        ),
+    )
+
+    assert [item.meal_role for item in response.primary_meal.items] == expected_roles
+    assert len({item.food_id for item in response.primary_meal.items}) == len(expected_roles)
+    if party_size >= 3:
+        assert response.substitutions == []
+
+
+@pytest.mark.asyncio
+async def test_family_refresh_replaces_at_least_sixty_percent_when_pool_allows(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    user, _ = seeded_session
+    _patch_external(monkeypatch)
+    request = RecommendRequest(
+        mood="neutral",
+        audience="family",
+        party_size=4,
+    )
+
+    first = await recommender.recommend(session, user, request)
+    first_ids = [item.food_id for item in first.primary_meal.items]
+    second = await recommender.recommend(
+        session,
+        user,
+        request.model_copy(update={"exclude_food_ids": first_ids}),
+    )
+    second_ids = {item.food_id for item in second.primary_meal.items}
+
+    assert len(set(first_ids) & second_ids) <= 1
 
 
 @pytest.mark.asyncio
@@ -377,18 +439,23 @@ async def test_constitution_forbidden_filters(session, seeded_session, monkeypat
     assert "红烧肉" not in names  # forbidden_for=[tanshi,shire]
 
 
-@pytest.mark.asyncio
-async def test_weather_cold_promotes_warm(session, seeded_session, monkeypatch):
-    """天气 cold + 温热性菜（清炖牛肉/羊肉汤 nature=warm）→ 上榜。"""
-    user, _ = seeded_session
-    _patch_external(monkeypatch, weather_tag="cold", temp_c=5.0)
-    # 提供坐标才会走 weather_client，从而命中 cold tag
-    req = RecommendRequest(mood="neutral", lat=39.92, lng=116.41)
-    resp = await recommender.recommend(session, user, req)
+def test_weather_cold_only_gently_prefers_warm_food() -> None:
+    warm = _make_food("温性菜", nature="warm")
+    cool = _make_food("凉性菜", nature="cool")
+    weather = _make_weather("cold", temp_c=5.0)
+    solar = _make_today()
 
-    names = [f.name for f in resp.foods]
-    warm_foods = {"清炖牛肉", "羊肉汤"}  # nature=warm
-    assert bool(set(names) & warm_foods), f"温热性菜应上榜，实际: {names}"
+    warm_seasonal, warm_modifier = recommender._seasonal_wellness_score(
+        recommender._score_solar_term(warm, solar)[0],
+        recommender._score_weather(warm, weather)[0],
+    )
+    cool_seasonal, cool_modifier = recommender._seasonal_wellness_score(
+        recommender._score_solar_term(cool, solar)[0],
+        recommender._score_weather(cool, weather)[0],
+    )
+
+    assert warm_seasonal > cool_seasonal
+    assert warm_modifier - cool_modifier <= 6.0
 
 
 @pytest.mark.asyncio
@@ -549,6 +616,27 @@ async def test_fallback_weather_when_no_coords(session, seeded_session, monkeypa
 
 
 @pytest.mark.asyncio
+async def test_recent_weather_snapshot_skips_second_provider_request(monkeypatch):
+    """前端刚取过天气时，推荐复用快照，不再串行请求一次 Open-Meteo。"""
+    snapshot = _make_weather("rainy", temp_c=18.0).model_copy(
+        update={"fetched_at": datetime.now(timezone.utc)},
+    )
+    mock = AsyncMock()
+    monkeypatch.setattr(recommender.weather_client, "get_current", mock)
+
+    weather = await recommender._resolve_weather(
+        RecommendRequest(
+            lat=39.92,
+            lng=116.41,
+            weather_snapshot=snapshot,
+        )
+    )
+
+    assert weather == snapshot
+    mock.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_fallback_weather_when_provider_is_unavailable(
     session,
     seeded_session,
@@ -662,7 +750,7 @@ def test_weather_score_is_capped_and_gap_is_not_dominant():
     assert max(scores) - min(scores) == 12.0
 
 
-def test_score_food_uses_seventy_five_point_breakdown():
+def test_score_food_uses_one_hundred_point_breakdown():
     food = _make_food(
         "高蛋白温性菜",
         nature="warm",
@@ -682,12 +770,19 @@ def test_score_food_uses_seventy_five_point_breakdown():
         "tired",
         "high",
     )
-    assert candidate.breakdown.weather == 6.0
-    assert candidate.breakdown.solar_term == 5.0
-    assert candidate.breakdown.mood == 10.0
-    assert candidate.breakdown.constitution == 12.0
-    assert candidate.breakdown.activity == 8.0
-    assert 0.0 <= candidate.base_score <= 75.0
+    assert 0.0 <= candidate.breakdown.weather_modifier <= 3.0
+    assert 0.0 <= candidate.breakdown.seasonal_wellness <= 18.0
+    assert 0.0 <= candidate.breakdown.personal_family <= 20.0
+    assert 0.0 <= candidate.base_score <= 100.0
+
+
+def test_weather_modifier_is_bounded_inside_seasonal_wellness():
+    low_score, low_modifier = recommender._seasonal_wellness_score(15.0, 3.0)
+    high_score, high_modifier = recommender._seasonal_wellness_score(15.0, 15.0)
+
+    assert low_modifier == -3.0
+    assert high_modifier == 3.0
+    assert high_score - low_score <= 6.0
 
 
 @pytest.mark.asyncio
@@ -790,7 +885,7 @@ async def test_invalid_reranker_output_falls_back_without_reintroducing_forbidde
         .order_by(RecommendationEvent.id.desc())  # type: ignore[attr-defined]
     ).first()
     assert event is not None
-    assert event.engine == "rules_v3"
+    assert event.engine == "rules_v4"
 
 
 @pytest.mark.asyncio
@@ -830,3 +925,34 @@ async def test_two_hundred_food_recommendation_finishes_under_half_second(
     elapsed = perf_counter() - started
     assert len(response.foods) == 3
     assert elapsed < 0.5
+
+
+@pytest.mark.asyncio
+async def test_recommendation_hot_path_uses_at_most_five_selects(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    user, _ = seeded_session
+    _patch_external(monkeypatch)
+    select_statements: list[str] = []
+
+    def capture_selects(
+        _conn,
+        _cursor,
+        statement,
+        _parameters,
+        _context,
+        _executemany,
+    ) -> None:
+        if statement.lstrip().upper().startswith("SELECT"):
+            select_statements.append(statement)
+
+    engine = session.get_bind()
+    event.listen(engine, "before_cursor_execute", capture_selects)
+    try:
+        await recommender.recommend(session, user, RecommendRequest())
+    finally:
+        event.remove(engine, "before_cursor_execute", capture_selects)
+
+    assert len(select_statements) <= 5, "\n\n".join(select_statements)

@@ -222,6 +222,20 @@ def test_recommend_success_returns_three_foods(
     assert "today" in data["context"]
     assert data["context"]["weather"]["weather_tag"] == "mild"
     assert data["context"]["today"]["zodiac_sign"] == "leo"
+    assert data["weight_profile"] == {
+        "nutrition": 22,
+        "seasonal_wellness": 18,
+        "personal_family": 20,
+        "preference_history": 15,
+        "feasibility": 15,
+        "diversity": 10,
+        "weather_modifier_limit": 3,
+    }
+    assert "医疗" in data["wellness_disclaimer"]
+    server_timing = res.headers["server-timing"]
+    assert "total;dur=" in server_timing
+    assert "profile;dur=" in server_timing
+    assert "database_url" not in server_timing.lower()
 
 
 def test_recommend_invalid_lat_returns_422(client, auth_token, mock_weather, monkeypatch):
@@ -587,6 +601,55 @@ def test_choose_complete_meal_is_idempotent(
     assert first.json()["data"]["chosen_total_nutrition"] == (
         first.json()["data"]["chosen_meal"]["total_nutrition"]
     )
+
+
+def test_choose_family_meal_accepts_repeated_roles_from_primary_snapshot(
+    client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch
+):
+    from datetime import date
+
+    from app.schemas.today_context import TodayContext
+
+    monkeypatch.setattr(
+        recommender,
+        "get_today_context_cached",
+        lambda: TodayContext(
+            date=date.today(),
+            solar_term_current="",
+            solar_term_next_name="立秋",
+            solar_term_next_date="2026-08-07",
+            zodiac_sign="leo",
+            animal="马",
+            lunar_month=7,
+            lunar_day=15,
+            is_leap_month=False,
+        ),
+    )
+    recommendation_response = client.post(
+        "/api/v1/daily/recommend",
+        json={"mood": "neutral", "audience": "family", "party_size": 4},
+        headers=auth_token,
+    )
+    assert recommendation_response.status_code == 200
+    recommendation = recommendation_response.json()["data"]
+    selected = [
+        item["food_id"] for item in recommendation["primary_meal"]["items"]
+    ]
+    assert len(selected) == 4
+
+    response = client.post(
+        "/api/v1/daily/choose",
+        json={
+            "recommendation_id": recommendation["recommendation_id"],
+            "selected_food_ids": selected,
+            "substitutions": [],
+        },
+        headers=auth_token,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["data"]["chosen_food_ids"] == selected
+    assert len(response.json()["data"]["chosen_meal"]["items"]) == 4
 
 
 def test_choose_complete_meal_rejects_unknown_id(

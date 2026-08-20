@@ -10,8 +10,9 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 docker run -d --name "$name" -p 127.0.0.1::8080 \
-  -e ENVIRONMENT=prod \
+  -e ENVIRONMENT=test \
   -e DEBUG=false \
+  -e DATABASE_URL=sqlite:////tmp/container-health.db \
   -e JWT_SECRET=container-health-smoke-secret-32chars \
   -e WX_APPID=wx-container-smoke \
   -e CLOUDBASE_ENV_ID=cloud-container-smoke \

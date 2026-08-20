@@ -8,11 +8,12 @@
 from datetime import date
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlmodel import Session
 
 from app.core.deps import get_current_user, get_db
 from app.core.errors import NotFoundError, ValidationError
+from app.core.timing import TimingTrace
 from app.models.daily_log import DailyLog
 from app.models.food import Food
 from app.models.user import User
@@ -32,6 +33,7 @@ router = APIRouter(prefix="/daily", tags=["daily"])
 @router.post("/recommend", response_model=dict[str, Any])
 async def recommend_route(
     body: RecommendRequest,
+    response: Response,
     user: User = Depends(get_current_user),
     session: Session = Depends(get_db),
 ) -> dict[str, object]:
@@ -43,7 +45,14 @@ async def recommend_route(
     if user.id is None:  # pragma: no cover - DB 行必有 id
         raise RuntimeError("get_current_user 返回的 user.id 不应为 None")
 
-    resp: RecommendResponse = await recommender.recommend(session, user, body)
+    timing = TimingTrace()
+    resp: RecommendResponse = await recommender.recommend(
+        session,
+        user,
+        body,
+        timing=timing,
+    )
+    response.headers["Server-Timing"] = timing.header_value()
     return success(data=resp.model_dump(mode="json"))
 
 
@@ -132,4 +141,7 @@ def _to_log_read(log: DailyLog) -> DailyLogRead:
         mood=log.mood,
         activity_level=log.activity_level,
         weather_tag=log.weather_tag,
+        dining_mode=log.dining_mode,
+        audience=log.audience,
+        party_size=log.party_size,
     )

@@ -30,4 +30,5 @@ export const submit = (answers: Record<number, number>) =>
 export const getResult = () =>
   request<ConstitutionResult>({
     url: '/api/v1/profile/constitution',
+    silentErrorStatuses: [404],
   })

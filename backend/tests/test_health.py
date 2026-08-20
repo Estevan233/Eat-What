@@ -29,3 +29,8 @@ def test_health_database_unavailable(client, monkeypatch):
 def test_health_has_request_id_header(client):
     res = client.get("/health")
     assert "x-request-id" in res.headers
+
+
+def test_health_has_server_timing_header(client):
+    res = client.get("/health")
+    assert res.headers["server-timing"].startswith("app;dur=")

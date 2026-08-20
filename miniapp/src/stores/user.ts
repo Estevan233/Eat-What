@@ -25,6 +25,7 @@ import { cloudLogin, guestLogin } from '@/api/auth'
 import { getProfile, upsertProfile } from '@/api/profile'
 import { getResult, submit as submitConstitution } from '@/api/constitution'
 import { getCloudContainerApi } from '@/platform/cloudbase'
+import { ApiError } from '@/types/api'
 import {
   AUTH_STORAGE_KEYS,
   clearAuthStorage,
@@ -168,7 +169,7 @@ export const useUserStore = defineStore('user', () => {
     return result
   }
 
-  /** 拉取上次体质判定结果（GET /profile/constitution）。无记录抛错，调用方自行处理。 */
+  /** 拉取上次体质判定结果。404 是正常首次空状态，真实故障保留旧缓存。 */
   async function fetchConstitution(): Promise<ConstitutionResult | null> {
     try {
       const result = await getResult()
@@ -176,9 +177,11 @@ export const useUserStore = defineStore('user', () => {
       writeStoredJson(AUTH_STORAGE_KEYS.constitution, result)
       return result
     } catch (e) {
-      // 404 / 网络错误都清空缓存，避免显示旧结果
-      constitution.value = null
-      removeStoredValue(AUTH_STORAGE_KEYS.constitution)
+      if (e instanceof ApiError && e.statusCode === 404) {
+        constitution.value = null
+        removeStoredValue(AUTH_STORAGE_KEYS.constitution)
+        return null
+      }
       throw e
     }
   }

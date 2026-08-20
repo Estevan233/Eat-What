@@ -36,6 +36,10 @@ export type Mood = 'happy' | 'neutral' | 'tired' | 'stressed' | 'anxious'
 
 export type ActivityLevel = 'light' | 'normal' | 'high'
 
+export type DiningMode = 'cook' | 'eat_out'
+
+export type Audience = 'personal' | 'family'
+
 /**
  * 9 种中医体质标识符 - 与后端 backend/app/schemas/constitution.py 的 ConstitutionType 同步。
  */
@@ -228,6 +232,11 @@ export interface RecommendRequest {
   activityLevel: ActivityLevel
   lat?: number
   lng?: number
+  diningMode: DiningMode
+  audience: Audience
+  partySize: number
+  excludeFoodIds?: number[]
+  weatherSnapshot?: WeatherData
 }
 
 export type MealRole = 'main' | 'vegetable' | 'staple'
@@ -278,6 +287,18 @@ export interface MealRecommendation {
   substitutionNotice?: string | null
   engine: string
   context: RecommendContext
+  weightProfile: RecommendationWeightProfile
+  wellnessDisclaimer: string
+}
+
+export interface RecommendationWeightProfile {
+  nutrition: number
+  seasonalWellness: number
+  personalFamily: number
+  preferenceHistory: number
+  feasibility: number
+  diversity: number
+  weatherModifierLimit: number
 }
 
 export type RecommendResponse = MealRecommendation
@@ -315,4 +336,63 @@ export interface RecipeRead {
   sourceUrl?: string | null
   nutritionBasis: string
   version: number
+}
+
+export type DiningVerdict = 'liked' | 'neutral' | 'avoided'
+
+export interface DiningMemoryUpsert {
+  shopName: string
+  dishName: string
+  verdict: DiningVerdict
+  note?: string | null
+}
+
+export interface DiningMemoryRead extends DiningMemoryUpsert {
+  id: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface DiningMemoryList {
+  items: DiningMemoryRead[]
+  page: number
+  size: number
+  total: number
+}
+
+export interface ExternalDiningRequest {
+  mood: Mood
+  activityLevel: ActivityLevel
+  audience: Audience
+  partySize: number
+  city?: string
+  lat?: number
+  lng?: number
+  excludeKeys?: string[]
+}
+
+export interface ExternalDiningSuggestion {
+  key: string
+  shopName?: string | null
+  dishName: string
+  category: string
+  mealFormat: string
+  servingStyle: 'individual' | 'shared'
+  energyKcalMinPerPerson: number
+  energyKcalMaxPerPerson: number
+  searchKeywords: string[]
+  orderTips: string[]
+  reason: string
+  seasonalNote: string
+  nutritionNote: string
+  source: 'rules' | 'memory'
+}
+
+export interface ExternalDiningResponse {
+  audience: Audience
+  partySize: number
+  cityLabel: string
+  suggestions: ExternalDiningSuggestion[]
+  rotationRestarted: boolean
+  disclaimer: string
 }

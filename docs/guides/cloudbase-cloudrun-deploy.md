@@ -26,16 +26,31 @@ MVP 阶段不需要单独购买 VPS。`callContainer` 负责小程序到同环�
 | 最大实例数 | `1`（MVP） |
 | 初始规格 | `0.25 vCPU / 0.5 GB`，压测后再调整 |
 
+环境分工：
+
+- `cloud1-d8gz4jm8vb964a1c9`：主环境，承载当前小程序和正式数据。
+- `tx-clouddev-d3g8w4jpif0222220`：预发/验收环境，不与主环境共用数据库和秘密。
+
+两个环境均已设为手动续费。这能避免到期自动扣费，但不会代替用量预算和告警；到期前应主动决定保留哪个环境。
+
 最小实例数为 0 可以压低闲时费用，但会有冷启动。若真实用户开始抱怨首次登录慢，再用数据决定是否改为 1，别一上来就给空气配豪宅。
 
 ## 3. 部署前安全处理
 
 用户曾在聊天中发送过小程序 AppSecret，应立即在微信公众平台重置。旧值视为已经泄露，不要再使用，也不要写入 Git、前端变量或截图。
 
-生成 JWT 密钥：
+生成 JWT 密钥（任意可信本地终端均可，推荐 WSL）：
 
 ```bash
 openssl rand -hex 32
+```
+
+这会输出 64 个十六进制字符。它是本项目给登录 Token 签名的独立随机密钥，不需要到微信或腾讯云“申请”，也不能复用 AppSecret/MySQL 密码。生成后直接复制到云托管新版本的 `JWT_SECRET` 环境变量，不要发到聊天、截图或提交到 Git。
+
+Windows PowerShell 也可调用 WSL 生成：
+
+```powershell
+wsl -d Ubuntu-22.04 -- openssl rand -hex 32
 ```
 
 正常的 CloudBase 登录依赖云托管可信身份头，不依赖 `code2session`。因此生产环境设置：
@@ -46,11 +61,23 @@ ENABLE_CODE2SESSION=false
 
 ## 4. 准备 CloudBase MySQL
 
-在同一个云开发环境中创建 MySQL 实例和数据库，获取内网地址、用户名和密码。容器使用同环境内网连接，连接串格式：
+当前个人版开通云托管私有网络会触发昂贵的套餐升级，不能为了“内网”两个字每月多交一大笔钱。现阶段保留已跑通的外网直连作为**有期限的过渡链路**，不购买私有网络；同时按下面的安全约束收口：
+
+- 为应用创建专用、最小权限数据库账号，不长期使用 root；
+- 密码使用独立高强度随机值，不与 JWT/AppSecret 复用；
+- 只在云托管服务端环境变量保存连接串；
+- 开启预算告警并检查数据库审计/连接日志；
+- 完成 CloudBase MySQL HTTPS REST Repository 迁移后立即关闭外网连接。
+
+CloudBase 官方明确提示外网直连只适合开发调试，因此它不是最终生产形态。最终路线不是付费开 VPC，而是先用真实 Server API Key 验证官方 MySQL REST API 的过滤、写入、错误与事务语义，再分模块替换 SQLAlchemy 运行时访问。验证没做完前不凭文档标题脑补接口——数据库不是许愿池。
+
+当前过渡连接串格式：
 
 ```dotenv
-DATABASE_URL=mysql+pymysql://USER:URL_ENCODED_PASSWORD@INTERNAL_HOST:3306/DATABASE?charset=utf8mb4
+DATABASE_URL=mysql://USER:URL_ENCODED_PASSWORD@INTERNAL_HOST:3306/DATABASE?charset=utf8mb4
 ```
+
+应用会把 CloudBase 复制出来的 `mysql://` 自动转为 SQLAlchemy 需要的 `mysql+pymysql://`。两种写法都可，但不要保留 `[DB-USERNAME]` / `[DB-PASSWORD]` 占位符。
 
 密码中的 `@`、`:`、`/`、`#` 等字符必须 URL 编码。数据库应使用 `utf8mb4`。
 
@@ -77,36 +104,68 @@ ENABLE_CODE2SESSION=false
 OPEN_METEO_API=https://api.open-meteo.com/v1/forecast
 ```
 
-敏感变量通过控制台密文配置：
+敏感变量只通过云托管版本的服务端运行时环境变量配置，不写入 Dockerfile、Git 或任何 `VITE_*` 变量：
 
 ```dotenv
 DATABASE_URL=<CloudBase MySQL 内网连接串>
 JWT_SECRET=<至少 32 字节的随机值>
 ```
 
+“服务端环境变量”不等于“前端可见变量”；CloudBase 官方文档说明它们绑定到特定服务版本。如果当前控制台没有单独的“密文”输入类型，就不要把它误称为完整 Secret Manager；对此 MVP，使用服务端版本环境变量即可，但要限制控制台账号权限并避免截图。
+
+### 启动探针报 `connection refused`
+
+如果镜像构建成功，但 Readiness/Liveness 报 `8080 connection refused`，表示 Uvicorn 未成功监听或已退出。先在“部署日志及详情”中找容器的第一条 Python/Uvicorn 错误，不要盯着最后的探针摘要。本项目最常见的启动拦截项是：
+
+- `JWT_SECRET` 未设置或少于 32 字节；
+- `DATABASE_URL` 仍是 SQLite、含占位符，或密码未 URL 编码；
+- `DEBUG` / `ENABLE_CODE2SESSION` 不是 `false`；
+- 云托管服务端口不是 `8080`，或 `PORT` 值带了额外引号。
+
 不要设置前端可见的 `WX_SECRET`。当前正式登录路径不需要它。
 
-## 6. 容器启动顺序
+同时确认生产配置：
 
-Dockerfile 启动时依次执行：
+```dotenv
+JWT_ALGORITHM=HS256
+```
 
-1. `alembic upgrade head`
-2. `eat-what seed-all`
-3. `uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}`
+服务会在 `ENVIRONMENT=prod` 时拒绝 SQLite、`DEBUG=true`、`ENABLE_CODE2SESSION=true` 和非 HS256 配置，避免部署页面显示绿色，数据却悄悄写进一次性容器。
 
-`seed-all` 是幂等的，会准备 205 道菜和 60 份逐人份菜谱。MVP 最大实例数为 1，启动时迁移尚可接受；将来扩容到多实例前，应把数据库迁移拆成独立发布任务，避免多个容器争抢迁移。
+## 6. 迁移与容器启动
 
-首次部署日志应能看到数据库升级到最新迁移，以及菜品/菜谱种子完成。启动异常时从日志里的第一条异常查起，不要只盯着最后一条连锁报错。
+应用容器只启动 Uvicorn，不在每个实例启动时执行 DDL 或种子导入：
+
+```text
+uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
+```
+
+首次部署或包含迁移的版本发布时：
+
+1. 发布新镜像，但先不要让用户流量进入新功能。
+2. 访问一次 `/health` 唤起实例。
+3. 在云托管“实例详情 → Webshell”中进入任一新版本实例。
+4. 执行 `/app/scripts/release.sh`，等待 Alembic 和幂等 seed 全部完成。
+5. 再执行 `/health` 和业务烟测，然后切换流量。
+
+`release.sh` 只做一次 `alembic upgrade head` 和 `eat-what seed-all`。不要同时在多个实例运行；未来接入 CI 时，应把它变成带数据库锁的一次性发布任务。
 
 ## 7. 部署后验证
 
-先在云托管控制台或服务测试入口验证：
+先确认 release 脚本成功，再在云托管控制台或服务测试入口验证：
 
 ```text
 GET /health
 ```
 
-预期返回 2xx 且状态为健康。随后用小程序通过 `callContainer` 验证：
+预期返回 2xx 且状态为健康。注意 `/health` 的 `SELECT 1` 只证明连接可用，不证明迁移和种子完整；首次发布还需在 Webshell 执行：
+
+```sh
+alembic current
+eat-what seed-all
+```
+
+随后用小程序通过 `callContainer` 验证：
 
 1. 游客登录；
 2. 微信一键登录；
@@ -114,6 +173,21 @@ GET /health
 4. 获取完整餐盘推荐；
 5. 打开菜谱、替换单项、收藏并确认整套餐；
 6. 重启/冷启动后检查历史仍存在。
+7. 切换“自己做 / 点外卖或到店吃”，检查两条结果不串台；
+8. 拒绝定位后手填城市，仍能获取外食方向；
+9. 以“喜欢 / 一般 / 避雷”保存店铺＋菜品记录，重新登录后依然存在；
+10. 家庭模式分别测试 2、4、6、8 人，依次得到 3、4、5、6 项；重复角色的菜品 ID 不重复，界面同时显示每人和全桌能量估算。
+
+本版本还需连续点击四次“换一套完整餐”和“给我 3 个外食方向”：相邻两批至少更换 2 项，候选充足时 3 项全换；忌口、体质禁忌和明确标记“避雷”的店铺＋菜品不得为了凑数重新混入。
+
+推荐响应会返回标准 `Server-Timing` 响应头，例如：
+
+```text
+total;dur=120.4, profile;dur=8.1, weather;dur=0.1, history;dur=23.6,
+catalog;dur=31.7, rank;dur=4.8, write;dur=38.5, app;dur=128.9
+```
+
+结合 `X-Request-ID` 和云托管日志判断瓶颈：`app` 很小但手机总耗时高，问题在网络/容器唤醒；`weather` 高说明天气快照未命中；数据库阶段高则继续查连接与 SQL。请分别记录冷启动第一次和实例已唤醒后的三次请求，不要拿第一次 1500ms 给所有请求判刑。
 
 如业务不需要公网直连，关闭不必要的公网访问入口。设置费用预算和告警，观察至少一周的调用次数、冷启动延迟、CPU、内存和 MySQL 使用量后再调整规格。
 
@@ -134,6 +208,17 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 
 确认云环境后，依次做编译、预览、真机调试和上传。
 
+本次验证产物：
+
+```text
+后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v5.zip
+微信工具目录：/root/miniapp-trellis/miniapp/dist/build/mp-weixin
+```
+
+上传后端包时选择“压缩包”，目标目录留空，Dockerfile 选择“有”；压缩包根目录应直接看到 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。
+
+2026-08-20 本地校验记录：后端 321 个测试、前端 44 个测试、类型检查、ESLint、小程序生产构建、Docker 镜像构建和容器健康检查全部通过。上传包 SHA-256 为 6ae9fec21399204bd0629f2ef76c8e6753cebec87b7f51968d5e44f76dd9d721。
+
 ## 9. 回滚
 
 - 应用异常：在云托管版本管理中把流量切回上一稳定版本。
@@ -145,3 +230,7 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 - [CloudBase 云托管：从源代码部署](https://docs.cloudbase.net/run/deploy/deploy/deploying-source-code)
 - [CloudBase 云托管：小程序访问服务](https://docs.cloudbase.net/run/develop/access/mini)
 - [CloudBase MySQL 初始化](https://docs.cloudbase.net/database/configuration/db/tdsql/initialization)
+- [CloudBase MySQL 直连服务](https://docs.cloudbase.net/database/configuration/db/tdsql/direct-connection)
+- [云托管集成 MySQL 与私有网络](https://docs.cloudbase.net/run/develop/resource-integration/mysql)
+- [CloudBase MySQL HTTP REST API](https://docs.cloudbase.net/http-api/mysqldb/mysql-restful-api)
+- [云托管 Webshell](https://docs.cloudbase.net/run/maintain/webshell)
