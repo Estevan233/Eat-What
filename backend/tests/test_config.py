@@ -18,6 +18,43 @@ def test_cloud_mode_does_not_require_wx_secret() -> None:
     assert settings.validate_required() == []
 
 
+def test_cloudbase_rest_mode_requires_server_api_key_not_database_url() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        debug=False,
+        database_backend="cloudbase_rest",
+        database_url="sqlite:///./unused.db",
+        cloudbase_db_api_key="",
+        jwt_secret="x" * 32,
+        wx_appid="wx-test",
+        cloudbase_env_id="cloud-test",
+        enable_code2session=False,
+    )
+
+    missing = settings.validate_required()
+
+    assert "CLOUDBASE_DB_API_KEY" in missing
+    assert "DATABASE_URL" not in missing
+
+
+def test_cloudbase_rest_mode_stays_gated_until_runtime_repositories_are_complete() -> None:
+    settings = Settings(
+        _env_file=None,
+        environment="production",
+        debug=False,
+        database_backend="cloudbase_rest",
+        database_url="sqlite:///./unused.db",
+        cloudbase_db_api_key="k" * 48,
+        jwt_secret="x" * 32,
+        wx_appid="wx-test",
+        cloudbase_env_id="cloud-test",
+        enable_code2session=False,
+    )
+
+    assert settings.validate_required() == ["DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY"]
+
+
 def test_cloudbase_standard_mysql_url_uses_installed_pymysql_driver() -> None:
     settings = Settings(
         _env_file=None,

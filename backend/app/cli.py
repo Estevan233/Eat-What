@@ -34,8 +34,8 @@ def main() -> int:
 def _run_seed_food() -> int:
     """执行 seed-food：建表 + 灌数据 + 打印条数。
 
-    环境要求：JWT_SECRET / WX_APPID / WX_SECRET 已在 .env 或环境变量里
-    （config.validate_required() 会在 init 时校验）。
+    环境要求：JWT_SECRET / WX_APPID / CLOUDBASE_ENV_ID 已在 .env 或环境变量里。
+    正式 CloudBase 登录不需要 WX_SECRET；仅显式开启旧 code2session 时才需要。
     """
     from app.db import SessionLocal, init_db
     from app.services.food_seed import DEFAULT_SEED_PATH, import_seed

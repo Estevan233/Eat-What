@@ -10,29 +10,22 @@
 7. POST 缺题 → 422（pydantic 通过 dict 校验，service 层校验体 422）
 
 学习点：
-- 复用 test_profile.py 的 auth_token fixture 模式：mock wx-login 拿 token
+- 复用 test_profile.py 的 auth_token fixture 模式：guest-login 拿 token
 - POST/GET 都用带 Authorization header 的 TestClient 调
 """
-from unittest.mock import AsyncMock
 
 import pytest
 
 from app.models.user_profile import UserProfile
-from app.services.wx_client import Code2SessionResult
 
 
 @pytest.fixture
-def auth_token(client, monkeypatch):
-    """构造登录成功场景，返回带 token 的 Authorization header。"""
-    from app.services import wx_client as mod
-    result: Code2SessionResult = {
-        "openid": "openid_for_constitution_test",
-        "session_key": "fake_session_key",
-        "unionid": None,
-    }
-    mod.wx_client.code2session = AsyncMock(return_value=result)
-
-    res = client.post("/api/v1/auth/wx-login", json={"code": "fake_code"})
+def auth_token(client):
+    """使用不依赖 AppSecret 的游客路径获取测试 token。"""
+    res = client.post(
+        "/api/v1/auth/guest-login",
+        json={"guest_id": "constitution-test-user"},
+    )
     assert res.status_code == 200
     token = res.json()["data"]["token"]
     return {"Authorization": f"Bearer {token}"}

@@ -40,11 +40,7 @@ def test_record_recommendation_keeps_events_and_latest_daily_log(session):
     )
 
     logs = list(session.exec(select(DailyLog)).all())
-    events = list(
-        session.exec(
-            select(RecommendationEvent).order_by(RecommendationEvent.id)
-        ).all()
-    )
+    events = list(session.exec(select(RecommendationEvent).order_by(RecommendationEvent.id)).all())
     assert len(logs) == 1
     assert logs[0].recommended_food_ids_json == [4, 5, 6]
     assert logs[0].chosen_food_ids_json == []
@@ -57,6 +53,41 @@ def test_record_recommendation_keeps_events_and_latest_daily_log(session):
     ]
     sensitive_fields = {"lat", "lng", "birthday", "height_cm", "weight_kg"}
     assert sensitive_fields.isdisjoint(RecommendationEvent.model_fields)
+
+
+def test_record_recommendation_is_idempotent_for_same_request_id(session):
+    user = _create_user(session)
+    assert user.id is not None
+
+    first_log, first_event = daily_service.record_recommendation(
+        session,
+        user.id,
+        recommended_food_ids=[1, 2, 3],
+        mood="neutral",
+        activity_level="normal",
+        weather_tag="mild",
+        engine="rules_v4",
+        request_id="request-idempotent-001",
+    )
+    repeated_log, repeated_event = daily_service.record_recommendation(
+        session,
+        user.id,
+        recommended_food_ids=[4, 5, 6],
+        mood="tired",
+        activity_level="high",
+        weather_tag="rainy",
+        engine="rules_v4",
+        request_id="request-idempotent-001",
+    )
+
+    events = list(session.exec(select(RecommendationEvent)).all())
+    logs = list(session.exec(select(DailyLog)).all())
+    assert len(events) == 1
+    assert len(logs) == 1
+    assert repeated_event.id == first_event.id
+    assert repeated_log.id == first_log.id
+    assert events[0].request_id == "request-idempotent-001"
+    assert logs[0].recommended_food_ids_json == [1, 2, 3]
 
 
 def test_record_recommendation_persists_immutable_meal_payload(session):

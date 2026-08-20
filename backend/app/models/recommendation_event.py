@@ -1,8 +1,10 @@
 """推荐曝光事件：一次成功推荐对应一行。"""
+
 from datetime import date, datetime
 from typing import Any
+from uuid import uuid4
 
-from sqlalchemy import Column, Index
+from sqlalchemy import Column, Index, UniqueConstraint
 from sqlalchemy.types import JSON
 from sqlmodel import Field, SQLModel
 
@@ -13,9 +15,14 @@ class RecommendationEvent(SQLModel, table=True):
     __tablename__ = "recommendation_events"
     __table_args__ = (
         Index("ix_recommendation_events_user_date", "user_id", "event_date"),
+        UniqueConstraint(
+            "request_id",
+            name="uq_recommendation_events_request_id",
+        ),
     )
 
     id: int | None = Field(default=None, primary_key=True)
+    request_id: str = Field(default_factory=lambda: str(uuid4()), max_length=64)
     user_id: int = Field(foreign_key="users.id", index=True)
     event_date: date = Field(index=True)
     recommended_food_ids_json: list[int] = Field(

@@ -4,9 +4,11 @@
 - BaseSettings 会自动按字段名匹配 .env 里的同名变量
 - lru_cache 让 get_settings() 单例化，避免重复读 .env
 """
-from functools import lru_cache
 
-from pydantic import field_validator
+from functools import lru_cache
+from typing import Literal
+
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,6 +21,10 @@ class Settings(BaseSettings):
 
     # 数据库
     database_url: str = "sqlite:///./dev.db"
+    database_backend: Literal["sqlalchemy", "cloudbase_rest"] = "sqlalchemy"
+    cloudbase_db_api_key: SecretStr | None = None
+    cloudbase_db_timeout_seconds: float = 5.0
+    cloudbase_db_read_retries: int = 1
 
     # JWT
     jwt_secret: str = ""
@@ -63,8 +69,9 @@ class Settings(BaseSettings):
         if self.enable_code2session and not self.wx_secret:
             missing.append("WX_SECRET")
         if self.environment.lower() in {"prod", "production"}:
-            if not self.database_url.startswith("mysql+pymysql://"):
-                missing.append("DATABASE_URL")
+            database_requirement = self._production_database_requirement()
+            if database_requirement is not None:
+                missing.append(database_requirement)
             if self.debug:
                 missing.append("DEBUG")
             if self.enable_code2session:
@@ -72,6 +79,22 @@ class Settings(BaseSettings):
             if self.jwt_algorithm != "HS256":
                 missing.append("JWT_ALGORITHM")
         return missing
+
+    def _production_database_requirement(self) -> str | None:
+        if self.database_backend == "sqlalchemy":
+            if not self.database_url.startswith("mysql+pymysql://"):
+                return "DATABASE_URL"
+            return None
+        api_key = (
+            self.cloudbase_db_api_key.get_secret_value()
+            if self.cloudbase_db_api_key is not None
+            else ""
+        )
+        if not api_key:
+            return "CLOUDBASE_DB_API_KEY"
+        # REST 客户端已可做独立只读验证，但业务 service 尚未全部切换 Repository。
+        # 在迁移完成前 fail closed，防止生产误落到默认 SQLite。
+        return "DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY"
 
 
 @lru_cache

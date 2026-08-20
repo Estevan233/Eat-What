@@ -11,23 +11,19 @@ T09 覆盖：
 6. lat/lng 越界 → 422
 7. mock weather_client 不真实联网
 """
+
 from unittest.mock import AsyncMock
 
 import pytest
 
 
 @pytest.fixture
-def auth_token(client, monkeypatch):
-    """构造登录 token，与 test_constitution.py 同风格。"""
-    from app.services import wx_client as mod
-    from app.services.wx_client import Code2SessionResult
-    result: Code2SessionResult = {
-        "openid": "openid_for_weather_test",
-        "session_key": "fake",
-        "unionid": None,
-    }
-    mod.wx_client.code2session = AsyncMock(return_value=result)
-    res = client.post("/api/v1/auth/wx-login", json={"code": "fake"})
+def auth_token(client):
+    """使用不依赖 AppSecret 的游客路径获取测试 token。"""
+    res = client.post(
+        "/api/v1/auth/guest-login",
+        json={"guest_id": "context-test-user"},
+    )
     assert res.status_code == 200
     token = res.json()["data"]["token"]
     return {"Authorization": f"Bearer {token}"}
@@ -106,6 +102,7 @@ def test_get_today_context_calls_are_consistent(client):
     """同一天两次调用响应一致（缓存生效）。"""
     # 清缓存（路由走 cached 版本）
     from app.services.solar_terms import _get_today_context_cached
+
     _get_today_context_cached.cache_clear()
 
     r1 = client.get("/api/v1/context/today")
@@ -121,8 +118,18 @@ def test_get_today_context_zodiac_value_in_12_signs(client):
     res = client.get("/api/v1/context/today")
     sign = res.json()["data"]["zodiac_sign"]
     assert sign in {
-        "aries", "taurus", "gemini", "cancer", "leo", "virgo",
-        "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces",
+        "aries",
+        "taurus",
+        "gemini",
+        "cancer",
+        "leo",
+        "virgo",
+        "libra",
+        "scorpio",
+        "sagittarius",
+        "capricorn",
+        "aquarius",
+        "pisces",
     }
 
 
@@ -169,7 +176,13 @@ def test_post_weather_authenticated_returns_data(client, auth_token, mock_weathe
 
     # weather_tag 在 6+1 集合
     assert data["weather_tag"] in {
-        "cold", "hot", "rainy", "snowy", "dry", "mild", "any",
+        "cold",
+        "hot",
+        "rainy",
+        "snowy",
+        "dry",
+        "mild",
+        "any",
     }
 
 

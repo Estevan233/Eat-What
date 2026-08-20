@@ -21,6 +21,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 # ---- 枚举（与 PRD schema + cooking_method 实际用到的枚举同步）----
 
@@ -51,7 +52,7 @@ THRESHOLD_HAS_FULL_NUTRITION = 0.80
 THRESHOLD_HAS_SOLAR_TERMS = 0.50
 
 
-def validate(data: list, min_foods: int) -> tuple[list[str], list[str]]:
+def validate(data: list[dict[str, Any]], min_foods: int) -> tuple[list[str], list[str]]:
     """返回 (errors, warnings)。errors 会阻断，warnings 仅提示。"""
     errors: list[str] = []
     warnings: list[str] = []

@@ -10,31 +10,19 @@
 7. forbidden_tag 非法 → 422
 
 学习点：
-- 通过 wx-login mock 端点拿 token，再带 Authorization 头调 profile 端点
+- 通过 guest-login 拿 token，再带 Authorization 头调 profile 端点
 - 422 是 Pydantic 校验失败时的默认状态码（FastAPI 的 RequestValidationError）
 """
-from unittest.mock import AsyncMock
 
 import pytest
 
-from app.services.wx_client import Code2SessionResult
-
 
 @pytest.fixture
-def auth_token(client, monkeypatch):
-    """构造一个登录成功场景，返回带 token 的 Authorization header。"""
-    # mock wx_client 返回成功
-    from app.services import wx_client as mod
-    result: Code2SessionResult = {
-        "openid": "openid_for_profile_test",
-        "session_key": "fake_session_key",
-        "unionid": None,
-    }
-    mod.wx_client.code2session = AsyncMock(return_value=result)
-
+def auth_token(client):
+    """使用不依赖 AppSecret 的游客路径获取测试 token。"""
     res = client.post(
-        "/api/v1/auth/wx-login",
-        json={"code": "fake_code"},
+        "/api/v1/auth/guest-login",
+        json={"guest_id": "profile-test-user"},
     )
     assert res.status_code == 200
     token = res.json()["data"]["token"]

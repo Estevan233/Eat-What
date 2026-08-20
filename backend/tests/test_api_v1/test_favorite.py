@@ -9,25 +9,19 @@
 6. GET /favorite 有数据
 7. GET /favorite 分页
 """
-from unittest.mock import AsyncMock
 
 import pytest
 
 from app.models.food import Food
-from app.services.wx_client import Code2SessionResult
 
 
 @pytest.fixture
-def auth_token(client, monkeypatch):
-    """登录拿 token。"""
-    from app.services import wx_client as mod
-    result: Code2SessionResult = {
-        "openid": "openid_for_fav_test",
-        "session_key": "fake",
-        "unionid": None,
-    }
-    mod.wx_client.code2session = AsyncMock(return_value=result)
-    res = client.post("/api/v1/auth/wx-login", json={"code": "fake"})
+def auth_token(client):
+    """使用不依赖 AppSecret 的游客路径获取测试 token。"""
+    res = client.post(
+        "/api/v1/auth/guest-login",
+        json={"guest_id": "favorite-test-user"},
+    )
     assert res.status_code == 200
     token = res.json()["data"]["token"]
     return {"Authorization": f"Bearer {token}"}
@@ -37,6 +31,7 @@ def auth_token(client, monkeypatch):
 def seed_foods(client):
     """直接用 session 建 5 道菜，返回 food_ids。"""
     from app.db import SessionLocal
+
     session = SessionLocal()
     try:
         foods = [

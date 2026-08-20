@@ -6,13 +6,16 @@
 - 推荐调 record_recommendation 原子更新 DailyLog 并追加事件；
   选择（T11）调 update_chosen_food_ids 写 chosen_food_ids
 """
+
 from collections.abc import Iterable
 from datetime import date, datetime, timedelta
 from typing import Any
+from uuid import uuid4
 
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
-from app.core.errors import InvalidMealChoiceError, MealAlreadyChosenError
+from app.core.errors import InvalidMealChoiceError, MealAlreadyChosenError, ValidationError
 from app.models.daily_log import DailyLog
 from app.models.recommendation_event import RecommendationEvent
 from app.schemas.meal import MealItem, MealNutrition, MealRole, MealSnapshot, MealSubstitution
@@ -58,11 +61,7 @@ def _prepare_today_log(
     party_size: int = 1,
 ) -> DailyLog:
     """准备当天日志但不提交，供单表与事件原子写入复用。"""
-    stmt = (
-        select(DailyLog)
-        .where(DailyLog.user_id == user_id)
-        .where(DailyLog.log_date == log_date)
-    )
+    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
     record = session.exec(stmt).first()
 
     rec_list = list(recommended_food_ids) if recommended_food_ids is not None else []
@@ -113,8 +112,23 @@ def record_recommendation(
     dining_mode: str = "cook",
     audience: str = "personal",
     party_size: int = 1,
+    request_id: str | None = None,
 ) -> tuple[DailyLog, RecommendationEvent]:
-    """原子更新当天日志并追加一次推荐曝光事件。"""
+    """原子更新当天日志并追加一次推荐曝光事件。
+
+    同一个 request_id 的重放返回第一次写入，不覆盖日报。该约束为后续
+    REST Repository 的“事件为真相、日报为投影”写入流程提供幂等基础。
+    """
+    normalized_request_id = _normalize_request_id(request_id)
+    if request_id is not None:
+        existing = _load_idempotent_recommendation(
+            session,
+            user_id,
+            normalized_request_id,
+        )
+        if existing is not None:
+            return existing
+
     target_date = event_date or date.today()
     ids = list(recommended_food_ids)
     log_record = _prepare_today_log(
@@ -130,6 +144,7 @@ def record_recommendation(
         party_size=party_size,
     )
     event = RecommendationEvent(
+        request_id=normalized_request_id,
         user_id=user_id,
         event_date=target_date,
         recommended_food_ids_json=ids,
@@ -155,10 +170,47 @@ def record_recommendation(
         log_record.recommended_meal_json = recommended_meal
         session.add(log_record)
         session.commit()
+    except IntegrityError:
+        session.rollback()
+        repeated = _load_idempotent_recommendation(
+            session,
+            user_id,
+            normalized_request_id,
+        )
+        if repeated is not None:
+            return repeated
+        raise
     except Exception:
         session.rollback()
         raise
     return log_record, event
+
+
+def _normalize_request_id(request_id: str | None) -> str:
+    if request_id is None:
+        return str(uuid4())
+    normalized = request_id.strip()
+    if not normalized or len(normalized) > 64:
+        raise ValidationError("request_id 必须为 1 到 64 个字符")
+    return normalized
+
+
+def _load_idempotent_recommendation(
+    session: Session,
+    user_id: int,
+    request_id: str,
+) -> tuple[DailyLog, RecommendationEvent] | None:
+    event = session.exec(
+        select(RecommendationEvent).where(RecommendationEvent.request_id == request_id)
+    ).first()
+    if event is None:
+        return None
+    if event.user_id != user_id:
+        raise ValidationError("推荐请求号已被占用")
+    record = get_today(session, user_id, log_date=event.event_date)
+    if record is None or record.recommendation_event_id != event.id:
+        raise ValidationError("推荐事件已写入，但今日日志投影待修复")
+    return record, event
 
 
 def _recommendation_summary(
@@ -268,8 +320,7 @@ def _allowed_items_by_role(
     primary_by_role: dict[MealRole, MealItem],
 ) -> dict[MealRole, dict[int, MealItem]]:
     allowed: dict[MealRole, dict[int, MealItem]] = {
-        role: {item.food_id: item}
-        for role, item in primary_by_role.items()
+        role: {item.food_id: item} for role, item in primary_by_role.items()
     }
     for raw in event.substitution_options_json:
         option = MealSubstitution.model_validate(raw)
@@ -283,9 +334,7 @@ def _resolve_selected_items(
 ) -> dict[MealRole, MealItem]:
     chosen_by_role: dict[MealRole, MealItem] = {}
     for food_id in selected:
-        matching_roles = [
-            role for role, items in allowed_by_role.items() if food_id in items
-        ]
+        matching_roles = [role for role, items in allowed_by_role.items() if food_id in items]
         if len(matching_roles) != 1:
             raise InvalidMealChoiceError(f"菜品 {food_id} 不在本次推荐或换菜范围内")
         role = matching_roles[0]
@@ -309,8 +358,7 @@ def _validate_declared_substitutions(
         if primary_by_role[role].food_id != item.food_id
     }
     declared_substitutions = {
-        (str(item["target_role"]), int(item["replacement_food_id"]))
-        for item in substitutions
+        (str(item["target_role"]), int(item["replacement_food_id"])) for item in substitutions
     }
     if actual_substitutions != declared_substitutions:
         raise InvalidMealChoiceError("换菜声明与最终餐单不一致")
@@ -384,11 +432,7 @@ def get_today(session: Session, user_id: int, *, log_date: date | None = None) -
     """取今天的 DailyLog，不存在返回 None。T11 用。"""
     if log_date is None:
         log_date = date.today()
-    stmt = (
-        select(DailyLog)
-        .where(DailyLog.user_id == user_id)
-        .where(DailyLog.log_date == log_date)
-    )
+    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
     return session.exec(stmt).first()
 
 
@@ -403,11 +447,7 @@ def update_chosen_food_ids(
     if log_date is None:
         log_date = date.today()
 
-    stmt = (
-        select(DailyLog)
-        .where(DailyLog.user_id == user_id)
-        .where(DailyLog.log_date == log_date)
-    )
+    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
     record = session.exec(stmt).first()
     if record is None:
         return None
@@ -430,11 +470,7 @@ def append_chosen_food_id(
     if log_date is None:
         log_date = date.today()
 
-    stmt = (
-        select(DailyLog)
-        .where(DailyLog.user_id == user_id)
-        .where(DailyLog.log_date == log_date)
-    )
+    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
     record = session.exec(stmt).first()
     if record is None:
         return None

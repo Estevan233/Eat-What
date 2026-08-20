@@ -35,3 +35,5 @@ def test_all_alembic_revisions_compile_for_mysql() -> None:
     assert result.returncode == 0, result.stderr
     assert "CREATE TABLE foods" in result.stdout
     assert "TEXT" in result.stdout
+    assert "request_id VARCHAR(64) NOT NULL" in result.stdout
+    assert "uq_recommendation_events_request_id" in result.stdout

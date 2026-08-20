@@ -78,9 +78,9 @@ def client_fixture(monkeypatch, test_engine):
     # 关键环境变量，避免 get_settings() 校验失败
     monkeypatch.setenv("JWT_SECRET", "test-secret-for-pytest-only-32chars")
     monkeypatch.setenv("WX_APPID", "wx-test")
-    monkeypatch.setenv("WX_SECRET", "test-secret")
+    monkeypatch.setenv("WX_SECRET", "")
     monkeypatch.setenv("CLOUDBASE_ENV_ID", "cloud-test")
-    monkeypatch.setenv("ENABLE_CODE2SESSION", "true")
+    monkeypatch.setenv("ENABLE_CODE2SESSION", "false")
 
     # 让 lru_cache 的 get_settings 读到上面的 env
     from app.core.config import get_settings

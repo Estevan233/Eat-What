@@ -18,7 +18,7 @@ sleep 1
 
 # 2. 检查 .env 是否存在
 if [ ! -f .env ]; then
-  echo "[dev.sh] 缺少 .env，请先：cp .env.example .env 并填入 JWT_SECRET / WX_APPID / WX_SECRET"
+  echo "[dev.sh] 缺少 .env，请先：cp .env.example .env 并填入 JWT_SECRET / WX_APPID / CLOUDBASE_ENV_ID"
   exit 1
 fi
 

@@ -102,6 +102,7 @@ WX_APPID=wx59c5620b7a894f8e
 CLOUDBASE_ENV_ID=cloud1-d8gz4jm8vb964a1c9
 ENABLE_CODE2SESSION=false
 OPEN_METEO_API=https://api.open-meteo.com/v1/forecast
+DATABASE_BACKEND=sqlalchemy
 ```
 
 敏感变量只通过云托管版本的服务端运行时环境变量配置，不写入 Dockerfile、Git 或任何 `VITE_*` 变量：
@@ -110,6 +111,29 @@ OPEN_METEO_API=https://api.open-meteo.com/v1/forecast
 DATABASE_URL=<CloudBase MySQL 内网连接串>
 JWT_SECRET=<至少 32 字节的随机值>
 ```
+
+这里的 `sqlalchemy` 是当前已经跑通的过渡配置。不要仅因为代码里出现了 REST 客户端，就提前删除 `DATABASE_URL` 或关闭公网 MySQL。
+
+完成 HTTPS Repository 的真实验收并解除代码中的 fail-closed 闸门后，新版本才改为：
+
+```dotenv
+DATABASE_BACKEND=cloudbase_rest
+CLOUDBASE_DB_API_KEY=<CloudBase Server API Key>
+CLOUDBASE_DB_TIMEOUT_SECONDS=5
+CLOUDBASE_DB_READ_RETRIES=1
+```
+
+`CLOUDBASE_DB_API_KEY` 是 CloudBase 服务端管理密钥，不是微信 AppSecret。它只允许出现在云托管服务端版本环境变量；不得发送到小程序、写入 `VITE_*`、提交 Git 或粘贴到调试日志。切换前先在 Webshell 执行只读验证：
+
+```sh
+python /app/scripts/verify_cloudbase_rdb.py
+```
+
+脚本只读取一行菜品，并只输出状态、行数、总数和请求号，不打印响应正文或密钥。只有返回 `cloudbase_rdb_read_ok`，且用户隔离、过滤、Upsert、异常和修复流程均验收后，才允许切换生产 Repository 并关闭 MySQL 公网连接。
+
+当前代码会以 `DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY` 拒绝直接启动 REST 生产模式。这是刻意的安全闸门，不是配置故障。
+
+本项目不允许小程序直接读写 MySQL，所有数据都经 FastAPI。生产表的 CloudBase 客户端基础权限应统一设为“无权限”，服务端再按 JWT 用户强制追加 `user_id` 过滤；`foods`、`recipes` 即使是公开数据也先保持服务端代理，避免形成两套访问规则。Server API Key 具备管理员权限，因此代码层用户隔离测试属于上线阻断项。
 
 “服务端环境变量”不等于“前端可见变量”；CloudBase 官方文档说明它们绑定到特定服务版本。如果当前控制台没有单独的“密文”输入类型，就不要把它误称为完整 Secret Manager；对此 MVP，使用服务端版本环境变量即可，但要限制控制台账号权限并避免截图。
 
@@ -211,13 +235,13 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 本次验证产物：
 
 ```text
-后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v5.zip
+后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v6.zip
 微信工具目录：/root/miniapp-trellis/miniapp/dist/build/mp-weixin
 ```
 
 上传后端包时选择“压缩包”，目标目录留空，Dockerfile 选择“有”；压缩包根目录应直接看到 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。
 
-2026-08-20 本地校验记录：后端 321 个测试、前端 44 个测试、类型检查、ESLint、小程序生产构建、Docker 镜像构建和容器健康检查全部通过。上传包 SHA-256 为 6ae9fec21399204bd0629f2ef76c8e6753cebec87b7f51968d5e44f76dd9d721。
+2026-08-20 本地校验记录：后端 331 个测试、前端 44 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建和无 AppSecret 容器启动烟测全部通过。上传包 SHA-256 为 6f1b405296d0338f0b5086dc257e11b19fe15f055b158883fe498e03c9c929ff。
 
 ## 9. 回滚
 

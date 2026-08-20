@@ -23,6 +23,7 @@ from app.services.wx_client import Code2SessionResult
 def mock_wx_success(monkeypatch):
     """为兼容端点显式开闸，并构造成功的 code2session 返回。"""
     monkeypatch.setenv("ENABLE_CODE2SESSION", "true")
+    monkeypatch.setenv("WX_SECRET", "test-secret")
     from app.core.config import get_settings
 
     get_settings.cache_clear()

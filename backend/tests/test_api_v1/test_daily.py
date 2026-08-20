@@ -12,6 +12,7 @@
 9. 推荐写入 DailyLog（recommended_food_ids）
 10. lat/lng 提供时调 weather_client
 """
+
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 
@@ -22,20 +23,15 @@ from app.models.food import Food
 from app.models.recipe import Recipe
 from app.schemas.weather import WeatherData
 from app.services import recommender
-from app.services.wx_client import Code2SessionResult
 
 
 @pytest.fixture
-def auth_token(client, monkeypatch):
-    """登录拿 token。"""
-    from app.services import wx_client as mod
-    result: Code2SessionResult = {
-        "openid": "openid_for_daily_test",
-        "session_key": "fake",
-        "unionid": None,
-    }
-    mod.wx_client.code2session = AsyncMock(return_value=result)
-    res = client.post("/api/v1/auth/wx-login", json={"code": "fake"})
+def auth_token(client):
+    """使用不依赖 AppSecret 的游客路径获取测试 token。"""
+    res = client.post(
+        "/api/v1/auth/guest-login",
+        json={"guest_id": "daily-test-user"},
+    )
     assert res.status_code == 200
     token = res.json()["data"]["token"]
     return {"Authorization": f"Bearer {token}"}
@@ -65,6 +61,7 @@ def seed_profile_and_foods(client, auth_token):
 
     # 直接用 session 建 foods（绕开 seed-food CLI）
     from app.db import SessionLocal
+
     session = SessionLocal()
     try:
         foods = [
@@ -94,28 +91,28 @@ def seed_profile_and_foods(client, auth_token):
         session.commit()
         for f in foods:
             session.refresh(f)
-        roles = ('staple', 'main', 'main', 'vegetable', 'vegetable')
+        roles = ("staple", "main", "main", "vegetable", "vegetable")
         for food, role in zip(foods, roles, strict=True):
             assert food.id is not None
             food.meal_role = role
             food.recipe_ready = True
-            food.visual_key = f'api-{role}-{food.id}'
+            food.visual_key = f"api-{role}-{food.id}"
             session.add(food)
             session.add(
                 Recipe(
                     food_id=food.id,
                     servings=2,
                     ingredients_json=[],
-                    steps_json=['一', '二', '三', '四'],
+                    steps_json=["一", "二", "三", "四"],
                     prep_time_min=5,
                     cook_time_min=20,
                     nutrition_per_serving_json={
-                        'energy_kcal': 250,
-                        'protein_g': 10,
-                        'fat_g': 5,
-                        'carb_g': 20,
+                        "energy_kcal": 250,
+                        "protein_g": 10,
+                        "fat_g": 5,
+                        "carb_g": 20,
                     },
-                    nutrition_basis='API 测试估算',
+                    nutrition_basis="API 测试估算",
                 )
             )
         session.commit()
@@ -142,6 +139,7 @@ def mock_weather():
         fetched_at=datetime.now(timezone.utc),
     )
     from app.services import weather_client as mod
+
     mod.weather_client.get_current = AsyncMock(return_value=sample)
     mod.weather_client.cache_clear()
     yield mod.weather_client
@@ -180,8 +178,10 @@ def test_recommend_success_returns_three_foods(
     from datetime import date
 
     from app.schemas.today_context import TodayContext
+
     monkeypatch.setattr(
-        recommender, "get_today_context_cached",
+        recommender,
+        "get_today_context_cached",
         lambda: TodayContext(
             date=date.today(),
             solar_term_current="",
@@ -204,8 +204,10 @@ def test_recommend_success_returns_three_foods(
     body = res.json()
     assert body["ok"] is True
     data = body["data"]
-    assert [item['meal_role'] for item in data['primary_meal']['items']] == [
-        'main', 'vegetable', 'staple'
+    assert [item["meal_role"] for item in data["primary_meal"]["items"]] == [
+        "main",
+        "vegetable",
+        "staple",
     ]
 
     # 3 道菜
@@ -322,8 +324,10 @@ def test_recommend_writes_daily_log(
     from datetime import date
 
     from app.schemas.today_context import TodayContext
+
     monkeypatch.setattr(
-        recommender, "get_today_context_cached",
+        recommender,
+        "get_today_context_cached",
         lambda: TodayContext(
             date=date.today(),
             solar_term_current="",
@@ -350,21 +354,18 @@ def test_recommend_writes_daily_log(
     from app.db import SessionLocal
     from app.models.daily_log import DailyLog
     from app.models.recommendation_event import RecommendationEvent
+
     user_id = seed_profile_and_foods[0]
     session = SessionLocal()
     try:
-        log = session.exec(
-            select(DailyLog).where(DailyLog.user_id == user_id)
-        ).first()
+        log = session.exec(select(DailyLog).where(DailyLog.user_id == user_id)).first()
         assert log is not None
         assert log.mood == "tired"
         assert log.weather_tag == "mild"
         assert len(log.recommended_food_ids_json) == 3
         events = list(
             session.exec(
-                select(RecommendationEvent).where(
-                    RecommendationEvent.user_id == user_id
-                )
+                select(RecommendationEvent).where(RecommendationEvent.user_id == user_id)
             ).all()
         )
         assert len(events) == 1
@@ -380,8 +381,10 @@ def test_recommend_fallback_weather_without_coords(
     from datetime import date
 
     from app.schemas.today_context import TodayContext
+
     monkeypatch.setattr(
-        recommender, "get_today_context_cached",
+        recommender,
+        "get_today_context_cached",
         lambda: TodayContext(
             date=date.today(),
             solar_term_current="",
@@ -414,8 +417,10 @@ def test_recommend_calls_weather_client_with_coords(
     from datetime import date
 
     from app.schemas.today_context import TodayContext
+
     monkeypatch.setattr(
-        recommender, "get_today_context_cached",
+        recommender,
+        "get_today_context_cached",
         lambda: TodayContext(
             date=date.today(),
             solar_term_current="",
@@ -442,15 +447,15 @@ def test_recommend_calls_weather_client_with_coords(
 
 
 @pytest.fixture
-def recommend_first(
-    client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch
-):
+def recommend_first(client, auth_token, seed_profile_and_foods, mock_weather, monkeypatch):
     """先跑一次推荐，拿到 food_ids + 写入 DailyLog。"""
     from datetime import date
 
     from app.schemas.today_context import TodayContext
+
     monkeypatch.setattr(
-        recommender, "get_today_context_cached",
+        recommender,
+        "get_today_context_cached",
         lambda: TodayContext(
             date=date.today(),
             solar_term_current="",
@@ -490,7 +495,9 @@ def test_choose_food_not_found_returns_404(client, auth_token, recommend_first):
     assert res.json()["code"] == "NOT_FOUND"
 
 
-def test_choose_no_recommend_first_returns_422(client, auth_token, seed_profile_and_foods, mock_weather):
+def test_choose_no_recommend_first_returns_422(
+    client, auth_token, seed_profile_and_foods, mock_weather
+):
     """没有推荐记录就 choose → 422。"""
     res = client.post(
         "/api/v1/daily/choose",
@@ -518,9 +525,7 @@ def test_choose_success_returns_daily_log(
     assert data["recommended_food_ids"] == recommend_first
 
 
-def test_choose_idempotent_same_food(
-    client, auth_token, recommend_first
-):
+def test_choose_idempotent_same_food(client, auth_token, recommend_first):
     """重复选同一道菜 → chosen_food_ids 不重复。"""
     food_id = recommend_first[0]
     client.post(
@@ -537,9 +542,7 @@ def test_choose_idempotent_same_food(
     assert res.json()["data"]["chosen_food_ids"] == [food_id]
 
 
-def test_choose_multiple_foods(
-    client, auth_token, recommend_first
-):
+def test_choose_multiple_foods(client, auth_token, recommend_first):
     """选多道菜 → chosen_food_ids 追加。"""
     f1, f2 = recommend_first[0], recommend_first[1]
     client.post(
@@ -586,9 +589,7 @@ def test_choose_complete_meal_is_idempotent(
     ).json()["data"]
     body = {
         "recommendation_id": recommendation["recommendation_id"],
-        "selected_food_ids": [
-            item["food_id"] for item in recommendation["primary_meal"]["items"]
-        ],
+        "selected_food_ids": [item["food_id"] for item in recommendation["primary_meal"]["items"]],
         "substitutions": [],
     }
 
@@ -598,8 +599,9 @@ def test_choose_complete_meal_is_idempotent(
     assert first.status_code == second.status_code == 200
     assert first.json()["data"] == second.json()["data"]
     assert len(first.json()["data"]["chosen_meal"]["items"]) == 3
-    assert first.json()["data"]["chosen_total_nutrition"] == (
-        first.json()["data"]["chosen_meal"]["total_nutrition"]
+    assert (
+        first.json()["data"]["chosen_total_nutrition"]
+        == (first.json()["data"]["chosen_meal"]["total_nutrition"])
     )
 
 
@@ -632,9 +634,7 @@ def test_choose_family_meal_accepts_repeated_roles_from_primary_snapshot(
     )
     assert recommendation_response.status_code == 200
     recommendation = recommendation_response.json()["data"]
-    selected = [
-        item["food_id"] for item in recommendation["primary_meal"]["items"]
-    ]
+    selected = [item["food_id"] for item in recommendation["primary_meal"]["items"]]
     assert len(selected) == 4
 
     response = client.post(
@@ -774,9 +774,7 @@ def test_today_uses_stored_meal_snapshot(
     ).json()["data"]
     body = {
         "recommendation_id": recommendation["recommendation_id"],
-        "selected_food_ids": [
-            item["food_id"] for item in recommendation["primary_meal"]["items"]
-        ],
+        "selected_food_ids": [item["food_id"] for item in recommendation["primary_meal"]["items"]],
         "substitutions": [],
     }
     chosen = client.post("/api/v1/daily/choose", json=body, headers=auth_token).json()["data"]
@@ -784,7 +782,9 @@ def test_today_uses_stored_meal_snapshot(
 
     session = SessionLocal()
     try:
-        recipe = session.exec(select(Recipe).where(Recipe.food_id == body["selected_food_ids"][0])).one()
+        recipe = session.exec(
+            select(Recipe).where(Recipe.food_id == body["selected_food_ids"][0])
+        ).one()
         recipe.nutrition_per_serving_json = {
             "energy_kcal": 9999,
             "protein_g": 0,
@@ -807,18 +807,14 @@ def test_today_unauthenticated_returns_401(client):
     assert res.status_code == 401
 
 
-def test_today_no_log_returns_null(
-    client, auth_token, seed_profile_and_foods, mock_weather
-):
+def test_today_no_log_returns_null(client, auth_token, seed_profile_and_foods, mock_weather):
     """今天没有推荐过 → data=null。"""
     res = client.get("/api/v1/daily/today", headers=auth_token)
     assert res.status_code == 200
     assert res.json()["data"] is None
 
 
-def test_today_returns_log_after_recommend(
-    client, auth_token, recommend_first
-):
+def test_today_returns_log_after_recommend(client, auth_token, recommend_first):
     """推荐后 GET /daily/today → 返回 DailyLogRead。"""
     res = client.get("/api/v1/daily/today", headers=auth_token)
     assert res.status_code == 200
@@ -835,9 +831,7 @@ def test_history_unauthenticated_returns_401(client):
     assert res.status_code == 401
 
 
-def test_history_returns_logs_after_recommend(
-    client, auth_token, recommend_first
-):
+def test_history_returns_logs_after_recommend(client, auth_token, recommend_first):
     """推荐后 GET /daily/history → 1 条记录。"""
     res = client.get("/api/v1/daily/history", headers=auth_token)
     assert res.status_code == 200
@@ -847,9 +841,7 @@ def test_history_returns_logs_after_recommend(
     assert data["items"][0]["recommended_food_ids"] == recommend_first
 
 
-def test_history_days_param_validation(
-    client, auth_token
-):
+def test_history_days_param_validation(client, auth_token):
     """days=0 → 422, days=100 → 422。"""
     res1 = client.get("/api/v1/daily/history?days=0", headers=auth_token)
     assert res1.status_code == 422

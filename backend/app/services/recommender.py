@@ -30,7 +30,7 @@ from app.schemas.daily import (
     RecommendRequest,
     RecommendResponse,
 )
-from app.schemas.meal import MealBuildResult
+from app.schemas.meal import MealBuildResult, MealRole
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData, WeatherTag
 from app.services import daily_service, food_service, profile_service
@@ -503,7 +503,7 @@ def _build_complete_meal(
     recipes_by_food_id: dict[int, Recipe],
     ranking_history: RecommendationHistory,
     mood: Mood,
-    role_targets: tuple[str, ...],
+    role_targets: tuple[MealRole, ...],
 ) -> tuple[MealBuildResult, list[RankedCandidate]]:
     fresh_candidates: list[RankedCandidate] = []
     for meal_role, required_count in Counter(role_targets).items():

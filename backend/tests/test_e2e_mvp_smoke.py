@@ -2,9 +2,10 @@
 
 学习点：
 - 用一个测试函数验证整个用户旅程，模块级单测覆盖不到的"流程连贯性"
-- 全程 in-memory SQLite + mock wx code2session + mock weather + patched today_context
+- 全程 in-memory SQLite + guest-login + mock weather + patched today_context
 - 每步断言关键字段；不通过即整体 MVP 报错
 """
+
 from datetime import date, datetime, timezone
 from unittest.mock import AsyncMock
 
@@ -16,7 +17,6 @@ from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 from app.services import recommender
 from app.services import weather_client as wc_mod
-from app.services.wx_client import Code2SessionResult
 
 # 模拟一份北京温和天气
 MOCK_WEATHER = WeatherData(
@@ -48,7 +48,9 @@ MOCK_TODAY = TodayContext(
 def _seed_foods(session) -> list[int]:
     """直接走 session 建 8 道菜覆盖 5 种 cooking_method + 适合冷天/热天。"""
     foods = []
-    for i, cm in enumerate(["boil", "soup", "stir_fry", "steam", "cold", "boil", "stir_fry", "steam"]):
+    for i, cm in enumerate(
+        ["boil", "soup", "stir_fry", "steam", "cold", "boil", "stir_fry", "steam"]
+    ):
         f = Food(
             name=f"烟测菜{i}",
             category="stir_fry" if cm in ("stir_fry",) else "soup" if cm == "soup" else "staple",
@@ -72,29 +74,29 @@ def _seed_foods(session) -> list[int]:
     session.commit()
     for f in foods:
         session.refresh(f)
-    roles = ('main', 'vegetable', 'staple')
+    roles = ("main", "vegetable", "staple")
     for index, food in enumerate(foods):
         assert food.id is not None
         role = roles[index % 3]
         food.meal_role = role
         food.recipe_ready = True
-        food.visual_key = f'e2e-{role}-{food.id}'
+        food.visual_key = f"e2e-{role}-{food.id}"
         session.add(food)
         session.add(
             Recipe(
                 food_id=food.id,
                 servings=2,
                 ingredients_json=[],
-                steps_json=['一', '二', '三', '四'],
+                steps_json=["一", "二", "三", "四"],
                 prep_time_min=5,
                 cook_time_min=20,
                 nutrition_per_serving_json={
-                    'energy_kcal': 250,
-                    'protein_g': 10,
-                    'fat_g': 5,
-                    'carb_g': 20,
+                    "energy_kcal": 250,
+                    "protein_g": 10,
+                    "fat_g": 5,
+                    "carb_g": 20,
                 },
-                nutrition_basis='E2E 测试估算',
+                nutrition_basis="E2E 测试估算",
             )
         )
     session.commit()
@@ -103,11 +105,6 @@ def _seed_foods(session) -> list[int]:
 
 @pytest.fixture
 def setup_app(client, monkeypatch):
-    # mock wx code2session
-    from app.services import wx_client
-    result: Code2SessionResult = {"openid": "e2e_user", "session_key": "fake", "unionid": None}
-    wx_client.wx_client.code2session = AsyncMock(return_value=result)
-
     # mock weather
     wc_mod.weather_client.get_current = AsyncMock(return_value=MOCK_WEATHER)
     wc_mod.weather_client.cache_clear()
@@ -120,7 +117,10 @@ def setup_app(client, monkeypatch):
 
 @pytest.fixture
 def authed(client, setup_app) -> dict[str, str]:
-    res = client.post("/api/v1/auth/wx-login", json={"code": "fake"})
+    res = client.post(
+        "/api/v1/auth/guest-login",
+        json={"guest_id": "e2e-test-user"},
+    )
     assert res.status_code == 200, res.json()
     token = res.json()["data"]["token"]
     return {"Authorization": f"Bearer {token}"}
@@ -128,7 +128,6 @@ def authed(client, setup_app) -> dict[str, str]:
 
 @pytest.fixture
 def seeded_ids(session) -> list[int]:
-
     return _seed_foods(session)
 
 
@@ -176,8 +175,10 @@ def test_mvp_e2e_flow(client, authed, seeded_ids):
     rec_data = res.json()["data"]
     foods = rec_data["foods"]
     assert len(foods) == 3
-    assert [item['meal_role'] for item in rec_data['primary_meal']['items']] == [
-        'main', 'vegetable', 'staple'
+    assert [item["meal_role"] for item in rec_data["primary_meal"]["items"]] == [
+        "main",
+        "vegetable",
+        "staple",
     ]
     chosen_ids = [f["id"] for f in foods]
     for f in foods:
