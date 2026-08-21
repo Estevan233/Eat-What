@@ -1,4 +1,4 @@
-'''Typed model repository backed by CloudBase MySQL HTTPS REST operations.'''
+"""Typed model repository backed by CloudBase MySQL HTTPS REST operations."""
 
 from __future__ import annotations
 
@@ -18,11 +18,11 @@ from app.repositories.cloudbase_rdb import (
     RdbOrder,
 )
 
-ModelT = TypeVar('ModelT', bound=SQLModel)
+ModelT = TypeVar("ModelT", bound=SQLModel)
 
 
 class CloudBaseRepository:
-    '''Small typed facade; business services still own authorization filters.'''
+    """Small typed facade; business services still own authorization filters."""
 
     is_cloudbase_rest = True
 
@@ -98,10 +98,10 @@ class CloudBaseRepository:
         table = cast(Any, model).__table__
         primary_keys = [column.name for column in table.primary_key.columns]
         if len(primary_keys) != 1:
-            raise ValueError('get requires exactly one primary key')
+            raise ValueError("get requires exactly one primary key")
         return self.first(
             model,
-            filters=(RdbFilter(primary_keys[0], 'eq', identity),),
+            filters=(RdbFilter(primary_keys[0], "eq", identity),),
         )
 
     def insert(self, record: ModelT) -> ModelT:
@@ -120,7 +120,7 @@ class CloudBaseRepository:
     ) -> ModelT:
         result = self.client.update(
             self._table(type(record)),
-            self._values(record),
+            self._values(record, omit_primary_keys=True),
             filters=filters,
         )
         return self._written_model(type(record), result.rows)
@@ -136,18 +136,22 @@ class CloudBaseRepository:
 
     @staticmethod
     def _table(model: type[SQLModel]) -> str:
-        table = cast(str | None, getattr(model, '__tablename__', None))
+        table = cast(str | None, getattr(model, "__tablename__", None))
         if not table:
-            raise ValueError('model has no table name')
+            raise ValueError("model has no table name")
         return table
 
     @staticmethod
-    def _values(record: SQLModel) -> dict[str, Any]:
-        values = record.model_dump(mode='json')
+    def _values(
+        record: SQLModel,
+        *,
+        omit_primary_keys: bool = False,
+    ) -> dict[str, Any]:
+        values = record.model_dump(mode="json")
         table = cast(Any, record).__table__
         primary_keys = {column.name for column in table.primary_key.columns}
         for key in list(values):
-            if values[key] is None and key in primary_keys:
+            if key in primary_keys and (omit_primary_keys or values[key] is None):
                 values.pop(key)
         return values
 
@@ -158,7 +162,7 @@ class CloudBaseRepository:
         rows: builtins.list[dict[str, Any]],
     ) -> ModelT:
         if not rows:
-            raise RuntimeError('CloudBase REST write returned no representation')
+            raise RuntimeError("CloudBase REST write returned no representation")
         return cls._model(model, rows[0])
 
     @staticmethod
@@ -172,7 +176,7 @@ class CloudBaseRepository:
                     row[column.name] = json.loads(value)
                 except json.JSONDecodeError as exc:
                     raise RuntimeError(
-                        f'invalid JSON returned for {model.__name__}.{column.name}',
+                        f"invalid JSON returned for {model.__name__}.{column.name}",
                     ) from exc
         return model.model_validate(row)
 
