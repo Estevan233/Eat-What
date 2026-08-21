@@ -2,7 +2,7 @@
 
 日期：2026-08-20
 
-状态：全表 REST Repository、幂等投影、进程健康检查和生产配置已实现；待云端只读契约与微信端灰度验收
+状态：全表 REST Repository、幂等投影、进程健康检查和生产配置已实现；云端只读契约已通过，待 v10 写入契约与微信端灰度验收
 
 ## 目标与边界
 
@@ -48,7 +48,8 @@
 - [x] 内存 REST double 跑通用户、档案、菜品/菜谱、收藏、外食记录、推荐事件和日报幂等投影。
 - [x] 生产配置允许 `DATABASE_BACKEND=cloudbase_rest`，缺少 Server API Key 时 fail closed。
 - [x] `/health` 改为进程探活，不访问数据库，避免周期性唤醒自动暂停实例。
-- [ ] 新版本 Webshell 运行 `python /app/scripts/verify_cloudbase_rdb.py`，真实验证 `eq/in/order/limit/count` 且日志无密钥。
+- [x] v9 Webshell 运行 `python /app/scripts/verify_cloudbase_rdb.py`，真实验证 `eq/in/order/limit/count` 且日志无密钥。
+- [ ] v10 Webshell 运行 `python /app/scripts/verify_cloudbase_rdb.py --write`，真实验证用户 Insert、按主键 Update 和 Delete 清理。
 - [ ] 通过小程序验证唯一键 Upsert、事件重放、用户隔离和 401/403/503 用户提示。
 - [ ] 备份生产数据库，记录 Alembic revision、表行数与抽样校验值。
 - [ ] 发布 `DATABASE_BACKEND=cloudbase_rest` 灰度版本并完成微信端核心烟测。

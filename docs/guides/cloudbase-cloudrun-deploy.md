@@ -112,15 +112,16 @@ Server API Key 不是微信 AppSecret。它只允许出现在云托管服务端�
 python -c "import os; print('CLOUDBASE_APIKEY=' + ('SET' if os.getenv('CLOUDBASE_APIKEY') else 'MISSING'))"
 ```
 
-预期输出 `CLOUDBASE_APIKEY=SET`。随后执行只读验证：
+预期输出 `CLOUDBASE_APIKEY=SET`。随后依次执行只读与写入验证：
 
 ```sh
 python /app/scripts/verify_cloudbase_rdb.py
+python /app/scripts/verify_cloudbase_rdb.py --write
 ```
 
-脚本会只读验证 `eq`、`in`、排序、分页和精确计数，只输出状态、行数、总数和请求号，不打印响应正文或密钥。返回 `cloudbase_rdb_read_ok` 后，再通过小程序烟测真实写入、用户隔离和推荐事件重放。
+第一条验证 `eq`、`in`、排序、分页和精确计数；第二条在 `users` 表插入一条随机诊断记录、按主键更新并在 `finally` 中删除。脚本只输出状态和请求号，不打印响应正文、OpenID 或密钥。必须同时看到 `cloudbase_rdb_read_ok` 和 `cloudbase_rdb_write_ok`。若写入仍返回 403，先检查 Server API Key 与表级写权限，不要把客户端权限粗暴改成“所有用户可写”。
 
-新 REST 版本运行时不需要 `DATABASE_URL`。为了分钟级回滚，可以暂时保留上一稳定 SQLAlchemy 部署版本及其环境变量，但不要把数据库密码复制到新代码、镜像或前端。REST 灰度通过后即可在 CloudBase 控制台关闭 MySQL 公网地址；自动暂停开关继续保持开启。
+新 REST 版本运行时会忽略 `DATABASE_URL`。为了分钟级回滚，可以暂时保留上一稳定 SQLAlchemy 部署版本及其环境变量，但不要误以为它会修复 REST 403。v10 写入验收和微信端灰度通过后，从新版本删除 `DATABASE_URL`，再在 CloudBase 控制台关闭 MySQL 公网地址；自动暂停开关继续保持开启。
 
 本项目不允许小程序直接读写 MySQL，所有数据都经 FastAPI。生产表的 CloudBase 客户端基础权限应统一设为“无权限”，服务端再按 JWT 用户强制追加 `user_id` 过滤；`foods`、`recipes` 即使是公开数据也先保持服务端代理，避免形成两套访问规则。Server API Key 具备管理员权限，因此代码层用户隔离测试属于上线阻断项。
 
@@ -179,7 +180,7 @@ uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
 
 1. 保留上一稳定 SQLAlchemy 版本，记录当前 Alembic revision 和数据表行数。
 2. 发布 REST 新版本，但先只给测试流量。
-3. 在 Webshell 确认 `CLOUDBASE_APIKEY=SET`，运行 `python /app/scripts/verify_cloudbase_rdb.py`。
+3. 在 Webshell 确认 `CLOUDBASE_APIKEY=SET`，依次运行只读验证和 `python /app/scripts/verify_cloudbase_rdb.py --write`。
 4. 验证 `/health`、登录、档案、推荐、收藏、外食记录、确认套餐和历史。
 5. 切换全部流量并观察一个业务周期；稳定后关闭 MySQL 公网地址。
 
@@ -241,13 +242,13 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 本次验证产物：
 
 ```text
-后端上传包：/root/miniapp-trellis/backend-cloudbase-20260821-v9.zip
+后端上传包：/root/miniapp-trellis/backend-cloudbase-20260821-v10.zip
 微信工具目录：/root/miniapp-trellis/miniapp/dist/build/mp-weixin
 ```
 
 上传后端包时选择“压缩包”，目标目录留空，Dockerfile 选择“有”；压缩包根目录应直接看到 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。
 
-2026-08-21 本地校验记录：后端 341 个测试、前端 57 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建，以及无 AppSecret 的 `cloudbase_rest` 生产配置容器启动烟测全部通过。上传前在仓库根目录运行 `sha256sum backend-cloudbase-20260821-v9.zip`，并把摘要留存在部署记录中。
+2026-08-21 本地校验记录：后端 344 个测试、前端 57 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建，以及无 AppSecret 的 `cloudbase_rest` 生产配置容器启动烟测全部通过。上传前在仓库根目录运行 `sha256sum backend-cloudbase-20260821-v10.zip`，并把摘要留存在部署记录中。
 
 ## 9. 回滚
 
