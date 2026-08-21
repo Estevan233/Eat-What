@@ -10,7 +10,7 @@ import { request } from './request'
 import type { TodayContext, WeatherData, WeatherRequest } from '@/types/api'
 
 export const getToday = () =>
-  request<TodayContext>({ url: '/api/v1/context/today' })
+  request<TodayContext>({ url: '/api/v1/context/today', loading: false })
 
 /**
  * 取当前坐标的实时天气。需登录 + 用户授权位置后由调用方传 lat/lng。
@@ -21,4 +21,5 @@ export const getWeather = (lat: number, lng: number) =>
     url: '/api/v1/context/weather',
     method: 'POST',
     data: { lat, lng },
+    loading: false,
   })

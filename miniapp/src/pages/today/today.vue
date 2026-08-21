@@ -299,7 +299,10 @@ async function onRecommend(): Promise<void> {
   }
 
   let coords: Coords | null = null
-  if (!(dailyStore.diningMode === 'eat_out' && dailyStore.city)) {
+  const needsLocation = dailyStore.diningMode === 'eat_out'
+    ? !dailyStore.city
+    : !dailyStore.hasFreshWeather
+  if (needsLocation) {
     try {
       coords = await getLocation()
     } catch {

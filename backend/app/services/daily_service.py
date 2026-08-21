@@ -13,17 +13,24 @@ from typing import Any
 from uuid import uuid4
 
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Session, select
+from sqlmodel import select
 
-from app.core.errors import InvalidMealChoiceError, MealAlreadyChosenError, ValidationError
+from app.core.errors import (
+    AppError,
+    InvalidMealChoiceError,
+    MealAlreadyChosenError,
+    ValidationError,
+)
 from app.models.daily_log import DailyLog
 from app.models.recommendation_event import RecommendationEvent
+from app.repositories.cloudbase_rdb import RdbFilter, RdbOrder
+from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
 from app.schemas.meal import MealItem, MealNutrition, MealRole, MealSnapshot, MealSubstitution
 
 MEAL_ROLE_ORDER: tuple[MealRole, ...] = ("main", "vegetable", "staple")
 
 
-def get_recent(session: Session, user_id: int, *, days: int = 3) -> list[DailyLog]:
+def get_recent(session: DatabaseSession, user_id: int, *, days: int = 3) -> list[DailyLog]:
     """取最近 N 天的 DailyLog。
 
     用于推荐算法第 4 步「营养均衡」：基于用户近 N 天实际选的菜，
@@ -37,6 +44,16 @@ def get_recent(session: Session, user_id: int, *, days: int = 3) -> list[DailyLo
     """
     today = date.today()
     start = today - timedelta(days=days - 1)
+    if is_cloudbase_repository(session):
+        return session.list(
+            DailyLog,
+            filters=(
+                RdbFilter('user_id', 'eq', user_id),
+                RdbFilter('log_date', 'gte', start),
+                RdbFilter('log_date', 'lte', today),
+            ),
+            order=(RdbOrder('log_date', 'desc'),),
+        )
     stmt = (
         select(DailyLog)
         .where(DailyLog.user_id == user_id)
@@ -48,7 +65,7 @@ def get_recent(session: Session, user_id: int, *, days: int = 3) -> list[DailyLo
 
 
 def _prepare_today_log(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     *,
     log_date: date,
@@ -61,8 +78,17 @@ def _prepare_today_log(
     party_size: int = 1,
 ) -> DailyLog:
     """准备当天日志但不提交，供单表与事件原子写入复用。"""
-    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
-    record = session.exec(stmt).first()
+    if is_cloudbase_repository(session):
+        record = session.first(
+            DailyLog,
+            filters=(
+                RdbFilter('user_id', 'eq', user_id),
+                RdbFilter('log_date', 'eq', log_date),
+            ),
+        )
+    else:
+        stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
+        record = session.exec(stmt).first()
 
     rec_list = list(recommended_food_ids) if recommended_food_ids is not None else []
 
@@ -95,7 +121,7 @@ def _prepare_today_log(
 
 
 def record_recommendation(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     *,
     recommended_food_ids: Iterable[int],
@@ -163,6 +189,20 @@ def record_recommendation(
         agent_name=agent_name,
         summary_json=_recommendation_summary(recommended_meal, substitutions or []),
     )
+    if is_cloudbase_repository(session):
+        saved_event = session.insert(event)
+        log_record.recommendation_event_id = saved_event.id
+        log_record.recommended_meal_json = recommended_meal
+        try:
+            saved_log = session.upsert(log_record)
+        except Exception as exc:
+            raise AppError(
+                '推荐事件已保存，今日日志投影待修复，请重试',
+                'RECOMMENDATION_PROJECTION_PENDING',
+                503,
+            ) from exc
+        return saved_log, saved_event
+
     session.add(event)
     try:
         session.flush()
@@ -196,19 +236,43 @@ def _normalize_request_id(request_id: str | None) -> str:
 
 
 def _load_idempotent_recommendation(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     request_id: str,
 ) -> tuple[DailyLog, RecommendationEvent] | None:
-    event = session.exec(
-        select(RecommendationEvent).where(RecommendationEvent.request_id == request_id)
-    ).first()
+    if is_cloudbase_repository(session):
+        event = session.first(
+            RecommendationEvent,
+            filters=(RdbFilter('request_id', 'eq', request_id),),
+        )
+    else:
+        event = session.exec(
+            select(RecommendationEvent).where(RecommendationEvent.request_id == request_id)
+        ).first()
     if event is None:
         return None
     if event.user_id != user_id:
         raise ValidationError("推荐请求号已被占用")
     record = get_today(session, user_id, log_date=event.event_date)
     if record is None or record.recommendation_event_id != event.id:
+        if is_cloudbase_repository(session):
+            repaired = DailyLog(
+                user_id=user_id,
+                log_date=event.event_date,
+                recommendation_event_id=event.id,
+                recommended_food_ids_json=list(event.recommended_food_ids_json),
+                chosen_food_ids_json=[],
+                recommended_meal_json=event.primary_meal_json,
+                mood=event.mood,
+                activity_level=event.activity_level,
+                weather_tag=event.weather_tag,
+                dining_mode=event.dining_mode,
+                audience=event.audience,
+                party_size=event.party_size,
+                created_at=event.created_at,
+                updated_at=datetime.utcnow(),
+            )
+            return session.upsert(repaired), event
         raise ValidationError("推荐事件已写入，但今日日志投影待修复")
     return record, event
 
@@ -227,7 +291,7 @@ def _recommendation_summary(
 
 
 def choose_complete_meal(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     *,
     recommendation_id: int,
@@ -247,6 +311,8 @@ def choose_complete_meal(
     record.chosen_meal_json = chosen.model_dump(mode="json")
     record.chosen_total_nutrition_json = chosen.total_nutrition.model_dump(mode="json")
     record.updated_at = datetime.utcnow()
+    if is_cloudbase_repository(session):
+        return session.upsert(record)
     session.add(record)
     try:
         session.commit()
@@ -258,15 +324,24 @@ def choose_complete_meal(
 
 
 def _load_choice_context(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     recommendation_id: int,
 ) -> tuple[RecommendationEvent, DailyLog]:
-    event = session.exec(
-        select(RecommendationEvent)
-        .where(RecommendationEvent.id == recommendation_id)
-        .where(RecommendationEvent.user_id == user_id)
-    ).first()
+    if is_cloudbase_repository(session):
+        event = session.first(
+            RecommendationEvent,
+            filters=(
+                RdbFilter('id', 'eq', recommendation_id),
+                RdbFilter('user_id', 'eq', user_id),
+            ),
+        )
+    else:
+        event = session.exec(
+            select(RecommendationEvent)
+            .where(RecommendationEvent.id == recommendation_id)
+            .where(RecommendationEvent.user_id == user_id)
+        ).first()
     if event is None or event.primary_meal_json is None:
         raise InvalidMealChoiceError("推荐记录不存在、已失效或不属于当前用户")
 
@@ -377,7 +452,7 @@ def _sum_nutrition(items: list[MealItem]) -> MealNutrition:
 
 
 def upsert_today_log(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     *,
     log_date: date | None = None,
@@ -402,6 +477,8 @@ def upsert_today_log(
         weather_tag=weather_tag,
     )
 
+    if is_cloudbase_repository(session):
+        return session.upsert(record)
     session.add(record)
     session.commit()
     session.refresh(record)
@@ -409,7 +486,7 @@ def upsert_today_log(
 
 
 def get_recent_recommendation_events(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     *,
     days: int = 7,
@@ -418,6 +495,16 @@ def get_recent_recommendation_events(
     """读取包含 as_of 当天在内的最近 N 天推荐曝光。"""
     end = as_of or date.today()
     start = end - timedelta(days=days - 1)
+    if is_cloudbase_repository(session):
+        return session.list(
+            RecommendationEvent,
+            filters=(
+                RdbFilter('user_id', 'eq', user_id),
+                RdbFilter('event_date', 'gte', start),
+                RdbFilter('event_date', 'lte', end),
+            ),
+            order=(RdbOrder('created_at', 'desc'),),
+        )
     stmt = (
         select(RecommendationEvent)
         .where(RecommendationEvent.user_id == user_id)
@@ -428,16 +515,24 @@ def get_recent_recommendation_events(
     return list(session.exec(stmt).all())
 
 
-def get_today(session: Session, user_id: int, *, log_date: date | None = None) -> DailyLog | None:
+def get_today(session: DatabaseSession, user_id: int, *, log_date: date | None = None) -> DailyLog | None:
     """取今天的 DailyLog，不存在返回 None。T11 用。"""
     if log_date is None:
         log_date = date.today()
+    if is_cloudbase_repository(session):
+        return session.first(
+            DailyLog,
+            filters=(
+                RdbFilter('user_id', 'eq', user_id),
+                RdbFilter('log_date', 'eq', log_date),
+            ),
+        )
     stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
     return session.exec(stmt).first()
 
 
 def update_chosen_food_ids(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     chosen_food_ids: Iterable[int],
     *,
@@ -447,12 +542,17 @@ def update_chosen_food_ids(
     if log_date is None:
         log_date = date.today()
 
-    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
-    record = session.exec(stmt).first()
+    if is_cloudbase_repository(session):
+        record = get_today(session, user_id, log_date=log_date)
+    else:
+        stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
+        record = session.exec(stmt).first()
     if record is None:
         return None
     record.chosen_food_ids_json = list(chosen_food_ids)
     record.updated_at = datetime.utcnow()
+    if is_cloudbase_repository(session):
+        return session.upsert(record)
     session.add(record)
     session.commit()
     session.refresh(record)
@@ -460,7 +560,7 @@ def update_chosen_food_ids(
 
 
 def append_chosen_food_id(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     food_id: int,
     *,
@@ -470,8 +570,11 @@ def append_chosen_food_id(
     if log_date is None:
         log_date = date.today()
 
-    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
-    record = session.exec(stmt).first()
+    if is_cloudbase_repository(session):
+        record = get_today(session, user_id, log_date=log_date)
+    else:
+        stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
+        record = session.exec(stmt).first()
     if record is None:
         return None
     chosen = list(record.chosen_food_ids_json)
@@ -479,6 +582,8 @@ def append_chosen_food_id(
         chosen.append(food_id)
     record.chosen_food_ids_json = chosen
     record.updated_at = datetime.utcnow()
+    if is_cloudbase_repository(session):
+        return session.upsert(record)
     session.add(record)
     session.commit()
     session.refresh(record)

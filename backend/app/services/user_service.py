@@ -7,13 +7,15 @@
 """
 from datetime import datetime
 
-from sqlmodel import Session, select
+from sqlmodel import select
 
 from app.models.user import User
+from app.repositories.cloudbase_rdb import RdbFilter
+from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
 
 
 def upsert_by_openid(
-    session: Session,
+    session: DatabaseSession,
     *,
     openid: str,
     unionid: str | None = None,
@@ -24,6 +26,28 @@ def upsert_by_openid(
 
     Returns: 落库后的 User 对象（含 id）。
     """
+    if is_cloudbase_repository(session):
+        user = session.first(
+            User,
+            filters=(RdbFilter('openid', 'eq', openid),),
+        )
+        if user is None:
+            user = User(
+                openid=openid,
+                unionid=unionid,
+                nickname=nickname or '微信用户',
+                avatar_url=avatar_url,
+            )
+        else:
+            if unionid:
+                user.unionid = unionid
+            if nickname:
+                user.nickname = nickname
+            if avatar_url:
+                user.avatar_url = avatar_url
+            user.updated_at = datetime.utcnow()
+        return session.upsert(user)
+
     stmt = select(User).where(User.openid == openid)
     user = session.exec(stmt).first()
 
@@ -62,7 +86,7 @@ GUEST_DEFAULT_NICKNAME = "游客"
 
 
 def get_or_create_guest(
-    session: Session,
+    session: DatabaseSession,
     *,
     guest_id: str,
     nickname: str | None = None,

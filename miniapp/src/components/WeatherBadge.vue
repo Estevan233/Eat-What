@@ -69,6 +69,7 @@ const solarTermText = computed(() => {
 const weather = computed(() => dailyStore.weather)
 const weatherChipText = computed(() => {
   if (!weather.value) return ''
+  if (!weather.value.providerAvailable) return '天气暂不可用'
   const temp = Math.round(weather.value.tempC)
   return `${temp}° ${weather.value.text} · ${WEATHER_TAG_LABEL[weather.value.weatherTag]}`
 })

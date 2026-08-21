@@ -22,6 +22,12 @@ Audience = Literal["personal", "family"]
 class RecommendRequest(BaseModel):
     """POST /daily/recommend 请求体。"""
 
+    request_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=64,
+        description='客户端生成的幂等请求号；网络重试复用同一值',
+    )
     mood: Mood = Field(default="neutral", description="今日心情")
     activity_level: ActivityLevel = Field(default="normal", description="活动量")
     lat: float | None = Field(default=None, ge=-90, le=90, description="纬度；缺省用天气 fallback")

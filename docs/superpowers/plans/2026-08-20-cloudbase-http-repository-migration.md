@@ -2,7 +2,7 @@
 
 日期：2026-08-20
 
-状态：REST 客户端与安全闸门已实现；全表 Repository 和生产切换待真实 Server API Key 验收
+状态：全表 REST Repository、幂等投影、进程健康检查和生产配置已实现；待云端只读契约与微信端灰度验收
 
 ## 目标与边界
 
@@ -11,8 +11,8 @@
 - Server API Key 只存云托管服务端环境变量，绝不进入小程序、Git、镜像和日志。
 - 小程序不直连 MySQL；生产表的客户端基础权限统一为“无权限”，全部经 FastAPI 代理。
 - Alembic 继续作为表结构真相源；HTTPS REST 只替换生产运行时 CRUD，不负责自动建表。
-- 真实验收前保持 `DATABASE_BACKEND=sqlalchemy`，不关闭当前公网 MySQL。
-- 当前设置 `DATABASE_BACKEND=cloudbase_rest` 会被生产配置校验明确拒绝，避免未迁完的 service 误写默认 SQLite。
+- 本次是同一 CloudBase MySQL 的访问方式切换，不复制数据、不重建表。
+- 上一 SQLAlchemy 版本作为短期回滚入口；REST 灰度通过后关闭当前公网 MySQL。
 
 ## 已确认的官方语义
 
@@ -44,9 +44,12 @@
 ## 云端切换门槛
 
 - [x] 控制台创建 Server API Key，开启云托管“API Key 设置”，由平台自动注入 `CLOUDBASE_APIKEY`；不在普通 Key-Value 环境变量中重复粘贴明文。
-- [ ] Webshell 运行 `python /app/scripts/verify_cloudbase_rdb.py`，只读通过且日志无密钥。
-- [ ] 真实验证 `eq/in/order/limit/count` 与 400/401/403/404/500/503 错误语义。
-- [ ] 在预发环境验证唯一键 Upsert、并发冲突、事件重放和用户隔离。
+- [x] 本地 MockTransport 验证 `eq/in/order/limit/count`、400/403/503 归一化、读重试、写不盲重试和密钥不泄露。
+- [x] 内存 REST double 跑通用户、档案、菜品/菜谱、收藏、外食记录、推荐事件和日报幂等投影。
+- [x] 生产配置允许 `DATABASE_BACKEND=cloudbase_rest`，缺少 Server API Key 时 fail closed。
+- [x] `/health` 改为进程探活，不访问数据库，避免周期性唤醒自动暂停实例。
+- [ ] 新版本 Webshell 运行 `python /app/scripts/verify_cloudbase_rdb.py`，真实验证 `eq/in/order/limit/count` 且日志无密钥。
+- [ ] 通过小程序验证唯一键 Upsert、事件重放、用户隔离和 401/403/503 用户提示。
 - [ ] 备份生产数据库，记录 Alembic revision、表行数与抽样校验值。
 - [ ] 发布 `DATABASE_BACKEND=cloudbase_rest` 灰度版本并完成微信端核心烟测。
 - [ ] 观察至少一个完整业务周期后关闭 MySQL 公网连接。

@@ -16,6 +16,10 @@ class WeatherData(BaseModel):
     """POST /context/weather / GET 缓存返回的当前实况天气。"""
 
     model_config = ConfigDict(from_attributes=True)
+    provider_available: bool = Field(
+        default=True,
+        description='是否来自可用的实时天气供应商；false 时 UI 不展示伪造温度',
+    )
 
     # Open-Meteo 不返城市名，后端用 "Open-Meteo @ lat,lng" 占位
     location_name: str

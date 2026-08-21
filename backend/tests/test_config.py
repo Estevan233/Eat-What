@@ -38,7 +38,7 @@ def test_cloudbase_rest_mode_requires_server_api_key_not_database_url() -> None:
     assert "DATABASE_URL" not in missing
 
 
-def test_cloudbase_rest_mode_stays_gated_until_runtime_repositories_are_complete() -> None:
+def test_cloudbase_rest_mode_is_production_ready_with_platform_api_key() -> None:
     settings = Settings(
         _env_file=None,
         environment="production",
@@ -52,7 +52,7 @@ def test_cloudbase_rest_mode_stays_gated_until_runtime_repositories_are_complete
         enable_code2session=False,
     )
 
-    assert settings.validate_required() == ["DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY"]
+    assert settings.validate_required() == []
 
 
 def test_cloudbase_server_api_key_accepts_platform_injected_name(monkeypatch) -> None:

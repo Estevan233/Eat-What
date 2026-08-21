@@ -67,6 +67,10 @@ def test_select_encodes_filters_order_and_count_without_leaking_key() -> None:
     assert API_KEY not in repr(client)
 
 
+def test_in_filter_encodes_a_bounded_scalar_list() -> None:
+    assert RdbFilter("id", "in", [7, 8]).as_query_value() == "in.(7,8)"
+
+
 def test_upsert_uses_unique_conflict_semantics_and_returns_rows() -> None:
     captured: list[httpx.Request] = []
 

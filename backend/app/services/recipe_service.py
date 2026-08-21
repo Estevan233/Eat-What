@@ -1,12 +1,20 @@
-from sqlmodel import Session, select
+from sqlmodel import select
 
 from app.models.food import Food
 from app.models.recipe import Recipe
+from app.repositories.cloudbase_rdb import RdbFilter
+from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
 from app.schemas.recipe import RecipeRead
 
 
-def get_by_food_id(session: Session, food_id: int) -> RecipeRead | None:
-    recipe = session.exec(select(Recipe).where(Recipe.food_id == food_id)).first()
+def get_by_food_id(session: DatabaseSession, food_id: int) -> RecipeRead | None:
+    if is_cloudbase_repository(session):
+        recipe = session.first(
+            Recipe,
+            filters=(RdbFilter('food_id', 'eq', food_id),),
+        )
+    else:
+        recipe = session.exec(select(Recipe).where(Recipe.food_id == food_id)).first()
     if recipe is None:
         return None
     food = session.get(Food, food_id)

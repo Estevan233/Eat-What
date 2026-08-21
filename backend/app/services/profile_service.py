@@ -7,19 +7,26 @@
 """
 from datetime import datetime
 
-from sqlmodel import Session, select
+from sqlmodel import select
 
 from app.models.user_profile import UserProfile
+from app.repositories.cloudbase_rdb import RdbFilter
+from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
 from app.schemas.profile import ProfileRead, ProfileUpsert
 
 
-def get_profile_record(session: Session, user_id: int) -> UserProfile | None:
+def get_profile_record(session: DatabaseSession, user_id: int) -> UserProfile | None:
     """读取档案模型，供推荐等服务复用，避免同一请求重复查询。"""
+    if is_cloudbase_repository(session):
+        return session.first(
+            UserProfile,
+            filters=(RdbFilter('user_id', 'eq', user_id),),
+        )
     stmt = select(UserProfile).where(UserProfile.user_id == user_id)
     return session.exec(stmt).first()
 
 
-def get_profile(session: Session, user_id: int) -> ProfileRead | None:
+def get_profile(session: DatabaseSession, user_id: int) -> ProfileRead | None:
     """读用户档案。不存在返回 None。"""
     record = get_profile_record(session, user_id)
     if record is None:
@@ -27,7 +34,7 @@ def get_profile(session: Session, user_id: int) -> ProfileRead | None:
     return ProfileRead.model_validate(record.to_read_dict())
 
 
-def upsert_profile(session: Session, user_id: int, data: ProfileUpsert) -> ProfileRead:
+def upsert_profile(session: DatabaseSession, user_id: int, data: ProfileUpsert) -> ProfileRead:
     """有就更新，没有就建。返回落库后的 ProfileRead。
 
     Args:
@@ -40,6 +47,27 @@ def upsert_profile(session: Session, user_id: int, data: ProfileUpsert) -> Profi
     """
     # service 层再次校验 forbidden_tags（schema 层校验不了动态集合）
     data.validate_tags()
+
+    if is_cloudbase_repository(session):
+        record = get_profile_record(session, user_id)
+        if record is None:
+            record = UserProfile(
+                user_id=user_id,
+                birthday=data.birthday,
+                gender=data.gender,
+                height_cm=data.height_cm,
+                weight_kg=data.weight_kg,
+                forbidden_tags=list(data.forbidden_tags),
+            )
+        else:
+            record.birthday = data.birthday
+            record.gender = data.gender
+            record.height_cm = data.height_cm
+            record.weight_kg = data.weight_kg
+            record.forbidden_tags = list(data.forbidden_tags)
+            record.updated_at = datetime.utcnow()
+        saved = session.upsert(record)
+        return ProfileRead.model_validate(saved.to_read_dict())
 
     stmt = select(UserProfile).where(UserProfile.user_id == user_id)
     record = session.exec(stmt).first()

@@ -166,6 +166,7 @@ export type WeatherTag = 'cold' | 'hot' | 'rainy' | 'snowy' | 'dry' | 'mild' | '
  * 字段经 request.ts 的 snakeToCamel 转换。
  */
 export interface WeatherData {
+  providerAvailable: boolean
   locationName: string
   tempC: number
   feelsLikeC: number
@@ -228,6 +229,7 @@ export interface RecommendContext {
  * request.ts 会在发送前自动转 snake_case。
  */
 export interface RecommendRequest {
+  requestId?: string
   mood: Mood
   activityLevel: ActivityLevel
   lat?: number
