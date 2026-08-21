@@ -11,10 +11,11 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
 from app.core.deps import get_current_user, get_db
+from app.core.errors import ExternalAPIError, RateLimitError
 from app.models.user import User
 from app.schemas.weather import WeatherData, WeatherRequest
 from app.services.solar_terms import get_today_context_cached
-from app.services.weather_client import weather_client
+from app.services.weather_client import neutral_weather, weather_client
 from app.utils.response import success
 
 router = APIRouter(prefix="/context", tags=["context"])
@@ -45,7 +46,10 @@ async def get_weather_route(
     if user.id is None:  # pragma: no cover - DB 行必有 id
         raise RuntimeError("get_current_user 返回的 user.id 不应为 None")
 
-    data = await weather_client.get_current(body.lat, body.lng)
+    try:
+        data = await weather_client.get_current(body.lat, body.lng)
+    except (ExternalAPIError, RateLimitError):
+        data = neutral_weather()
     return success(data=data.model_dump(mode="json"))
 
 

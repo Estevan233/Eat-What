@@ -4,10 +4,12 @@ import unicodedata
 from datetime import datetime
 
 from sqlalchemy import func
-from sqlmodel import Session, select
+from sqlmodel import select
 
 from app.core.errors import NotFoundError
 from app.models.dining_memory import DiningMemory
+from app.repositories.cloudbase_rdb import RdbFilter, RdbOrder
+from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
 from app.schemas.dining import DiningMemoryUpsert, DiningVerdict
 
 
@@ -17,12 +19,40 @@ def normalize_identity(value: str) -> tuple[str, str]:
 
 
 def upsert_memory(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     payload: DiningMemoryUpsert,
 ) -> DiningMemory:
     shop_name, shop_key = normalize_identity(payload.shop_name)
     dish_name, dish_key = normalize_identity(payload.dish_name)
+    if is_cloudbase_repository(session):
+        filters = (
+            RdbFilter('user_id', 'eq', user_id),
+            RdbFilter('normalized_shop_name', 'eq', shop_key),
+            RdbFilter('normalized_dish_name', 'eq', dish_key),
+        )
+        record = session.first(DiningMemory, filters=filters)
+        now = datetime.utcnow()
+        if record is None:
+            record = DiningMemory(
+                user_id=user_id,
+                shop_name=shop_name,
+                dish_name=dish_name,
+                normalized_shop_name=shop_key,
+                normalized_dish_name=dish_key,
+                verdict=payload.verdict,
+                note=payload.note,
+                created_at=now,
+                updated_at=now,
+            )
+        else:
+            record.shop_name = shop_name
+            record.dish_name = dish_name
+            record.verdict = payload.verdict
+            record.note = payload.note
+            record.updated_at = now
+        return session.upsert(record)
+
     record = session.exec(
         select(DiningMemory)
         .where(DiningMemory.user_id == user_id)
@@ -55,13 +85,25 @@ def upsert_memory(
 
 
 def list_memories(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     *,
     page: int,
     size: int,
     verdict: DiningVerdict | None = None,
 ) -> tuple[list[DiningMemory], int]:
+    if is_cloudbase_repository(session):
+        filters = [RdbFilter('user_id', 'eq', user_id)]
+        if verdict is not None:
+            filters.append(RdbFilter('verdict', 'eq', verdict))
+        return session.list_with_total(
+            DiningMemory,
+            filters=tuple(filters),
+            order=(RdbOrder('updated_at', 'desc'),),
+            limit=size,
+            offset=(page - 1) * size,
+        )
+
     conditions = [DiningMemory.user_id == user_id]
     if verdict is not None:
         conditions.append(DiningMemory.verdict == verdict)
@@ -80,7 +122,17 @@ def list_memories(
     return items, int(total)
 
 
-def delete_memory(session: Session, user_id: int, memory_id: int) -> None:
+def delete_memory(session: DatabaseSession, user_id: int, memory_id: int) -> None:
+    if is_cloudbase_repository(session):
+        filters = (
+            RdbFilter('id', 'eq', memory_id),
+            RdbFilter('user_id', 'eq', user_id),
+        )
+        if session.first(DiningMemory, filters=filters) is None:
+            raise NotFoundError('dining_memory', memory_id)
+        session.delete(DiningMemory, filters=filters)
+        return
+
     record = session.exec(
         select(DiningMemory)
         .where(DiningMemory.id == memory_id)
@@ -92,7 +144,13 @@ def delete_memory(session: Session, user_id: int, memory_id: int) -> None:
     session.commit()
 
 
-def all_memories(session: Session, user_id: int) -> list[DiningMemory]:
+def all_memories(session: DatabaseSession, user_id: int) -> list[DiningMemory]:
+    if is_cloudbase_repository(session):
+        return session.list(
+            DiningMemory,
+            filters=(RdbFilter('user_id', 'eq', user_id),),
+            order=(RdbOrder('updated_at', 'desc'),),
+        )
     return list(
         session.exec(
             select(DiningMemory)

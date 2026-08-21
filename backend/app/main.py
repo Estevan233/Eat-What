@@ -11,10 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1 import api_router
+from app.core.cloudbase_errors import map_cloudbase_failure
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.logging import RequestContextMiddleware, configure_logging
-from app.db import check_database, init_db
+from app.db import init_db
+from app.repositories.cloudbase_rdb import CloudBaseRdbError
 from app.utils.response import error, success
 
 log = structlog.get_logger()
@@ -64,6 +66,24 @@ def create_app() -> FastAPI:
             content=error(code=exc.code, message=exc.message),
         )
 
+    @app.exception_handler(CloudBaseRdbError)
+    async def cloudbase_rdb_error_handler(
+        request: Request,
+        exc: CloudBaseRdbError,
+    ) -> JSONResponse:
+        failure = map_cloudbase_failure(exc)
+        log.warning(
+            "cloudbase_rdb_error",
+            path=request.url.path,
+            code=exc.code,
+            upstream_status=exc.status_code,
+            cloudbase_request_id=exc.request_id,
+        )
+        return JSONResponse(
+            status_code=failure.status_code,
+            content=error(code=failure.code, message=failure.message),
+        )
+
     @app.exception_handler(Exception)
     async def unhandled_handler(request: Request, exc: Exception) -> JSONResponse:
         log.exception("unhandled_error", path=request.url.path)
@@ -75,18 +95,17 @@ def create_app() -> FastAPI:
     # ---- 健康检查 ----
     @app.get("/health", tags=["meta"])
     def health() -> JSONResponse:
-        if not check_database():
-            return JSONResponse(
-                status_code=503,
-                content=error(
-                    code="SERVICE_UNAVAILABLE",
-                    message="服务暂不可用",
-                    data={"status": "degraded", "database": "unavailable"},
-                ),
-            )
+        database_state = (
+            "lazy-rest" if settings.database_backend == "cloudbase_rest"
+            else "configured"
+        )
         return JSONResponse(
             content=success(
-                data={"status": "healthy", "database": "ready", "env": settings.environment}
+                data={
+                    "status": "healthy",
+                    "database": database_state,
+                    "env": settings.environment,
+                }
             )
         )
 

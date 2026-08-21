@@ -186,6 +186,33 @@ def test_post_weather_authenticated_returns_data(client, auth_token, mock_weathe
     }
 
 
+def test_post_weather_provider_timeout_returns_neutral_soft_fallback(
+    client,
+    auth_token,
+    mock_weather,
+):
+    '''天气供应商超时不能拖垮首页，返回明确标记的中性软降级。'''
+    from app.core.errors import ExternalAPIError
+
+    mock_weather.get_current.side_effect = ExternalAPIError(
+        'open-meteo',
+        'ConnectTimeout',
+    )
+
+    res = client.post(
+        '/api/v1/context/weather',
+        json={'lat': 35.6833, 'lng': 139.75},
+        headers=auth_token,
+    )
+
+    assert res.status_code == 200
+    body = res.json()
+    assert body['ok'] is True
+    assert body['data']['provider_available'] is False
+    assert body['data']['location_name'] == '天气暂不可用'
+    assert body['data']['weather_tag'] == 'mild'
+
+
 def test_post_weather_invalid_lat_returns_422(client, auth_token, mock_weather):
     """lat 越界（>90）→ 422。"""
     res = client.post(

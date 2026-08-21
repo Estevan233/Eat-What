@@ -112,6 +112,7 @@ RECENT_HIGH_FAT_TOTAL = 60.0  # 近 3 天选过的菜脂肪总和 ≥ 60g 视为
 def _fallback_weather(*, provider_unavailable: bool = False) -> WeatherData:
     """返回不偏向任何菜品的中性天气，不伪造实时观测。"""
     return WeatherData(
+        provider_available=False,
         location_name="天气暂不可用" if provider_unavailable else "未知位置",
         temp_c=22.0,
         feels_like_c=22.0,
@@ -662,6 +663,7 @@ async def recommend(
         dining_mode=req.dining_mode,
         audience=req.audience,
         party_size=req.party_size,
+        request_id=req.request_id,
     )
     trace.stop("write", stage_started)
 

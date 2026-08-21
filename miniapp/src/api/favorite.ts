@@ -54,4 +54,7 @@ export const listFavorites = (
   page: number = 1,
   size: number = 20,
 ): Promise<FavoriteListResponse> =>
-  request<FavoriteListResponse>({ url: `/api/v1/favorite?page=${page}&size=${size}` })
+  request<FavoriteListResponse>({
+    url: `/api/v1/favorite?page=${page}&size=${size}`,
+    loading: false,
+  })

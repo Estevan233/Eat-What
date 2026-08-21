@@ -15,6 +15,7 @@ export const recommendExternal = (
     url: '/api/v1/dining/recommend',
     method: 'POST',
     data,
+    loading: false,
   })
 
 export const listDiningMemories = (

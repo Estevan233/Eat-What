@@ -10,10 +10,12 @@
 from datetime import datetime
 from typing import Any, cast
 
-from sqlmodel import Session, select
+from sqlmodel import select
 
 from app.core.errors import NotFoundError, ValidationError
 from app.models.user_profile import UserProfile
+from app.repositories.cloudbase_rdb import RdbFilter
+from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
 from app.schemas.constitution import ConstitutionResult, ConstitutionType
 
 # ---- 题库（题面文本忠于 ZYYXH/T157-2009 标准）----
@@ -126,12 +128,28 @@ def judge(scores: dict[int, int]) -> ConstitutionResult:
     )
 
 
-def save_constitution(session: Session, user_id: int, result: ConstitutionResult) -> None:
+def save_constitution(session: DatabaseSession, user_id: int, result: ConstitutionResult) -> None:
     """把判定结果写入 UserProfile.constitution_type / constitution_scores。
 
     要求档案已存在（T05 PUT /profile 才能创建档案）。如果档案不存在，
     抛 NotFoundError（前端应引导用户先填档案）。
     """
+    if is_cloudbase_repository(session):
+        record = session.first(
+            UserProfile,
+            filters=(RdbFilter('user_id', 'eq', user_id),),
+        )
+        if record is None:
+            raise NotFoundError('user_profile', user_id)
+        record.constitution_type = result.constitution_type_str
+        record.constitution_scores = {
+            cast(str, key): value
+            for key, value in result.scores_normalized.items()
+        }
+        record.updated_at = datetime.utcnow()
+        session.upsert(record)
+        return
+
     stmt = select(UserProfile).where(UserProfile.user_id == user_id)
     record = session.exec(stmt).first()
     if record is None:
@@ -146,10 +164,16 @@ def save_constitution(session: Session, user_id: int, result: ConstitutionResult
     session.commit()
 
 
-def get_constitution(session: Session, user_id: int) -> ConstitutionResult | None:
+def get_constitution(session: DatabaseSession, user_id: int) -> ConstitutionResult | None:
     """从 UserProfile 读上次判定结果。不存在返回 None。"""
-    stmt = select(UserProfile).where(UserProfile.user_id == user_id)
-    record = session.exec(stmt).first()
+    if is_cloudbase_repository(session):
+        record = session.first(
+            UserProfile,
+            filters=(RdbFilter('user_id', 'eq', user_id),),
+        )
+    else:
+        stmt = select(UserProfile).where(UserProfile.user_id == user_id)
+        record = session.exec(stmt).first()
     if record is None or record.constitution_type is None or record.constitution_scores is None:
         return None
 

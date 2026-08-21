@@ -49,6 +49,8 @@ def init_db() -> None:
     """Create tables only for local/test SQLite; deployed environments use Alembic."""
     import app.models  # noqa: F401
 
+    if settings.database_backend == "cloudbase_rest":
+        return
     if settings.environment.lower() in {"dev", "development", "test"}:
         SQLModel.metadata.create_all(engine)
 

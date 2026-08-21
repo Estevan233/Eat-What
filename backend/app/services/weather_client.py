@@ -84,6 +84,23 @@ def wind_dir_label(deg: float) -> str:
     return WIND_DIRECTIONS[idx]
 
 
+def neutral_weather(*, location_name: str = '天气暂不可用') -> WeatherData:
+    '''外部天气不可用时的中性算法输入；明确标记，不冒充实时观测。'''
+    return WeatherData(
+        provider_available=False,
+        location_name=location_name,
+        temp_c=22.0,
+        feels_like_c=22.0,
+        text='暂不可用',
+        wind_dir='无',
+        wind_scale='0级 无风',
+        humidity=50,
+        precipitation_mm=0.0,
+        weather_tag='mild',
+        fetched_at=datetime.now(timezone.utc),
+    )
+
+
 def classify_weather_tag(
     weather_code: int,
     temp_c: float,

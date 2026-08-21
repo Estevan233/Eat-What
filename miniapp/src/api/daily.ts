@@ -48,6 +48,7 @@ export const recommend = (data: RecommendRequest): Promise<RecommendResponse> =>
     url: '/api/v1/daily/recommend',
     method: 'POST',
     data,
+    loading: false,
   })
 
 /** POST /daily/choose - 选择一道菜写入 DailyLog。 */
@@ -68,7 +69,7 @@ export const chooseMeal = (data: ChooseMealRequest): Promise<DailyLogRead> =>
 
 /** GET /daily/today - 取今天的 DailyLog，不存在返回 null。 */
 export const getTodayLog = (): Promise<DailyLogRead | null> =>
-  request<DailyLogRead | null>({ url: '/api/v1/daily/today' })
+  request<DailyLogRead | null>({ url: '/api/v1/daily/today', loading: false })
 
 /** GET /daily/history - 近 N 天的日志列表。 */
 export const getHistory = (days: number = 30): Promise<HistoryResponse> =>

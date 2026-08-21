@@ -12,6 +12,7 @@ import {
 import type { DailyLogRead, HistoryResponse } from '@/api/daily'
 import { applySubstitution as replaceMealSlot } from '@/domain/meal'
 import { ApiError } from '@/types/api'
+import { createRequestId } from '@/utils/id'
 import type {
   ActivityLevel,
   Audience,
@@ -127,9 +128,11 @@ export const useDailyStore = defineStore('daily', () => {
   const offline = ref(false)
   const lastRequestId = ref<string | null>(null)
   const recentCookIds = ref<number[]>(parseStorage<number[]>(RECENT_COOK_IDS_KEY) || [])
+  let pendingRecommendRequestId: string | null = null
 
   // The old homepage reads recommendation.foods until the plate UI commit lands.
   const recommendation = computed(() => serverRecommendation.value)
+  const hasFreshWeather = computed(() => Boolean(freshWeatherSnapshot(weather.value)))
   const availableSubstitutions = computed(() => {
     if (!serverRecommendation.value || !currentMeal.value) return []
     return serverRecommendation.value.substitutions.filter((option) => {
@@ -176,7 +179,10 @@ export const useDailyStore = defineStore('daily', () => {
     loading.value = true
     lastRequestId.value = null
     try {
+      const requestId = pendingRecommendRequestId || createRequestId('recommend')
+      pendingRecommendRequestId = requestId
       const body: RecommendRequest = {
+        requestId,
         mood: mood.value,
         activityLevel: activityLevel.value,
         lat,
@@ -188,6 +194,7 @@ export const useDailyStore = defineStore('daily', () => {
         weatherSnapshot: freshWeatherSnapshot(weather.value),
       }
       const data = await apiRecommend(body)
+      pendingRecommendRequestId = null
       serverRecommendation.value = data
       currentMeal.value = data.primaryMeal
       appliedSubstitutions.value = []
@@ -207,6 +214,7 @@ export const useDailyStore = defineStore('daily', () => {
         offline.value = true
         return serverRecommendation.value
       }
+      pendingRecommendRequestId = null
       throw error
     } finally {
       loading.value = false
@@ -329,6 +337,7 @@ export const useDailyStore = defineStore('daily', () => {
     todayContext,
     weather,
     recommendation,
+    hasFreshWeather,
     serverRecommendation,
     currentMeal,
     appliedSubstitutions,

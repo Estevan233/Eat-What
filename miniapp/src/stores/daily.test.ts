@@ -108,6 +108,7 @@ const recommendation: MealRecommendation = {
   wellnessDisclaimer: '节气与体质内容仅作日常饮食参考。',
   context: {
     weather: {
+      providerAvailable: true,
       locationName: '默认城市',
       tempC: 22,
       feelsLikeC: 22,
@@ -196,6 +197,23 @@ describe('daily complete meal store', () => {
     await expect(store.fetchRecommend()).resolves.toEqual(recommendation)
     expect(store.stale).toBe(true)
     expect(store.offline).toBe(true)
+  })
+
+  it('reuses the same request id after a transient failure and rotates after success', async () => {
+    vi.stubGlobal('uni', storageStub(cachedEnvelope()))
+    recommendMock
+      .mockRejectedValueOnce(new ApiError('断网', 'NETWORK_ERROR'))
+      .mockResolvedValueOnce(recommendation)
+      .mockResolvedValueOnce(recommendationWithIds([4, 5, 6]))
+    const store = useDailyStore()
+
+    await store.fetchRecommend()
+    await store.fetchRecommend()
+    await store.fetchRecommend()
+
+    const firstRequestId = recommendMock.mock.calls[0][0].requestId
+    expect(recommendMock.mock.calls[1][0].requestId).toBe(firstRequestId)
+    expect(recommendMock.mock.calls[2][0].requestId).not.toBe(firstRequestId)
   })
 
   it('does not hide authentication or service configuration errors', async () => {
@@ -303,6 +321,7 @@ describe('daily complete meal store', () => {
     expect(recommendMock).toHaveBeenCalledWith(expect.objectContaining({
       weatherSnapshot: freshWeather,
     }))
+    expect(store.hasFreshWeather).toBe(true)
   })
 
   it('invalidates a cooking recommendation when switching to external dining', async () => {

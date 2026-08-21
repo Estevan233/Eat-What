@@ -59,27 +59,18 @@ wsl -d Ubuntu-22.04 -- openssl rand -hex 32
 ENABLE_CODE2SESSION=false
 ```
 
-## 4. 准备 CloudBase MySQL
+## 4. CloudBase MySQL 的上线形态
 
-当前个人版开通云托管私有网络会触发昂贵的套餐升级，不能为了“内网”两个字每月多交一大笔钱。现阶段保留已跑通的外网直连作为**有期限的过渡链路**，不购买私有网络；同时按下面的安全约束收口：
+最终运行时链路已经切换为 CloudBase MySQL HTTPS REST Repository，不购买私有网络，也不需要单独搬一份数据库：表和数据仍是当前 `cloud1` 环境中的同一个 MySQL，只是 FastAPI 从公网 TCP/SQLAlchemy 改为官方 HTTPS API。
 
-- 为应用创建专用、最小权限数据库账号，不长期使用 root；
-- 密码使用独立高强度随机值，不与 JWT/AppSecret 复用；
-- 只在云托管服务端环境变量保存连接串；
-- 开启预算告警并检查数据库审计/连接日志；
-- 完成 CloudBase MySQL HTTPS REST Repository 迁移后立即关闭外网连接。
+保留数据库“自动暂停”为开启状态。CloudBase 官方说明数据库启动后最少运行 10 分钟，连续 10 分钟无访问会自动暂停；这会带来首次访问冷启动，但能降低学生项目的闲时费用。本项目同时保证：
 
-CloudBase 官方明确提示外网直连只适合开发调试，因此它不是最终生产形态。最终路线不是付费开 VPC，而是先用真实 Server API Key 验证官方 MySQL REST API 的过滤、写入、错误与事务语义，再分模块替换 SQLAlchemy 运行时访问。验证没做完前不凭文档标题脑补接口——数据库不是许愿池。
+- 云托管最小实例数保持 `0`、最大实例数 `1`；
+- `/health` 只检查进程是否存活，不查询 MySQL，避免探针反复唤醒数据库；
+- 首页先展示本地上次推荐，再后台刷新；天气失败降级为中性权重，不阻断主推荐；
+- 热实例缓存 10 分钟的只读菜品/菜谱目录，不缓存用户档案、收藏或历史。
 
-当前过渡连接串格式：
-
-```dotenv
-DATABASE_URL=mysql://USER:URL_ENCODED_PASSWORD@INTERNAL_HOST:3306/DATABASE?charset=utf8mb4
-```
-
-应用会把 CloudBase 复制出来的 `mysql://` 自动转为 SQLAlchemy 需要的 `mysql+pymysql://`。两种写法都可，但不要保留 `[DB-USERNAME]` / `[DB-PASSWORD]` 占位符。
-
-密码中的 `@`、`:`、`/`、`#` 等字符必须 URL 编码。数据库应使用 `utf8mb4`。
+表结构仍由 Alembic 管理，HTTPS REST 只负责运行时 CRUD，不负责 DDL。现有生产库已执行到当前 revision 并导入幂等种子，因此本次切换不再运行数据搬迁。以后新增字段时，必须先通过受控 SQL 连接、CloudBase SQL 编辑器或一次性发布任务执行迁移，再发布依赖新字段的 REST 版本。
 
 ## 5. 创建云托管服务
 
@@ -102,24 +93,15 @@ WX_APPID=wx59c5620b7a894f8e
 CLOUDBASE_ENV_ID=cloud1-d8gz4jm8vb964a1c9
 ENABLE_CODE2SESSION=false
 OPEN_METEO_API=https://api.open-meteo.com/v1/forecast
-DATABASE_BACKEND=sqlalchemy
+DATABASE_BACKEND=cloudbase_rest
+CLOUDBASE_DB_TIMEOUT_SECONDS=5
+CLOUDBASE_DB_READ_RETRIES=1
 ```
 
 敏感变量只通过云托管版本的服务端运行时环境变量配置，不写入 Dockerfile、Git 或任何 `VITE_*` 变量：
 
 ```dotenv
-DATABASE_URL=<CloudBase MySQL 内网连接串>
 JWT_SECRET=<至少 32 字节的随机值>
-```
-
-这里的 `sqlalchemy` 是当前已经跑通的过渡配置。不要仅因为代码里出现了 REST 客户端，就提前删除 `DATABASE_URL` 或关闭公网 MySQL。
-
-完成 HTTPS Repository 的真实验收并解除代码中的 fail-closed 闸门后，新版本才改为：
-
-```dotenv
-DATABASE_BACKEND=cloudbase_rest
-CLOUDBASE_DB_TIMEOUT_SECONDS=5
-CLOUDBASE_DB_READ_RETRIES=1
 ```
 
 在部署版本页面打开“API Key 设置”，选择已创建的 `Eat-What` Server API Key。平台会自动注入标准环境变量 `CLOUDBASE_APIKEY`，不需要也不应在普通 Key-Value 环境变量中再复制一份明文。代码也兼容显式变量 `CLOUDBASE_DB_API_KEY`，但它只用于本地验证或平台自动注入不可用时的回退。
@@ -136,11 +118,9 @@ python -c "import os; print('CLOUDBASE_APIKEY=' + ('SET' if os.getenv('CLOUDBASE
 python /app/scripts/verify_cloudbase_rdb.py
 ```
 
-脚本只读取一行菜品，并只输出状态、行数、总数和请求号，不打印响应正文或密钥。只有返回 `cloudbase_rdb_read_ok`，且用户隔离、过滤、Upsert、异常和修复流程均验收后，才允许切换生产 Repository 并关闭 MySQL 公网连接。
+脚本会只读验证 `eq`、`in`、排序、分页和精确计数，只输出状态、行数、总数和请求号，不打印响应正文或密钥。返回 `cloudbase_rdb_read_ok` 后，再通过小程序烟测真实写入、用户隔离和推荐事件重放。
 
-当前代码会以 `DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY` 拒绝直接启动 REST 生产模式。这是刻意的安全闸门，不是配置故障。
-
-因此当前正式版本继续保持 `DATABASE_BACKEND=sqlalchemy` 和有效的 `DATABASE_URL`。只读验证脚本可在该模式下独立运行；不要为了跑脚本提前切成 `cloudbase_rest`。
+新 REST 版本运行时不需要 `DATABASE_URL`。为了分钟级回滚，可以暂时保留上一稳定 SQLAlchemy 部署版本及其环境变量，但不要把数据库密码复制到新代码、镜像或前端。REST 灰度通过后即可在 CloudBase 控制台关闭 MySQL 公网地址；自动暂停开关继续保持开启。
 
 本项目不允许小程序直接读写 MySQL，所有数据都经 FastAPI。生产表的 CloudBase 客户端基础权限应统一设为“无权限”，服务端再按 JWT 用户强制追加 `user_id` 过滤；`foods`、`recipes` 即使是公开数据也先保持服务端代理，避免形成两套访问规则。Server API Key 具备管理员权限，因此代码层用户隔离测试属于上线阻断项。
 
@@ -193,15 +173,17 @@ wx.cloud.callContainer({
 uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
 ```
 
-首次部署或包含迁移的版本发布时：
+本次数据库已由上一 SQLAlchemy 版本执行 Alembic 和幂等 seed，不要在 `DATABASE_BACKEND=cloudbase_rest` 的新实例里再次执行 `/app/scripts/release.sh`；它是 DDL 发布工具，需要原生数据库连接，不是应用启动步骤。
 
-1. 发布新镜像，但先不要让用户流量进入新功能。
-2. 访问一次 `/health` 唤起实例。
-3. 在云托管“实例详情 → Webshell”中进入任一新版本实例。
-4. 执行 `/app/scripts/release.sh`，等待 Alembic 和幂等 seed 全部完成。
-5. 再执行 `/health` 和业务烟测，然后切换流量。
+上线顺序：
 
-`release.sh` 只做一次 `alembic upgrade head` 和 `eat-what seed-all`。不要同时在多个实例运行；未来接入 CI 时，应把它变成带数据库锁的一次性发布任务。
+1. 保留上一稳定 SQLAlchemy 版本，记录当前 Alembic revision 和数据表行数。
+2. 发布 REST 新版本，但先只给测试流量。
+3. 在 Webshell 确认 `CLOUDBASE_APIKEY=SET`，运行 `python /app/scripts/verify_cloudbase_rdb.py`。
+4. 验证 `/health`、登录、档案、推荐、收藏、外食记录、确认套餐和历史。
+5. 切换全部流量并观察一个业务周期；稳定后关闭 MySQL 公网地址。
+
+未来确有结构迁移时，先在旧 SQLAlchemy 版本或受控发布任务执行 `/app/scripts/release.sh`，再部署 REST 应用版本；不要让多个实例同时跑迁移。
 
 ## 7. 部署后验证
 
@@ -211,12 +193,7 @@ uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
 GET /health
 ```
 
-预期返回 2xx 且状态为健康。注意 `/health` 的 `SELECT 1` 只证明连接可用，不证明迁移和种子完整；首次发布还需在 Webshell 执行：
-
-```sh
-alembic current
-eat-what seed-all
-```
+预期返回 2xx，且 `data.status=healthy`、`data.database=lazy-rest`。`/health` 刻意不访问数据库；数据库契约由 `verify_cloudbase_rdb.py` 和业务烟测验证。把数据库查询塞进高频探活，会让自动暂停形同虚设，属于花钱买“绿色监控”的反向理财。
 
 随后用小程序通过 `callContainer` 验证：
 
@@ -264,13 +241,13 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 本次验证产物：
 
 ```text
-后端上传包：/root/miniapp-trellis/backend-cloudbase-20260820-v8.zip
+后端上传包：/root/miniapp-trellis/backend-cloudbase-20260821-v9.zip
 微信工具目录：/root/miniapp-trellis/miniapp/dist/build/mp-weixin
 ```
 
 上传后端包时选择“压缩包”，目标目录留空，Dockerfile 选择“有”；压缩包根目录应直接看到 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。
 
-2026-08-20 本地校验记录：后端 332 个测试、前端 45 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建和无 AppSecret 容器启动烟测全部通过。上传包 SHA-256 为 c21565741ff16a17728b80aa9674c5dc5a3415c8744cf8340547fe2dd05c12a9。
+2026-08-21 本地校验记录：后端 341 个测试、前端 57 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建，以及无 AppSecret 的 `cloudbase_rest` 生产配置容器启动烟测全部通过。上传前在仓库根目录运行 `sha256sum backend-cloudbase-20260821-v9.zip`，并把摘要留存在部署记录中。
 
 ## 9. 回滚
 

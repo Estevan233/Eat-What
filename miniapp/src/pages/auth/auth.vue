@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { shouldShowAuthErrorToast, toAuthErrorMessage } from '@/auth/error'
+import { resolvePostLoginNavigation } from '@/auth/navigation'
 import { APP_NAME, BRAND_SUBTITLE, HERO_TITLE } from '@/config/brand'
 import { useUserStore } from '@/stores/user'
 
@@ -41,11 +42,9 @@ function goNext() {
   const pages = getCurrentPages()
   const last = pages[pages.length - 1]
   const redirect = (last as unknown as { options?: { redirect?: string } }).options?.redirect
-  if (redirect) {
-    uni.redirectTo({ url: decodeURIComponent(redirect) })
-  } else {
-    uni.switchTab({ url: '/pages/today/today' })
-  }
+  const navigation = resolvePostLoginNavigation(redirect)
+  if (navigation.method === 'switchTab') uni.switchTab({ url: navigation.url })
+  else uni.redirectTo({ url: navigation.url })
 }
 
 function handleLoginError(action: string, error: unknown) {

@@ -98,9 +98,7 @@ class Settings(BaseSettings):
         api_key = resolved_api_key.get_secret_value() if resolved_api_key is not None else ""
         if not api_key:
             return "CLOUDBASE_APIKEY"
-        # REST 客户端已可做独立只读验证，但业务 service 尚未全部切换 Repository。
-        # 在迁移完成前 fail closed，防止生产误落到默认 SQLite。
-        return "DATABASE_BACKEND_CLOUDBASE_REST_NOT_READY"
+        return None
 
 
 @lru_cache

@@ -7,23 +7,22 @@ def test_health_ok(client):
     body = res.json()
     assert body["ok"] is True
     assert body["data"]["status"] == "healthy"
-    assert body["data"]["database"] == "ready"
+    assert body["data"]["database"] == "configured"
     assert body["data"]["env"] == "dev"
 
 
-def test_health_database_unavailable(client, monkeypatch):
-    monkeypatch.setattr("app.main.check_database", lambda: False)
+def test_health_does_not_wake_the_database(client, monkeypatch):
+    def unexpected_probe():
+        raise AssertionError("liveness must not wake an auto-paused database")
+
+    monkeypatch.setattr("app.db.check_database", unexpected_probe)
 
     res = client.get("/health")
 
-    assert res.status_code == 503
+    assert res.status_code == 200
     body = res.json()
-    assert body["ok"] is False
-    assert body["code"] == "SERVICE_UNAVAILABLE"
-    assert body["data"] == {
-        "status": "degraded",
-        "database": "unavailable",
-    }
+    assert body["ok"] is True
+    assert body["data"]["database"] == "configured"
 
 
 def test_health_has_request_id_header(client):
