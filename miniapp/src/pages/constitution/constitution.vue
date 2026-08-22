@@ -98,6 +98,7 @@ import { requireLogin } from '@/utils/auth-guard'
 import {
   CONSTITUTION_NAMES,
   CONSTITUTION_OPTIONS,
+  CONSTITUTION_QUESTIONS,
   CONSTITUTION_TYPES,
 } from '@/constants/constitution'
 import type {
@@ -159,7 +160,7 @@ async function loadQuestions() {
     optionList.value = data.options
   } catch (e) {
     // request 层已 toast；本地兜底用常量避免空白
-    questions.value = []
+    questions.value = [...CONSTITUTION_QUESTIONS]
     optionList.value = CONSTITUTION_OPTIONS as unknown as ConstitutionOption[]
   } finally {
     loadingQuestions.value = false

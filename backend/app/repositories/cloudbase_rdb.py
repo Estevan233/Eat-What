@@ -205,7 +205,8 @@ class CloudBaseRdbClient:
     ) -> RdbResult:
         if not filters:
             raise ValueError("delete requires at least one filter")
-        params: list[QueryParam] = [(item.field, item.as_query_value()) for item in filters]
+        params: list[QueryParam] = [("select", "*")]
+        params.extend((item.field, item.as_query_value()) for item in filters)
         return self._request(
             "DELETE",
             self._table_path(table),

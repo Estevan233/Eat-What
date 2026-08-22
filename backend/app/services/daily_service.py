@@ -30,6 +30,24 @@ from app.schemas.meal import MealItem, MealNutrition, MealRole, MealSnapshot, Me
 MEAL_ROLE_ORDER: tuple[MealRole, ...] = ("main", "vegetable", "staple")
 
 
+def _save_cloudbase_daily_log(
+    session: DatabaseSession,
+    record: DailyLog,
+) -> DailyLog:
+    """Persist one daily projection without relying on REST upsert permissions."""
+    if not is_cloudbase_repository(session):  # pragma: no cover - caller contract
+        raise TypeError("CloudBase repository required")
+    if record.id is None:
+        return session.insert(record)
+    return session.update(
+        record,
+        filters=(
+            RdbFilter('id', 'eq', record.id),
+            RdbFilter('user_id', 'eq', record.user_id),
+        ),
+    )
+
+
 def get_recent(session: DatabaseSession, user_id: int, *, days: int = 3) -> list[DailyLog]:
     """取最近 N 天的 DailyLog。
 
@@ -194,7 +212,7 @@ def record_recommendation(
         log_record.recommendation_event_id = saved_event.id
         log_record.recommended_meal_json = recommended_meal
         try:
-            saved_log = session.upsert(log_record)
+            saved_log = _save_cloudbase_daily_log(session, log_record)
         except Exception as exc:
             raise AppError(
                 '推荐事件已保存，今日日志投影待修复，请重试',
@@ -256,23 +274,23 @@ def _load_idempotent_recommendation(
     record = get_today(session, user_id, log_date=event.event_date)
     if record is None or record.recommendation_event_id != event.id:
         if is_cloudbase_repository(session):
-            repaired = DailyLog(
-                user_id=user_id,
-                log_date=event.event_date,
-                recommendation_event_id=event.id,
-                recommended_food_ids_json=list(event.recommended_food_ids_json),
-                chosen_food_ids_json=[],
-                recommended_meal_json=event.primary_meal_json,
-                mood=event.mood,
-                activity_level=event.activity_level,
-                weather_tag=event.weather_tag,
-                dining_mode=event.dining_mode,
-                audience=event.audience,
-                party_size=event.party_size,
-                created_at=event.created_at,
-                updated_at=datetime.utcnow(),
-            )
-            return session.upsert(repaired), event
+            if record is None:
+                record = DailyLog(
+                    user_id=user_id,
+                    log_date=event.event_date,
+                    created_at=event.created_at,
+                )
+            record.recommendation_event_id = event.id
+            record.recommended_food_ids_json = list(event.recommended_food_ids_json)
+            record.recommended_meal_json = event.primary_meal_json
+            record.mood = event.mood
+            record.activity_level = event.activity_level
+            record.weather_tag = event.weather_tag
+            record.dining_mode = event.dining_mode
+            record.audience = event.audience
+            record.party_size = event.party_size
+            record.updated_at = datetime.utcnow()
+            return _save_cloudbase_daily_log(session, record), event
         raise ValidationError("推荐事件已写入，但今日日志投影待修复")
     return record, event
 
@@ -312,7 +330,7 @@ def choose_complete_meal(
     record.chosen_total_nutrition_json = chosen.total_nutrition.model_dump(mode="json")
     record.updated_at = datetime.utcnow()
     if is_cloudbase_repository(session):
-        return session.upsert(record)
+        return _save_cloudbase_daily_log(session, record)
     session.add(record)
     try:
         session.commit()
@@ -478,7 +496,7 @@ def upsert_today_log(
     )
 
     if is_cloudbase_repository(session):
-        return session.upsert(record)
+        return _save_cloudbase_daily_log(session, record)
     session.add(record)
     session.commit()
     session.refresh(record)
@@ -552,7 +570,7 @@ def update_chosen_food_ids(
     record.chosen_food_ids_json = list(chosen_food_ids)
     record.updated_at = datetime.utcnow()
     if is_cloudbase_repository(session):
-        return session.upsert(record)
+        return _save_cloudbase_daily_log(session, record)
     session.add(record)
     session.commit()
     session.refresh(record)
@@ -583,7 +601,7 @@ def append_chosen_food_id(
     record.chosen_food_ids_json = chosen
     record.updated_at = datetime.utcnow()
     if is_cloudbase_repository(session):
-        return session.upsert(record)
+        return _save_cloudbase_daily_log(session, record)
     session.add(record)
     session.commit()
     session.refresh(record)

@@ -33,7 +33,9 @@ def get_recommendation_catalog(
             return cached
         rest_foods = session.list(
             Food,
-            filters=(RdbFilter('recipe_ready', 'eq', True),),
+            # CloudBase MySQL REST represents boolean predicates with
+            # `is.true`; `eq.true` can be coerced as numeric zero by MySQL.
+            filters=(RdbFilter('recipe_ready', 'is', True),),
             order=(RdbOrder('id'),),
         )
         food_ids = [food.id for food in rest_foods if food.id is not None]

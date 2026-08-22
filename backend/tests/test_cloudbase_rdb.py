@@ -71,6 +71,10 @@ def test_in_filter_encodes_a_bounded_scalar_list() -> None:
     assert RdbFilter("id", "in", [7, 8]).as_query_value() == "in.(7,8)"
 
 
+def test_boolean_filter_uses_cloudbase_is_true_literal() -> None:
+    assert RdbFilter("recipe_ready", "is", True).as_query_value() == "is.true"
+
+
 def test_upsert_uses_unique_conflict_semantics_and_returns_rows() -> None:
     captured: list[httpx.Request] = []
 
@@ -96,6 +100,35 @@ def test_upsert_uses_unique_conflict_semantics_and_returns_rows() -> None:
     assert request.headers["Prefer"] == "return=representation, resolution=merge-duplicates"
     assert result.rows == [{"user_id": 7, "birthday": "2000-01-01"}]
     assert result.affected == 2
+
+
+def test_delete_requests_deleted_representation_with_select_star() -> None:
+    captured: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.append(request)
+        return httpx.Response(
+            200,
+            headers={"Content-Range": "*/1"},
+            json=[{"id": 42}],
+        )
+
+    client = _client(httpx.MockTransport(handler))
+    try:
+        result = client.delete(
+            "users",
+            filters=(RdbFilter("id", "eq", 42),),
+        )
+    finally:
+        client.close()
+
+    request = captured[0]
+    assert request.method == "DELETE"
+    assert request.url.params["select"] == "*"
+    assert request.url.params["id"] == "eq.42"
+    assert request.headers["Prefer"] == "return=representation"
+    assert result.rows == [{"id": 42}]
+    assert result.affected == 1
 
 
 @pytest.mark.parametrize("method_name", ["update", "delete"])

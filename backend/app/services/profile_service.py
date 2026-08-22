@@ -59,6 +59,7 @@ def upsert_profile(session: DatabaseSession, user_id: int, data: ProfileUpsert) 
                 weight_kg=data.weight_kg,
                 forbidden_tags=list(data.forbidden_tags),
             )
+            saved = session.insert(record)
         else:
             record.birthday = data.birthday
             record.gender = data.gender
@@ -66,7 +67,10 @@ def upsert_profile(session: DatabaseSession, user_id: int, data: ProfileUpsert) 
             record.weight_kg = data.weight_kg
             record.forbidden_tags = list(data.forbidden_tags)
             record.updated_at = datetime.utcnow()
-        saved = session.upsert(record)
+            saved = session.update(
+                record,
+                filters=(RdbFilter('user_id', 'eq', user_id),),
+            )
         return ProfileRead.model_validate(saved.to_read_dict())
 
     stmt = select(UserProfile).where(UserProfile.user_id == user_id)

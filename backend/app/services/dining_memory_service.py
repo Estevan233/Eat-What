@@ -45,13 +45,14 @@ def upsert_memory(
                 created_at=now,
                 updated_at=now,
             )
+            return session.insert(record)
         else:
             record.shop_name = shop_name
             record.dish_name = dish_name
             record.verdict = payload.verdict
             record.note = payload.note
             record.updated_at = now
-        return session.upsert(record)
+            return session.update(record, filters=filters)
 
     record = session.exec(
         select(DiningMemory)
