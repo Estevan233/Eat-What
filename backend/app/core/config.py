@@ -39,16 +39,8 @@ class Settings(BaseSettings):
     enable_code2session: bool = False
     port: int = 8080
 
-    # 和风天气（已弃用 - T09 切换到 Open-Meteo，保留字段以便回退）
-    hefeng_key: str = ""
-    hefeng_api: str = "https://devapi.qweather.com/v7/weather/now"
-    hefeng_geo_api: str = "https://geoapi.qweather.com/v2/city/lookup"
-
-    # Open-Meteo（T09 实际使用，免 key 免注册）
+    # Open-Meteo（免 key、免注册）
     open_meteo_api: str = "https://api.open-meteo.com/v1/forecast"
-
-    # 高德
-    amap_key: str = ""
 
     @field_validator("database_url", mode="before")
     @classmethod

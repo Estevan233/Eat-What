@@ -2,131 +2,92 @@
 
 今天吃啥嘞？Eat-What，卜一卜 → 补一补。
 
-> 结合用户的星座、节气、天气、心情、体质与忌口，用规则+打分算法给出今天该吃什么的决策建议。
+饭卜卜是一款微信小程序，根据人数、做饭/外食场景、心情、活动量、忌口、体质、节气与天气，推荐更合适的一餐。当前 MVP 已具备发布候选能力。
 
-[![Trellis](https://img.shields.io/badge/managed%20by-Trellis-2563eb)](https://github.com/mindfold-ai/Trellis)
-[![License](https://img.shields.io/badge/license-AGPL--3.0-16a34a)](./LICENSE)
+## 已实现功能
 
----
+- 微信一键登录与游客登录
+- 个人健康档案、忌口标签与九种体质测试
+- 一人/家庭模式的完整餐盘推荐和单项替换
+- 外卖/到店吃方向推荐、店铺＋菜品记录与避雷
+- 菜品能量估算、营养摘要、菜谱详情、收藏和备注
+- 推荐历史、近期去重和多轮轮换
+- 拒绝定位时手动填写城市；天气不可用时降级而不阻断推荐
 
-## 项目状态
+## 架构
 
-🚧 MVP 开发中 — 当前阶段：项目脚手架与 spec 填充
-
----
-
-## 目录结构
-
+```text
+微信小程序（uni-app + Vue 3 + TypeScript）
+  -> wx.cloud.callContainer
+  -> CloudBase 云托管（FastAPI）
+  -> CloudBase MySQL HTTPS REST API
 ```
+
+生产环境不使用公网 MySQL TCP 连接，也不需要单独购买 VPS。微信 AppSecret 不进入前端、Git 或当前可信身份头登录链路。
+
+## 目录
+
+```text
 miniapp-trellis/
-├── miniapp/              # uni-app + Vue3 + TS 微信小程序前端
-├── backend/              # FastAPI + SQLModel 后端
-├── .trellis/             # Trellis 工程框架（spec / tasks / workspace）
-├── .opencode/            # opencode 平台集成
-└── AGENTS.md             # AI 助手入口
+├── miniapp/              # uni-app 微信小程序前端
+├── backend/              # FastAPI 后端、迁移、种子和测试
+├── docs/guides/          # 部署、微信工具和验收指南
+├── docs/plans/           # 仍有参考价值的方案记录
+├── .trellis/             # Trellis 工程规范与任务记录
+└── .opencode/            # opencode 集成
 ```
 
----
-
-## 技术栈
-
-| 层 | 选型 |
-|---|---|
-| 前端 | uni-app + Vue 3 + TypeScript + Vite + Pinia + uni-ui |
-| 后端 | FastAPI + SQLModel + SQLite(开发) / PostgreSQL(生产) |
-| 认证 | 微信 openid → JWT |
-| 部署 | uvicorn + Nginx（后期） |
-
-### 第三方数据源
-
-| 数据 | 来源 | 费用 |
-|---|---|---|
-| 天气 | 和风天气开发版 API | 免费 1000 次/天 |
-| 节气/农历 | `lunar_python` 本地计算 | 免费 |
-| 星座 | 后端按生日计算 | 免费 |
-| 地理位置 | `wx.getLocation` + 高德逆地理 | 微信免费、高德免费 5k/日 |
-
----
-
-## MVP 范围（P0 + 体质测试）
-
-11 个任务，由 Trellis 管理：
-
-| # | 任务 | 描述 |
-|---|---|---|
-| T01 | 脚手架 + spec 改写 | uni-app / FastAPI 项目骨架（已完成 spec 部分） |
-| T02 | FastAPI 基础设施 | main、Settings、DB、JWT 工具 |
-| T03 | uni-app 基础设施 | 项目骨架、Pinia、请求封装、tabBar |
-| T04 | 微信登录全链路 | wx.login → code2session → JWT |
-| T05 | 用户档案 | 模型 + 编辑页 |
-| T06 | 体质测试 | 九种体质问卷 + 判定 |
-| T07 | 食物库冷启动 | 200 道菜 JSON + 导入脚本 |
-| T08 | 节气 + 星座服务 | lunar_python 集成 |
-| T09 | 和风天气 | API 接入 + 1h 缓存 |
-| T10 | 推荐算法 | 规则筛选 + 加权打分 + 理由生成 |
-| T11 | 今日推荐 UI + 历史收藏 | 主页 + 历史记录 + 收藏 |
-
-详见 `.trellis/tasks/` 下各任务的 `prd.md`。
-
----
-
-## 快速开始
+## 本地开发
 
 ### 后端
 
 ```bash
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -e ".[dev]"
-cp .env.example .env  # 填配置
+cp .env.example .env
+alembic upgrade head
+eat-what seed-all
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 前端
+### 小程序
 
 ```bash
 cd miniapp
-npm install
-npm run dev:mp-weixin   # 编译到微信小程序
-# 用微信开发者工具打开 dist/dev/mp-weixin
+npm ci
+npm run dev:mp-weixin
 ```
 
-### 类型同步
+微信开发者工具应导入 `miniapp/dist/dev/mp-weixin`，不要导入仓库根目录或 `miniapp/src`。
+
+## 发布前验证
 
 ```bash
-# 后端启动后
-cd miniapp && npm run gen:api   # 从 OpenAPI 拉取 TS 类型
+cd backend
+.venv/bin/ruff check .
+.venv/bin/mypy app
+.venv/bin/pytest -q
+
+cd ../miniapp
+npm run lint
+npm run type-check
+npm test -- --run
+npm run build:mp-weixin
+test -f dist/build/mp-weixin/app.json
 ```
 
----
+部署后还必须运行 CloudBase REST 读写契约验证和微信开发者工具真实预览；本地测试通过不能代替云端验收。
 
-## Trellis 工作流
+## 部署与维护
 
-本项目由 [Trellis](https://github.com/mindfold-ai/Trellis) 管理，使用 opencode 平台。
+- [CloudBase 云托管部署](docs/guides/cloudbase-cloudrun-deploy.md)
+- [Windows 微信开发者工具 + WSL](docs/guides/wechat-devtools-wsl.md)
+- [菜谱与完整餐盘验收](docs/guides/meal-recipe-acceptance.md)
+- [后端说明](backend/README.md)
 
-```bash
-# 查看当前活跃任务
-python3 ./.trellis/scripts/task.py current --source
-
-# 列出所有任务
-python3 ./.trellis/scripts/task.py list
-
-# 启动某个任务
-python3 ./.trellis/scripts/task.py start <task-dir>
-```
-
-在 opencode 会话里用 `/trellis:start` 进入开发循环，`/trellis:finish-work` 收尾。
-
----
-
-## 开发约定
-
-- 前端规范：[`.trellis/spec/frontend/`](./.trellis/spec/frontend/index.md)
-- 后端规范：[`.trellis/spec/backend/`](./.trellis/spec/backend/index.md)
-- 跨层思考：[`.trellis/spec/guides/`](./.trellis/spec/guides/index.md)
-- 工作流：[`.trellis/workflow.md`](./.trellis/workflow.md)
-
----
+发布压缩包、`dist`、`node_modules`、本地数据库、`.env`、微信工具私有配置和 Agent 运行状态都不提交 Git。生产密钥只由 CloudBase 服务端环境变量/API Key 注入。
 
 ## License
 

@@ -14,11 +14,11 @@ from app.schemas.constitution import ConstitutionResult
 from app.schemas.dining import DiningMemoryUpsert
 from app.schemas.profile import ProfileUpsert
 from app.services import (
+    constitution,
     daily_service,
     dining_memory_service,
     favorite_service,
     food_service,
-    constitution,
     profile_service,
     recipe_service,
     user_service,

@@ -1,5 +1,19 @@
 # Windows 下载残留元数据
 *.Zone.Identifier
 
-# 品牌素材压缩包（已解压到 eat_what_brand_assets/）
+# 可再生发布包（不要把版本压缩包堆进源码仓库）
 *.zip
+/.zip
+
+# 本机 Agent / IDE 运行状态；保留在本地，不参与协作
+/.agents/
+/.claude/
+/.superpowers/
+/skills-lock.json
+
+# 误将仓库根目录或 .trellis 目录导入微信开发者工具时生成的配置
+# 正确项目配置位于 miniapp 源码构建后的 dist/*/mp-weixin 中。
+/project.config.json
+/project.private.config.json
+/.trellis/project.config.json
+/.trellis/project.private.config.json

@@ -23,7 +23,7 @@ MVP 阶段不需要单独购买 VPS。`callContainer` 负责小程序到同环�
 | 监听端口 | `8080` |
 | AppID | `wx59c5620b7a894f8e` |
 | 最小实例数 | `0` |
-| 最大实例数 | `1`（MVP） |
+| 最大实例数 | `5`（按需扩容上限，不代表常驻 5 个实例） |
 | 初始规格 | `0.25 vCPU / 0.5 GB`，压测后再调整 |
 
 环境分工：
@@ -33,7 +33,7 @@ MVP 阶段不需要单独购买 VPS。`callContainer` 负责小程序到同环�
 
 两个环境均已设为手动续费。这能避免到期自动扣费，但不会代替用量预算和告警；到期前应主动决定保留哪个环境。
 
-最小实例数为 0 可以压低闲时费用，但会有冷启动。若真实用户开始抱怨首次登录慢，再用数据决定是否改为 1，别一上来就给空气配豪宅。
+最小实例数为 0 可以压低闲时费用，但会有冷启动。最大实例数 5 只是流量突增时的上限；没有请求时不会常驻 5 个实例。若真实用户开始抱怨首次登录慢，再用数据决定是否把最小实例改为 1，别一上来就给空气配豪宅。
 
 ## 3. 部署前安全处理
 
@@ -63,9 +63,9 @@ ENABLE_CODE2SESSION=false
 
 最终运行时链路已经切换为 CloudBase MySQL HTTPS REST Repository，不购买私有网络，也不需要单独搬一份数据库：表和数据仍是当前 `cloud1` 环境中的同一个 MySQL，只是 FastAPI 从公网 TCP/SQLAlchemy 改为官方 HTTPS API。
 
-保留数据库“自动暂停”为开启状态。CloudBase 官方说明数据库启动后最少运行 10 分钟，连续 10 分钟无访问会自动暂停；这会带来首次访问冷启动，但能降低学生项目的闲时费用。本项目同时保证：
+保留数据库“自动暂停”为开启状态。具体空闲暂停窗口以控制台当前显示为准；它会带来首次访问冷启动，但能降低学生项目的闲时费用。本项目同时保证：
 
-- 云托管最小实例数保持 `0`、最大实例数 `1`；
+- 云托管最小实例数保持 `0`、最大实例数 `5`；
 - `/health` 只检查进程是否存活，不查询 MySQL，避免探针反复唤醒数据库；
 - 首页先展示本地上次推荐，再后台刷新；天气失败降级为中性权重，不阻断主推荐；
 - 热实例缓存 10 分钟的只读菜品/菜谱目录，不缓存用户档案、收藏或历史。
@@ -81,7 +81,7 @@ ENABLE_CODE2SESSION=false
 3. 构建上下文选择仓库的 `backend` 目录。
 4. Dockerfile 使用 `backend/Dockerfile`。
 5. 容器端口填 `8080`。
-6. MVP 设置最小实例数 0、最大实例数 1。
+6. MVP 设置最小实例数 0、最大实例数 5。
 
 生产环境变量：
 
@@ -121,7 +121,7 @@ python /app/scripts/verify_cloudbase_rdb.py --write
 
 第一条验证 `eq`、`in`、排序、分页和精确计数；第二条在 `users` 表插入一条随机诊断记录、按主键更新并在 `finally` 中删除。脚本只输出状态和请求号，不打印响应正文、OpenID 或密钥。必须同时看到 `cloudbase_rdb_read_ok` 和 `cloudbase_rdb_write_ok`。若写入仍返回 403，先检查 Server API Key 与表级写权限，不要把客户端权限粗暴改成“所有用户可写”。
 
-新 REST 版本运行时会忽略 `DATABASE_URL`。为了分钟级回滚，可以暂时保留上一稳定 SQLAlchemy 部署版本及其环境变量，但不要误以为它会修复 REST 403。v10 写入验收和微信端灰度通过后，从新版本删除 `DATABASE_URL`，再在 CloudBase 控制台关闭 MySQL 公网地址；自动暂停开关继续保持开启。
+新 REST 版本不得配置 `DATABASE_URL`。回滚应在云托管版本管理中切回上一稳定版本，不能把公网连接串重新塞进当前版本假装修复 REST 错误。HTTP Repository 写入验收和微信端灰度通过后，CloudBase MySQL 公网访问保持关闭；自动暂停开关继续开启。
 
 本项目不允许小程序直接读写 MySQL，所有数据都经 FastAPI。生产表的 CloudBase 客户端基础权限应统一设为“无权限”，服务端再按 JWT 用户强制追加 `user_id` 过滤；`foods`、`recipes` 即使是公开数据也先保持服务端代理，避免形成两套访问规则。Server API Key 具备管理员权限，因此代码层用户隔离测试属于上线阻断项。
 
@@ -188,7 +188,7 @@ uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
 
 ## 7. 部署后验证
 
-先确认 release 脚本成功，再在云托管控制台或服务测试入口验证：
+先确认云托管版本启动正常；只有本次确实包含表结构变更时才检查受控迁移任务。普通 REST 版本不要运行 `release.sh`。随后在云托管控制台或服务测试入口验证：
 
 ```text
 GET /health
@@ -239,16 +239,15 @@ test -f dist/build/mp-weixin/app.json && echo "release app.json OK"
 
 确认云环境后，依次做编译、预览、真机调试和上传。
 
-本次验证产物：
+微信工具目录固定为：
 
 ```text
-后端上传包：/root/miniapp-trellis/backend-cloudbase-20260821-v10.zip
-微信工具目录：/root/miniapp-trellis/miniapp/dist/build/mp-weixin
+/root/miniapp-trellis/miniapp/dist/build/mp-weixin
 ```
 
-上传后端包时选择“压缩包”，目标目录留空，Dockerfile 选择“有”；压缩包根目录应直接看到 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。
+后端优先从仓库中的 `backend` 目录做源代码部署。若控制台必须上传压缩包，应在仓库外临时生成；压缩包根目录直接包含 `Dockerfile`、`pyproject.toml`、`app/`、`alembic/`、`data/` 和 `scripts/`。发布包可由源码重新生成，因此不要提交 Git，也不要用文件名里的 v10、v11 猜当前线上版本。
 
-2026-08-21 本地校验记录：后端 344 个测试、前端 57 个测试、全量 Ruff、全量 mypy、TypeScript、ESLint、小程序生产构建、Docker 镜像构建，以及无 AppSecret 的 `cloudbase_rest` 生产配置容器启动烟测全部通过。上传前在仓库根目录运行 `sha256sum backend-cloudbase-20260821-v10.zip`，并把摘要留存在部署记录中。
+每次发布都重新运行后端测试、Ruff、mypy、前端测试、TypeScript、ESLint、小程序生产构建、Docker 构建与 CloudBase REST 写入契约验证，并在部署记录中保存当次提交 SHA、云托管版本号和包摘要。旧测试数量和旧压缩包摘要不属于长期文档资产。
 
 ## 9. 回滚
 

@@ -196,7 +196,7 @@ class CloudBaseRepository:
                     if field is not None
                     else None
                 )
-                if isinstance(default, (builtins.list, dict)):
+                if isinstance(default, builtins.list | dict):
                     # CloudBase's REST gateway can return an empty JSON
                     # collection as null on a later GET. Restore the model's
                     # non-null collection default without changing nullable

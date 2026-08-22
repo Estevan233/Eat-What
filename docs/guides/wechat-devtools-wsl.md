@@ -137,6 +137,7 @@ grep '"appid"' dist/dev/mp-weixin/project.config.json
 | 5xx | 容器启动、迁移、种子数据或数据库连接失败 | 查看首个异常和同一 `requestId` |
 | 模拟器正常、手机失败 | 使用了旧构建，或预览版本未连接同一云环境 | 用发布构建重新预览并核对环境 ID |
 | 点击“我的”无响应 | 旧包对 tabBar 页面使用了 `navigateTo` | 清缓存并使用包含 `switchTab` 修复的新构建 |
+| `tunneling socket ... 127.0.0.1:7890` | 开发者工具选择系统代理，但 Clash 已停止或端口已变化 | 启动 Clash 并核对端口，或切换为不使用代理 |
 
 ## 8. 发布前最短检查
 
@@ -153,8 +154,36 @@ test -f dist/build/mp-weixin/app.json
 
 然后导入 `dist/build/mp-weixin`，恢复正常安全校验，完成模拟器、预览二维码和真机三轮验收。
 
-## 9. 官方参考
+## 9. CLI 与可选 MCP
+
+在“设置 → 安全”开启服务端口后，可以用微信开发者工具 CLI 做可重复的真实预览。端口可能随本机配置变化，不要写死进源码：
+
+```powershell
+& 'D:\VXDev\微信web开发者工具\cli.bat' preview `
+  --port <当前服务端口> `
+  --project '\\wsl.localhost\Ubuntu-22.04\root\miniapp-trellis\miniapp\dist\build\mp-weixin' `
+  --qr-format image `
+  --qr-output '<仓库外的临时二维码路径>'
+```
+
+官方提供的 `wechatide` MCP 可作为本机开发增强，但不是应用运行依赖。只有本机 `wechatide` 已加入 `PATH`、服务端口已开启且 Agent 客户端确实需要操作开发者工具时才配置：
+
+```json
+{
+  "mcpServers": {
+    "wechat-devtools": {
+      "command": "wechatide",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+这属于个人开发环境配置，不提交应用仓库。默认也不要开启“允许获取工具登录票据”或“自动信任项目”；需要相关自动化时再按最小权限单独开启。普通编译、预览和上传使用 CLI 已足够。
+
+## 10. 官方参考
 
 - [CloudBase 云托管：小程序访问服务](https://docs.cloudbase.net/run/develop/access/mini)
 - [CloudBase 云托管：从源代码部署](https://docs.cloudbase.net/run/deploy/deploy/deploying-source-code)
 - [uni-app CLI 运行与发行](https://uniapp.dcloud.net.cn/worktile/CLI.html)
+- [微信开发者工具 CLI](https://developers.weixin.qq.com/miniprogram/dev/devtools/cli.html)
