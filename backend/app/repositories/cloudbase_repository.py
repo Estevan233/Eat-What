@@ -150,6 +150,17 @@ class CloudBaseRepository:
         values = record.model_dump(mode="json")
         table = cast(Any, record).__table__
         primary_keys = {column.name for column in table.primary_key.columns}
+        for column in table.columns:
+            value = values.get(column.name)
+            if isinstance(column.type, JSON) and value is not None:
+                # CloudBase MySQL REST expects JSON-column values as JSON
+                # strings. Native arrays/objects are rejected on PATCH and
+                # empty arrays can otherwise be persisted as null on POST.
+                values[column.name] = json.dumps(
+                    value,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
         for key in list(values):
             if key in primary_keys and (omit_primary_keys or values[key] is None):
                 values.pop(key)
@@ -178,6 +189,19 @@ class CloudBaseRepository:
                     raise RuntimeError(
                         f"invalid JSON returned for {model.__name__}.{column.name}",
                     ) from exc
+            if isinstance(column.type, JSON) and row.get(column.name) is None:
+                field = model.model_fields.get(column.name)
+                default = (
+                    field.get_default(call_default_factory=True)
+                    if field is not None
+                    else None
+                )
+                if isinstance(default, (builtins.list, dict)):
+                    # CloudBase's REST gateway can return an empty JSON
+                    # collection as null on a later GET. Restore the model's
+                    # non-null collection default without changing nullable
+                    # JSON fields such as constitution_scores.
+                    row[column.name] = default
         return model.model_validate(row)
 
 

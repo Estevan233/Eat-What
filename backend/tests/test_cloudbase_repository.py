@@ -57,6 +57,34 @@ def test_select_model_decodes_json_and_preserves_owned_filter() -> None:
     assert kwargs["limit"] == 1
 
 
+def test_select_model_restores_non_nullable_json_collection_default() -> None:
+    """CloudBase may represent an empty JSON array as null on a later GET."""
+    client = StubClient()
+    client.select = lambda table, **kwargs: RdbResult(
+        rows=[
+            {
+                "user_id": 7,
+                "birthday": "2000-01-01",
+                "gender": "male",
+                "height_cm": 180,
+                "weight_kg": 70.5,
+                "forbidden_tags": None,
+                "constitution_type": None,
+                "constitution_scores": None,
+                "updated_at": "2026-08-20T12:00:00",
+            }
+        ],
+        status_code=200,
+        total=1,
+    )
+    repository = CloudBaseRepository(client)
+
+    profile = repository.first(UserProfile)
+
+    assert profile is not None
+    assert profile.forbidden_tags == []
+
+
 def test_upsert_model_serializes_json_and_datetime() -> None:
     client = StubClient()
     repository = CloudBaseRepository(client)
@@ -75,7 +103,8 @@ def test_upsert_model_serializes_json_and_datetime() -> None:
     assert saved.user_id == 7
     _, table, values = client.calls[-1]
     assert table == "user_profiles"
-    assert values["forbidden_tags"] == ["pork"]
+    assert json.loads(values["forbidden_tags"]) == ["pork"]
+    assert values["constitution_scores"] is None
     assert values["updated_at"] == "2026-08-20T12:00:00"
 
 
