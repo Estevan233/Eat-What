@@ -10,6 +10,7 @@ from app.models.food import Food
 from app.models.recipe import Recipe
 from app.repositories.cloudbase_rdb import RdbFilter, RdbResult
 from app.repositories.cloudbase_repository import CloudBaseRepository
+from app.schemas.constitution import ConstitutionResult
 from app.schemas.dining import DiningMemoryUpsert
 from app.schemas.profile import ProfileUpsert
 from app.services import (
@@ -17,6 +18,7 @@ from app.services import (
     dining_memory_service,
     favorite_service,
     food_service,
+    constitution,
     profile_service,
     recipe_service,
     user_service,
@@ -43,6 +45,7 @@ class MemoryRdbClient:
         self.tables: dict[str, list[dict[str, Any]]] = {}
         self.ids: dict[str, int] = {}
         self.select_calls = 0
+        self.select_requests: list[tuple[str, tuple[RdbFilter, ...]]] = []
         self.write_calls: list[tuple[str, str, Any]] = []
 
     def close(self) -> None:
@@ -60,6 +63,7 @@ class MemoryRdbClient:
         count=False,
     ) -> RdbResult:
         self.select_calls += 1
+        self.select_requests.append((table, tuple(filters)))
         rows = [deepcopy(row) for row in self.tables.get(table, [])]
         rows = [row for row in rows if all(self._matches(row, item) for item in filters)]
         total = len(rows)
@@ -200,6 +204,48 @@ def test_core_services_run_without_sqlalchemy_session() -> None:
     )
     assert profile.forbidden_tags == ["pork"]
 
+    updated_profile = profile_service.upsert_profile(
+        repository,
+        user.id,
+        ProfileUpsert(
+            birthday="2000-01-01",
+            gender="male",
+            height_cm=181,
+            weight_kg=69,
+            forbidden_tags=["pork"],
+        ),
+    )
+    assert updated_profile.height_cm == 181
+    profile_writes = [
+        call for call in repository.client.write_calls
+        if call[1] == "user_profiles"
+    ]
+    assert [call[0] for call in profile_writes] == ["insert", "update"]
+    assert profile_writes[1][2]["filters"] == (
+        RdbFilter("user_id", "eq", user.id),
+    )
+
+    constitution.save_constitution(
+        repository,
+        user.id,
+        ConstitutionResult(
+            primary="pinghe",
+            secondary=[],
+            scores_normalized={
+                "pinghe": 80,
+                "qixu": 20,
+                "yangxu": 20,
+                "yinxu": 20,
+                "tanshi": 20,
+                "shire": 20,
+                "xueyu": 20,
+                "qiyu": 20,
+                "tebing": 20,
+            },
+            constitution_type_str="pinghe",
+        ),
+    )
+
     food = repository.insert(
         Food(
             name="番茄鸡蛋",
@@ -230,6 +276,10 @@ def test_core_services_run_without_sqlalchemy_session() -> None:
     assert cached_foods is foods
     assert cached_recipes is recipes
     assert repository.client.select_calls == catalog_select_calls
+    assert (
+        "foods",
+        (RdbFilter("recipe_ready", "is", True),),
+    ) in repository.client.select_requests
     assert recipe_service.get_by_food_id(repository, food.id).food_name == "番茄鸡蛋"
 
     assert favorite_service.toggle_favorite(repository, user.id, food.id) is True
@@ -257,6 +307,19 @@ def test_core_services_run_without_sqlalchemy_session() -> None:
     assert memory_total == 1
     assert memories[0].id == memory.id
 
+    updated_memory = dining_memory_service.upsert_memory(
+        repository,
+        user.id,
+        DiningMemoryUpsert(
+            shop_name="楼下小馆",
+            dish_name="番茄鸡蛋",
+            verdict="avoided",
+            note="偏咸",
+        ),
+    )
+    assert updated_memory.id == memory.id
+    assert updated_memory.note == "偏咸"
+
     first_log, first_event = daily_service.record_recommendation(
         repository,
         user.id,
@@ -280,3 +343,4 @@ def test_core_services_run_without_sqlalchemy_session() -> None:
     assert repeated_event.id == first_event.id
     assert repeated_log.id == first_log.id
     assert repeated_log.recommended_food_ids_json == [food.id]
+    assert all(call[0] != "upsert" for call in repository.client.write_calls)

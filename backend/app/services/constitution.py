@@ -147,7 +147,10 @@ def save_constitution(session: DatabaseSession, user_id: int, result: Constituti
             for key, value in result.scores_normalized.items()
         }
         record.updated_at = datetime.utcnow()
-        session.upsert(record)
+        session.update(
+            record,
+            filters=(RdbFilter('user_id', 'eq', user_id),),
+        )
         return
 
     stmt = select(UserProfile).where(UserProfile.user_id == user_id)

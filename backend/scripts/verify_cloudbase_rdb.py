@@ -93,8 +93,20 @@ def verify_write_contract(client: CloudBaseRdbClient) -> dict[str, int | str]:
             filters=(RdbFilter("id", "eq", user_id),),
         )
 
-    if len(deleted.rows) != 1 or deleted.rows[0].get("id") != user_id:
+    represented_ids = [row.get("id") for row in deleted.rows]
+    if represented_ids and represented_ids != [user_id]:
         raise RuntimeError("users delete response contract is invalid")
+    if deleted.affected not in (None, 1):
+        raise RuntimeError("users delete affected-count contract is invalid")
+
+    remaining = client.select(
+        "users",
+        columns=("id",),
+        filters=(RdbFilter("id", "eq", user_id),),
+        limit=1,
+    )
+    if remaining.rows:
+        raise RuntimeError("users cleanup verification failed")
 
     return {
         "insert_status": inserted.status_code,
