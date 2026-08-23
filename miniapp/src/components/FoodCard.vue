@@ -94,7 +94,7 @@ async function onToggleFavorite() {
 }
 
 .card-chosen {
-  border-color: #bfe8c8;
+  border-color: $fresh-light;
 }
 
 /* 左侧性味色条 */
@@ -103,8 +103,8 @@ async function onToggleFavorite() {
   flex-shrink: 0;
 }
 
-.bar-cold, .bar-cool { background: #3b82f6; }
-.bar-neutral { background: #94a3b8; }
+.bar-cold, .bar-cool { background: $cold; }
+.bar-neutral { background: $ink-3; }
 .bar-warm, .bar-hot { background: $brand; }
 
 .card-body {
@@ -127,13 +127,13 @@ async function onToggleFavorite() {
 
 .fav-btn {
   font-size: 40rpx;
-  color: #d8cfc4;
+  color: $disabled;
   padding: 0 8rpx;
   transition: all 0.2s;
 }
 
 .fav-on {
-  color: #ef4444;
+  color: $danger;
   transform: scale(1.1);
 }
 
@@ -160,8 +160,8 @@ async function onToggleFavorite() {
 }
 
 .chip-cal {
-  color: #b45309;
-  background: #fff7ed;
+  color: $warning;
+  background: $warning-light;
 }
 
 .chip-tag {
@@ -203,7 +203,7 @@ async function onToggleFavorite() {
 
 .reason-text {
   font-size: 24rpx;
-  color: #8a4b22;
+  color: $brand-dark;
   line-height: 1.6;
 }
 
@@ -242,7 +242,7 @@ async function onToggleFavorite() {
 }
 
 .chosen-btn {
-  background: #c9bfb2;
+  background: $disabled;
   box-shadow: none;
 }
 </style>

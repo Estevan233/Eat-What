@@ -74,7 +74,7 @@ const weatherChipText = computed(() => {
   return `${temp}° ${weather.value.text} · ${WEATHER_TAG_LABEL[weather.value.weatherTag]}`
 })
 const weatherColor = computed(() => {
-  if (!weather.value) return '#2563eb'
+  if (!weather.value) return '#e8590c'
   return WEATHER_TAG_COLOR[weather.value.weatherTag]
 })
 
@@ -137,7 +137,7 @@ defineExpose({ refreshWeather })
 
 .chip {
   font-size: 24rpx;
-  color: #2563eb;
+  color: $brand;
 }
 
 .chip-term {

@@ -22,7 +22,6 @@
           <text class="nickname">{{ userStore.profile?.nickname || '微信用户' }}</text>
           <view class="badges">
             <text v-if="userStore.isGuest" class="badge badge-guest">游客</text>
-            <text class="badge badge-id">id {{ userStore.profile?.id }}</text>
           </view>
         </view>
       </view>
@@ -228,13 +227,8 @@ function onLogout() {
 }
 
 .badge-guest {
-  color: #b45309;
-  background: #fef3c7;
-}
-
-.badge-id {
-  color: $ink-2;
-  background: $bg;
+  color: $warning;
+  background: $warning-light;
 }
 
 /* ---- 菜单 ---- */
@@ -311,7 +305,7 @@ function onLogout() {
 }
 
 .btn-logout-text {
-  color: #dc2626;
+  color: $danger;
   font-size: 28rpx;
 }
 </style>

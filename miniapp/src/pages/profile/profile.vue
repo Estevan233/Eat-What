@@ -24,7 +24,7 @@
         <text class="label">性别</text>
         <radio-group @change="onGenderChange">
           <label v-for="g in genderOptions" :key="g.value" class="radio-item">
-            <radio :value="g.value" :checked="form.gender === g.value" />
+            <radio :value="g.value" :checked="form.gender === g.value" color="#e8590c" />
             <text class="radio-label">{{ g.label }}</text>
           </label>
         </radio-group>
@@ -267,7 +267,19 @@ async function onSubmit() {
 .picker-value {
   font-size: 30rpx;
   color: $ink;
-  padding: 8rpx 0;
+  padding: 20rpx 24rpx;
+  background: $bg;
+  border: 1rpx solid $line;
+  border-radius: $radius-sm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.picker-value::after {
+  content: '📅';
+  font-size: 28rpx;
+  opacity: 0.6;
 }
 
 .radio-item {

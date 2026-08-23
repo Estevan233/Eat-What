@@ -90,6 +90,7 @@ $brand-soft: #ffd9be;
 /* 辅助色 */
 $fresh: #2f9e44;        // 新鲜/已选
 $fresh-light: #e8f7ec;
+$fresh-dark: #1d6e2e;
 $ink: #2b2320;          // 主文字（暖黑）
 $ink-2: #8a8078;        // 次级文字
 $ink-3: #b5aba0;        // 占位/弱化
@@ -108,3 +109,35 @@ $shadow-cta: 0 12rpx 32rpx rgba(232, 89, 12, 0.32);
 
 /* 品牌渐变（主按钮 / 强调区） */
 $grad-brand: linear-gradient(135deg, #f97316 0%, #e8590c 55%, #d9480f 100%);
+
+/* =============================================================
+   语义色补全 + 默认 uni-app 变量覆盖
+   ============================================================= */
+
+/* 语义色 */
+$warning: #d97706;
+$warning-light: #fff8df;
+$warning-dark: #765315;
+
+$danger: #ef4444;
+
+$disabled: #c9bfb2;
+
+$cold: #3b82f6;      /* 食物性味：寒凉 */
+$cold-light: #eff6ff;
+
+/* 覆盖默认 uni-app 变量，使 uni-ui 组件跟随品牌色 */
+$uni-color-primary: $brand;
+$uni-color-success: $fresh;
+$uni-color-warning: $warning;
+$uni-color-error: $danger;
+
+$uni-text-color: $ink;
+$uni-text-color-grey: $ink-2;
+$uni-text-color-placeholder: $ink-3;
+
+$uni-bg-color: $card;
+$uni-bg-color-grey: $bg;
+$uni-bg-color-hover: $brand-light;
+
+$uni-border-color: $line;
