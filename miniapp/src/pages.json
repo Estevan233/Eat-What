@@ -43,11 +43,11 @@
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
-      { "pagePath": "pages/today/today", "text": "今天" },
-      { "pagePath": "pages/profile/profile", "text": "档案" },
-      { "pagePath": "pages/constitution/constitution", "text": "体质" },
-      { "pagePath": "pages/history/history", "text": "历史" },
-      { "pagePath": "pages/mine/mine", "text": "我的" }
+      { "pagePath": "pages/today/today", "text": "今天", "iconPath": "static/tabbar/today.png", "selectedIconPath": "static/tabbar/today-active.png" },
+      { "pagePath": "pages/profile/profile", "text": "档案", "iconPath": "static/tabbar/profile.png", "selectedIconPath": "static/tabbar/profile-active.png" },
+      { "pagePath": "pages/constitution/constitution", "text": "体质", "iconPath": "static/tabbar/constitution.png", "selectedIconPath": "static/tabbar/constitution-active.png" },
+      { "pagePath": "pages/history/history", "text": "历史", "iconPath": "static/tabbar/history.png", "selectedIconPath": "static/tabbar/history-active.png" },
+      { "pagePath": "pages/mine/mine", "text": "我的", "iconPath": "static/tabbar/mine.png", "selectedIconPath": "static/tabbar/mine-active.png" }
     ]
   },
   "globalStyle": {
