@@ -78,6 +78,9 @@ function appendRecentIds(existing: number[], latest: number[]): number[] {
 
 function freshWeatherSnapshot(value: WeatherData | null): WeatherData | undefined {
   if (!value) return undefined
+  // 中性 fallback（providerAvailable=false）不算新鲜：
+  // 否则一次 Open-Meteo 失败会被缓存 2 小时，期间一直显示"天气暂不可用"且不重试。
+  if (!value.providerAvailable) return undefined
   const fetchedAt = Date.parse(value.fetchedAt)
   if (!Number.isFinite(fetchedAt)) return undefined
   const age = Date.now() - fetchedAt

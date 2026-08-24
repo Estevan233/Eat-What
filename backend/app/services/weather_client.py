@@ -8,6 +8,7 @@
 - 进程内 dict+TTL 缓存，key 用 6 位小数 round（~11m 精度），同坐标 1h 内不重打
 - 客户端实例化时调 get_settings()，便于测试用 monkeypatch 替换配置
 """
+import asyncio
 from datetime import datetime, timezone
 from typing import Any
 
@@ -194,22 +195,7 @@ class OpenMeteoClient:
         }
         log.info("weather_fetch_start", lat=lat, lng=lng, url=self._base_url)
 
-        try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                resp = await client.get(self._base_url, params=params)
-        except httpx.HTTPError as e:
-            error_type = type(e).__name__
-            error_detail = str(e).strip() or error_type
-            log.warning(
-                "weather_network_error",
-                error_type=error_type,
-                error=error_detail,
-            )
-            raise ExternalAPIError(
-                "open-meteo",
-                f"网络异常({error_type}): {error_detail}",
-            ) from None
-
+        resp = await self._get_with_retry(params)
         if resp.status_code == 429:
             raise RateLimitError("open-meteo")
         if resp.status_code != 200:
@@ -225,6 +211,43 @@ class OpenMeteoClient:
         self._cache_put(key, weather)
         log.info("weather_fetch_ok", lat=lat, lng=lng, tag=weather.weather_tag)
         return weather
+
+    async def _get_with_retry(
+        self,
+        params: dict[str, str | float],
+        *,
+        max_attempts: int = 2,
+    ) -> httpx.Response:
+        """带连接级重试的 GET。只重试连接失败（DNS/TLS/建连），
+        不在超时上重试，避免叠加等待让调用方（推荐 3s 预算）雪上加霜。
+        """
+        last_exc: httpx.HTTPError | None = None
+        for attempt in range(max_attempts):
+            try:
+                async with httpx.AsyncClient(timeout=self._timeout) as client:
+                    return await client.get(self._base_url, params=params)
+            except (httpx.ConnectError, httpx.ConnectTimeout) as e:
+                # 连接级失败常是瞬时（DNS/TLS 抖动），退避后重试一次
+                last_exc = e
+                if attempt + 1 < max_attempts:
+                    await asyncio.sleep(0.25 * (attempt + 1))
+                    continue
+                break
+            except httpx.HTTPError as e:
+                last_exc = e
+                break
+
+        error_type = type(last_exc).__name__ if last_exc else "HTTPError"
+        error_detail = str(last_exc).strip() if last_exc else error_type
+        log.warning(
+            "weather_network_error",
+            error_type=error_type,
+            error=error_detail,
+        )
+        raise ExternalAPIError(
+            "open-meteo",
+            f"网络异常({error_type}): {error_detail}",
+        ) from None
 
     def _parse(self, data: dict[str, Any], lat: float, lng: float) -> WeatherData:
         """把 Open-Meteo 响应解析为 WeatherData。字段缺失抛 ExternalAPIError。"""

@@ -324,6 +324,25 @@ describe('daily complete meal store', () => {
     expect(store.hasFreshWeather).toBe(true)
   })
 
+  it('does not treat neutral fallback weather (providerAvailable=false) as fresh', async () => {
+    const neutralWeather = {
+      ...recommendation.context.weather,
+      providerAvailable: false,
+      fetchedAt: new Date().toISOString(),
+    }
+    uni.setStorageSync('eat_what_weather', JSON.stringify(neutralWeather))
+    setActivePinia(createPinia())
+    const store = useDailyStore()
+
+    expect(store.hasFreshWeather).toBe(false)
+
+    await store.fetchRecommend(39.92, 116.41)
+
+    expect(recommendMock).toHaveBeenCalledWith(expect.objectContaining({
+      weatherSnapshot: undefined,
+    }))
+  })
+
   it('invalidates a cooking recommendation when switching to external dining', async () => {
     const store = useDailyStore()
     await store.fetchRecommend()

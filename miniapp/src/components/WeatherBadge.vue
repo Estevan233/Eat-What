@@ -91,7 +91,8 @@ onMounted(async () => {
 /** 拉天气前需登录 + 位置授权；由外部按钮/today.vue onShow 触发。 */
 async function refreshWeather(): Promise<void> {
   if (!userStore.isLoggedIn) return
-  if (dailyStore.weather && isFresh(dailyStore.weather.fetchedAt)) return
+  // 中性 fallback（providerAvailable=false）不算有效缓存，允许立即重试。
+  if (dailyStore.weather && dailyStore.weather.providerAvailable && isFresh(dailyStore.weather.fetchedAt)) return
   try {
     const coords: Coords = await getLocation()
     await dailyStore.fetchWeather(coords.lat, coords.lng)
@@ -123,9 +124,9 @@ defineExpose({ refreshWeather })
   display: inline-flex;
   align-items: center;
   padding: 12rpx 24rpx;
-  background: #f4f7ff;
+  background: $brand-light;
   border-radius: 32rpx;
-  border: 1rpx solid #dbe4ff;
+  border: 1rpx solid $brand-soft;
 }
 
 .ctx-row {
@@ -141,7 +142,7 @@ defineExpose({ refreshWeather })
 }
 
 .chip-term {
-  color: #047857;
+  color: $fresh;
 }
 
 .chip-weather {
@@ -149,17 +150,17 @@ defineExpose({ refreshWeather })
 }
 
 .chip-grant {
-  color: #d97706;
+  color: $warning;
   text-decoration: underline;
 }
 
 .sep {
   font-size: 22rpx;
-  color: #c4d3f0;
+  color: $ink-3;
 }
 
 .text-muted {
   font-size: 24rpx;
-  color: #94a3b8;
+  color: $ink-3;
 }
 </style>

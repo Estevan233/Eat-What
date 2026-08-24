@@ -53,8 +53,8 @@ from app.services.weather_client import weather_client
 
 log = structlog.get_logger()
 
-# 小程序请求层默认 10 秒超时。天气只是软信号，最多占用其中 2 秒。
-RECOMMEND_WEATHER_TIMEOUT_SECONDS = 2.0
+# 小程序请求层默认 10 秒超时。天气只是软信号，最多占用其中 3 秒（跨境访问留余量）。
+RECOMMEND_WEATHER_TIMEOUT_SECONDS = 3.0
 WEATHER_SNAPSHOT_TTL = timedelta(hours=2)
 WEATHER_SNAPSHOT_CLOCK_SKEW = timedelta(minutes=5)
 
