@@ -44,7 +44,18 @@
       <navigator url="/pages/history/history" class="history-link">历史 ›</navigator>
     </view>
 
-    <view class="panel">
+    <!-- 选择器 summary（收起态） -->
+    <view v-if="!selectorsExpanded" class="panel-summary" @click="toggleSelectors">
+      <text class="panel-summary-text">用餐设置：{{ selectorSummary }}</text>
+      <text class="panel-summary-edit">✎</text>
+    </view>
+
+    <!-- 选择器面板（展开态） -->
+    <view v-show="selectorsExpanded" class="panel">
+      <view class="panel-header">
+        <text class="panel-header-label">用餐设置</text>
+        <text class="panel-header-toggle" @click="toggleSelectors">收起</text>
+      </view>
       <view class="panel-row">
         <text class="panel-label">为谁吃</text>
         <view class="chip-row">
@@ -114,10 +125,11 @@
       <text v-if="dailyStore.audience === 'family'" class="family-hint">
         家庭模式优先考虑共享、少折腾；能量仍按每人估算，不拿锅的大小装科学。
       </text>
-      <button class="cta" :disabled="isLoading" @click="onRecommend">
-        {{ ctaText }}
-      </button>
     </view>
+
+    <button class="cta" :disabled="isLoading" @click="onRecommend">
+      {{ ctaText }}
+    </button>
 
     <view v-if="pageError" class="error-banner">
       <text class="error-title">这次没有拿到新推荐</text>
@@ -234,6 +246,7 @@ const userStore = useUserStore()
 const { getLocation } = useLocation()
 const badgeRef = ref<InstanceType<typeof WeatherBadge> | null>(null)
 const pageError = ref('')
+const selectorsExpanded = ref(false)
 const PARTY_SIZES = [2, 3, 4, 5, 6, 8]
 
 const MOOD_EMOJI: Record<Mood, string> = {
@@ -241,6 +254,21 @@ const MOOD_EMOJI: Record<Mood, string> = {
 }
 const ACTIVITY_EMOJI: Record<ActivityLevel, string> = {
   light: '🚶', normal: '🚶‍♂️', high: '🏃',
+}
+const selectorSummary = computed(() => {
+  const parts: string[] = []
+  parts.push(dailyStore.diningMode === 'eat_out' ? '外卖' : '自己做')
+  if (dailyStore.audience === 'family') {
+    parts.push(`${dailyStore.partySize}人`)
+  } else {
+    parts.push('个人')
+  }
+  parts.push(MOOD_LABELS[dailyStore.mood])
+  parts.push(ACTIVITY_LABELS[dailyStore.activityLevel])
+  return parts.join(' · ')
+})
+function toggleSelectors() {
+  selectorsExpanded.value = !selectorsExpanded.value
 }
 const isLoading = computed(() => dailyStore.diningMode === 'cook'
   ? dailyStore.loading
@@ -362,6 +390,8 @@ onShow(() => {
     favoriteStore.fetchList().catch(() => undefined)
   }
   setTimeout(() => badgeRef.value?.refreshWeather?.(), 100)
+  // 无推荐结果时自动展开选择器，有结果时收起
+  selectorsExpanded.value = !dailyStore.currentMeal
 })
 </script>
 
@@ -389,6 +419,12 @@ onShow(() => {
 .chosen-text { color: $fresh; font-size: 21rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .history-link { color: $fresh; font-size: 22rpx; }
 .panel { margin-bottom: 26rpx; padding: 28rpx; border-radius: $radius-lg; background: $card; box-shadow: $shadow-card; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20rpx; }
+.panel-header-label { color: $ink; font-size: 28rpx; font-weight: 750; }
+.panel-header-toggle { color: $brand; font-size: 24rpx; }
+.panel-summary { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16rpx; padding: 20rpx 28rpx; border-radius: $radius-lg; background: $brand-light; border: 1rpx solid $brand-soft; }
+.panel-summary-text { color: $brand-dark; font-size: 24rpx; font-weight: 650; }
+.panel-summary-edit { color: $brand; font-size: 28rpx; }
 .panel-row { display: flex; align-items: flex-start; gap: 14rpx; margin-bottom: 22rpx; }
 .panel-label { width: 104rpx; flex: 0 0 104rpx; padding-top: 10rpx; color: $ink-2; font-size: 24rpx; font-weight: 650; }
 .chip-row { flex: 1; display: flex; flex-wrap: wrap; gap: 10rpx; }
@@ -405,6 +441,7 @@ onShow(() => {
 .cta::after { border: none; }
 .cta[disabled] { color: #fff; opacity: .65; }
 .error-banner, .cache-banner { display: flex; flex-direction: column; gap: 6rpx; margin-bottom: 20rpx; padding: 20rpx 22rpx; border-radius: 20rpx; }
+.cache-banner { flex-direction: row; align-items: center; gap: 10rpx; padding: 12rpx 22rpx; border-radius: 999rpx; margin-bottom: 12rpx; }
 .error-banner { color: $danger; background: #fff0eb; border: 1rpx solid #ffd0c2; }
 .cache-banner { color: $warning-dark; background: $warning-light; border: 1rpx solid #f1df9e; }
 .error-title, .cache-title { font-size: 24rpx; font-weight: 750; }
