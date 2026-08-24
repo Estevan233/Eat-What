@@ -30,7 +30,7 @@
       <view class="menu">
         <view class="menu-item" @click="goConstitution">
           <view class="menu-left">
-            <text class="menu-icon">🧬</text>
+            <uni-icons type="person" size="22" color="#e8590c" />
             <text class="menu-label">体质测试</text>
           </view>
           <text v-if="userStore.hasConstitution" class="menu-value">{{ primaryLabel }}</text>
@@ -38,7 +38,7 @@
         </view>
         <view class="menu-item" @click="goProfile">
           <view class="menu-left">
-            <text class="menu-icon">📋</text>
+            <uni-icons type="star" size="22" color="#e8590c" />
             <text class="menu-label">健康档案</text>
           </view>
           <text v-if="userStore.hasProfile" class="menu-value">已填 ✓</text>
@@ -46,14 +46,14 @@
         </view>
         <view class="menu-item" @click="goFavorite">
           <view class="menu-left">
-            <text class="menu-icon">❤️</text>
+            <uni-icons type="heart" size="22" color="#e8590c" />
             <text class="menu-label">我的收藏</text>
           </view>
           <text class="menu-action">›</text>
         </view>
         <view class="menu-item" @click="goDiningMemory">
           <view class="menu-left">
-            <text class="menu-icon">🧾</text>
+            <uni-icons type="list" size="22" color="#e8590c" />
             <text class="menu-label">外食记录</text>
           </view>
           <text class="menu-action">›</text>
@@ -260,10 +260,6 @@ function onLogout() {
   display: flex;
   align-items: center;
   gap: 20rpx;
-}
-
-.menu-icon {
-  font-size: 36rpx;
 }
 
 .menu-label {

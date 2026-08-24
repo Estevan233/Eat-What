@@ -30,6 +30,24 @@
         </view>
       </view>
 
+      <!-- 体质特征卡 -->
+      <view v-if="advice" class="advice-card">
+        <view class="advice-section">
+          <text class="advice-label">🔍 体质特征</text>
+          <view class="trait-row">
+            <text v-for="(t, i) in advice.traits" :key="i" class="trait-chip">{{ t }}</text>
+          </view>
+        </view>
+        <view class="advice-section">
+          <text class="advice-label">🍽 饮食建议</text>
+          <text v-for="(d, i) in advice.diet" :key="i" class="advice-text">• {{ d }}</text>
+        </view>
+        <view class="advice-section">
+          <text class="advice-label">⚠️ 注意避免</text>
+          <text v-for="(a, i) in advice.avoid" :key="i" class="advice-text">• {{ a }}</text>
+        </view>
+      </view>
+
       <view class="chart">
         <text class="chart-title">九种体质转化分</text>
         <view v-for="t in CONSTITUTION_TYPES" :key="t" class="bar-row">
@@ -47,7 +65,10 @@
         </view>
       </view>
 
-      <button class="btn-primary retake-btn" :disabled="submitting" @click="onRetake">
+      <button class="action-btn" @click="goToday">
+        🍽 看看今天适合吃什么
+      </button>
+      <button class="retake-btn" :disabled="submitting" @click="onRetake">
         重新测试
       </button>
     </view>
@@ -96,6 +117,7 @@ import { useUserStore } from '@/stores/user'
 import { getQuestions } from '@/api/constitution'
 import { requireLogin } from '@/utils/auth-guard'
 import {
+  CONSTITUTION_ADVICE,
   CONSTITUTION_NAMES,
   CONSTITUTION_OPTIONS,
   CONSTITUTION_QUESTIONS,
@@ -133,6 +155,9 @@ const primaryLabel = computed(() =>
 )
 const secondaryLabels = computed(() =>
   result.value ? result.value.secondary.map((s) => CONSTITUTION_NAMES[s]) : [],
+)
+const advice = computed(() =>
+  result.value ? CONSTITUTION_ADVICE[result.value.primary] : null,
 )
 
 function scoreOf(t: ConstitutionType): number {
@@ -226,6 +251,10 @@ function goLogin() {
 
 function goProfile() {
   uni.navigateTo({ url: '/pages/profile/profile' })
+}
+
+function goToday() {
+  uni.switchTab({ url: '/pages/today/today' })
 }
 </script>
 
@@ -431,6 +460,70 @@ function goProfile() {
   border: 1rpx solid $brand-soft;
 }
 
+.advice-card {
+  background: $card;
+  border-radius: $radius-lg;
+  padding: 30rpx 28rpx;
+  margin-bottom: 30rpx;
+  box-shadow: $shadow-card;
+}
+
+.advice-section {
+  margin-bottom: 24rpx;
+}
+
+.advice-section:last-child {
+  margin-bottom: 0;
+}
+
+.advice-label {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: $ink;
+  margin-bottom: 12rpx;
+}
+
+.trait-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.trait-chip {
+  padding: 8rpx 20rpx;
+  background: $brand-light;
+  color: $brand-dark;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  border: 1rpx solid $brand-soft;
+}
+
+.advice-text {
+  display: block;
+  font-size: 26rpx;
+  color: $ink-2;
+  line-height: 1.8;
+}
+
+.action-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: $grad-brand;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  border-radius: 999rpx;
+  border: none;
+  margin-bottom: 20rpx;
+  box-shadow: $shadow-cta;
+}
+
+.action-btn::after {
+  border: none;
+}
+
 .chart {
   background: $card;
   border-radius: $radius-lg;
@@ -497,14 +590,14 @@ function goProfile() {
   height: 80rpx;
   line-height: 80rpx;
   background: $card;
-  color: $brand;
-  border: 1rpx solid $brand;
+  color: $ink-2;
+  border: 1rpx solid $line;
   border-radius: 999rpx;
   font-size: 28rpx;
 }
 
 .retake-btn[disabled] {
-  color: $brand-soft;
-  border-color: $brand-soft;
+  color: $ink-3;
+  border-color: $ink-3;
 }
 </style>
