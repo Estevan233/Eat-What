@@ -23,13 +23,18 @@
 
 CloudBase 官方说明云托管默认可经平台出口访问第三方公网 API；关闭该出向能力才需要 VPC+NAT。当前 Open-Meteo 的 ConnectTimeout 说明特定外部路径不稳定，不等价于 Cloud Run 完全不能出公网。
 
-QWeather 当前天气 API 接受 `经度,纬度`，无需先做逆地理编码；API Key 可放 `X-QW-Api-Key` 请求头，请求必须使用用户项目自己的 API Host。QWeather 文档还提示 2027-01-01 起 API Key 鉴权会有每日调用量限制，因此服务端必须缓存并保留备用源，后续可按量评估是否改 JWT 鉴权。
+QWeather 当前天气 API 接受 `经度,纬度`，无需先做逆地理编码；API Key 可放 `X-QW-Api-Key` 请求头，请求必须使用用户项目自己的 API Host。其当前按量档位为每月前 50,000 次免费、随后 950,000 次 0.0007 元/次，标准共享服务 QPM 3000。文档还提示 2027-01-01 起 API Key 鉴权会限制每日调用量，因此服务端必须缓存，后续可按量评估是否改 JWT 鉴权。
 
-结论：QWeather 国内主源、Open-Meteo 备用、last-good 缓存和 neutral 末级降级；不购买 VPC/NAT。
+高德天气只接受 adcode；从小程序经纬度出发通常需要逆地理编码再查询天气。个人认证天气月免费额度 5,000 次、QPS 3，超额天气查询均价 30 元/万次。它适合作为低频国内备用源，不适合在本项目中承担每次请求主源。
+
+结论：QWeather 国内主源、高德低频备用、last-good 缓存和 neutral 末级降级；Open-Meteo 退出生产默认链路；不购买 VPC/NAT。
 
 参考：
 
 - <https://docs.cloudbase.net/run/deploy/networking/egress>
 - <https://dev.qweather.com/docs/api/weather/weather-now/>
 - <https://dev.qweather.com/docs/configuration/authentication/>
-
+- <https://dev.qweather.com/docs/finance/pricing/>
+- <https://dev.qweather.com/en/docs/features/performance/>
+- <https://lbs.amap.com/api/webservice/guide/api/weatherinfo>
+- <https://lbs.amap.com/pages/base_service_price>

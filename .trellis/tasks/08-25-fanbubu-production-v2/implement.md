@@ -41,12 +41,12 @@
 
 ## 4. QWeather 双源天气
 
-- [ ] 写 QWeather 响应映射、配置成对校验、超时、fallback、fresh/stale/neutral 四级路径测试。
+- [ ] 写 QWeather/高德响应映射、配置成对校验、超时、fallback、fresh/stale/neutral 四级路径测试，并断言生产默认不调用 Open-Meteo。
 - [ ] 提取 WeatherProvider 边界并实现 WeatherService；控制串行时间预算。
 - [ ] 扩展 WeatherData 与前端 Badge/缓存逻辑，验证旧缓存反序列化。
-- [ ] 在本地 mock 后，用 Cloud Run WebShell 分别执行 QWeather 和 Open-Meteo 连通性诊断；凭据只来自环境变量。
+- [ ] 在本地 mock 后，用 Cloud Run WebShell 分别执行 QWeather 与高德连通性/时延诊断；Open-Meteo 只做可选对照；凭据只来自环境变量。
 
-回滚点：移除 QWeather 配置自动使用备用源；WeatherData 新字段保持兼容。
+回滚点：移除 QWeather 配置自动使用高德；移除两者配置自动使用 stale/neutral；WeatherData 新字段保持兼容。
 
 ## 5. AI 用餐意图
 
@@ -71,4 +71,3 @@
 
 - 自动化全绿不等于全链路跑通；必须同时有 Cloud Run WebShell、开发者工具模拟器和真机证据。
 - 任一真实链路无法验证时，报告“本地完成/线上待验收”，不得使用“已经上线可用”之类的魔法咒语糊弄过去。
-
