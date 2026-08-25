@@ -3,7 +3,7 @@
   "name": "fanbubu-production-v2",
   "title": "饭卜卜生产增强版",
   "description": "完善微信登录后资料、120 道可靠菜谱、个性化多样性、双源天气与 AI 用餐意图。",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "fullstack",
   "package": "fullstack",
