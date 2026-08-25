@@ -3,7 +3,7 @@
  * token / profile / userProfile / constitution 落 storage，刷新页面不丢。
  *
  * login() 流程：
- *   wx.login() → 拿 code → 调 api.auth.wxLogin(code) → 拿 {token, user} → 存 store + storage
+ *   wx.cloud.callContainer() → 云托管注入可信身份头 → 拿 {token, user} → 存 store + storage
  *
  * guestLogin() 流程（游客模式）：
  *   读 storage 里的 guest_id，没有就生成 UUID → 调 api.auth.guestLogin(guestId) → 存 store + storage
@@ -16,14 +16,15 @@
  *
  * learn point：
  * - Pinia 用 setup 语法，token/profile 都是 ref，computed 自动响应
- * - uni.login 是异步 API，回调里 resolve/reject
- * - 注意区分 user（id+nickname+avatar_url）与 userProfile（生日/性别/身高/...）
+ * - 正式微信登录不在客户端保存 AppSecret，也不调用 code2session
+ * - 注意区分 profile（公开昵称/头像）与 userProfile（生日/性别/身高/...）
  */
 import { defineStore } from 'pinia'
 import { computed, onScopeDispose, ref } from 'vue'
 import { cloudLogin, guestLogin } from '@/api/auth'
-import { getProfile, upsertProfile } from '@/api/profile'
+import { getProfile, updateAccountProfile, upsertProfile } from '@/api/profile'
 import { getResult, submit as submitConstitution } from '@/api/constitution'
+import { normalizeUserRead } from '@/auth/profile-onboarding'
 import { getCloudContainerApi } from '@/platform/cloudbase'
 import { ApiError } from '@/types/api'
 import {
@@ -39,6 +40,7 @@ import {
   writeStoredString,
 } from '@/auth/storage'
 import type {
+  AccountProfilePatch,
   ConstitutionResult,
   ProfileRead,
   ProfileUpsert,
@@ -58,7 +60,7 @@ function generateGuestId(): string {
 
 export const useUserStore = defineStore('user', () => {
   const token = ref<string>('')
-  // user = 登录响应里的 UserRead（id + nickname + avatar_url）
+  // profile = 登录响应里的 UserRead（id + nickname + avatarUrl）
   const profile = ref<UserRead | null>(null)
   // userProfile = 档案详情（生日/性别/身高/体重/忌口）
   const userProfile = ref<ProfileRead | null>(null)
@@ -78,27 +80,11 @@ export const useUserStore = defineStore('user', () => {
 
   // 启动时从 storage 恢复
   token.value = getStoredToken()
-  profile.value = readStoredJson<UserRead>(AUTH_STORAGE_KEYS.profile)
+  const storedProfile = readStoredJson<UserRead>(AUTH_STORAGE_KEYS.profile)
+  profile.value = storedProfile ? normalizeUserRead(storedProfile) : null
   userProfile.value = readStoredJson<ProfileRead>(AUTH_STORAGE_KEYS.userProfile)
   constitution.value = readStoredJson<ConstitutionResult>(AUTH_STORAGE_KEYS.constitution)
   guestId.value = readStoredString(AUTH_STORAGE_KEYS.guestId)
-
-  /** 调 wx.login 拿 code */
-  function getWxCode(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      uni.login({
-        provider: 'weixin',
-        success: (res) => {
-          if (res.code) {
-            resolve(res.code)
-          } else {
-            reject(new Error('wx.login 未返回 code'))
-          }
-        },
-        fail: (err) => reject(new Error(err.errMsg || 'wx.login 失败')),
-      })
-    })
-  }
 
   /**
    * 微信小程序登录走 CloudBase 私有链路，由云托管注入可信身份头。
@@ -110,10 +96,13 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const data = await cloudLogin()
+    const user = normalizeUserRead(data.user)
     token.value = data.token
-    profile.value = data.user
-    saveLoginSession(data.token, data.user)
-    return data.user
+    profile.value = user
+    guestId.value = ''
+    removeStoredValue(AUTH_STORAGE_KEYS.guestId)
+    saveLoginSession(data.token, user)
+    return user
   }
 
   /**
@@ -127,9 +116,17 @@ export const useUserStore = defineStore('user', () => {
     }
     const data = await guestLogin(guestId.value, nickname)
     token.value = data.token
-    profile.value = data.user
-    saveLoginSession(data.token, data.user)
-    return data.user
+    const user = normalizeUserRead(data.user)
+    profile.value = user
+    saveLoginSession(data.token, user)
+    return user
+  }
+
+  async function saveAccountProfile(payload: AccountProfilePatch): Promise<UserRead> {
+    const updated = normalizeUserRead(await updateAccountProfile(payload))
+    profile.value = updated
+    writeStoredJson(AUTH_STORAGE_KEYS.profile, updated)
+    return updated
   }
 
   /** 拉取档案详情（GET /profile），存 store + storage */
@@ -211,9 +208,9 @@ export const useUserStore = defineStore('user', () => {
     userProfile,
     constitution,
     guestId,
-    getWxCode,
     login,
     loginAsGuest,
+    saveAccountProfile,
     fetchUserProfile,
     saveUserProfile,
     saveConstitution,

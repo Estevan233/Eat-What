@@ -6,10 +6,23 @@
  * - 所以这里直接传 camelCase 类型的 data，拿 camelCase 类型的返回
  */
 import { request } from './request'
-import type { ProfileRead, ProfileUpsert, UserWithProfile } from '@/types/api'
+import type {
+  AccountProfilePatch,
+  ProfileRead,
+  ProfileUpsert,
+  UserRead,
+  UserWithProfile,
+} from '@/types/api'
 
 export const getProfile = () =>
   request<UserWithProfile>({ url: '/api/v1/profile' })
 
 export const upsertProfile = (data: ProfileUpsert) =>
   request<ProfileRead, ProfileUpsert>({ url: '/api/v1/profile', method: 'PUT', data })
+
+export const updateAccountProfile = (data: AccountProfilePatch) =>
+  request<UserRead, AccountProfilePatch>({
+    url: '/api/v1/profile/account',
+    method: 'PUT',
+    data,
+  })

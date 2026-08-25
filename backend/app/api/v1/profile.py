@@ -12,11 +12,29 @@ from sqlmodel import Session
 
 from app.core.deps import get_current_user, get_db
 from app.models.user import User
-from app.schemas.profile import ProfileUpsert, UserRead
-from app.services import profile_service
+from app.schemas.auth import AuthUserRead
+from app.schemas.profile import AccountProfilePatch, ProfileUpsert, UserRead
+from app.services import profile_service, user_service
 from app.utils.response import success
 
 router = APIRouter(prefix="/profile", tags=["profile"])
+
+
+@router.patch("/account", response_model=dict[str, Any])
+@router.put("/account", response_model=dict[str, Any])
+def patch_account_route(
+    body: AccountProfilePatch,
+    user: User = Depends(get_current_user),
+    session: Session = Depends(get_db),
+) -> dict[str, object]:
+    """更新当前已认证用户主动提交的昵称或头像。"""
+    updated = user_service.update_public_profile(
+        session,
+        user,
+        nickname=body.nickname,
+        avatar_url=body.avatar_url,
+    )
+    return success(data=AuthUserRead.model_validate(updated).model_dump())
 
 
 @router.get("", response_model=dict[str, Any])

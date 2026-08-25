@@ -13,7 +13,7 @@
     <!-- 已登录 -->
     <view v-else class="logged-in">
       <!-- 用户卡 -->
-      <view class="user-card">
+      <view class="user-card" @click="goAccountProfile">
         <image v-if="avatarUrl" class="avatar" :src="avatarUrl" mode="aspectFill" />
         <view v-else class="avatar avatar-placeholder">
           <text class="avatar-letter">{{ userStore.profile?.nickname?.charAt(0) || '?' }}</text>
@@ -75,12 +75,13 @@
 import { computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { CONSTITUTION_NAMES } from '@/constants/constitution'
+import type { ConstitutionResult } from '@/types/api'
 
 const userStore = useUserStore()
 
-const avatarUrl = computed(() => userStore.profile?.avatar_url || '')
+const avatarUrl = computed(() => userStore.profile?.avatarUrl || '')
 const primaryLabel = computed(() => {
-  const c = userStore.constitution
+  const c = userStore.constitution as ConstitutionResult | null
   return c ? CONSTITUTION_NAMES[c.primary] : ''
 })
 
@@ -96,6 +97,12 @@ function goConstitution() {
 
 function goProfile() {
   uni.navigateTo({ url: '/pages/profile/profile' })
+}
+
+function goAccountProfile() {
+  uni.navigateTo({
+    url: '/pages/account-profile/account-profile?redirect=' + encodeURIComponent('/pages/mine/mine'),
+  })
 }
 
 function goFavorite() {

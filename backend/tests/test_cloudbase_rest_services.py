@@ -186,6 +186,28 @@ def test_user_creation_uses_insert_and_existing_login_uses_filtered_update() -> 
     assert "id" not in update_payload["values"]
 
 
+def test_public_profile_update_uses_authenticated_id_filter() -> None:
+    client = MemoryRdbClient()
+    repository = CloudBaseRepository(client)
+    user = user_service.get_or_create_guest(
+        repository,
+        guest_id="public-profile-rest",
+    )
+
+    updated = user_service.update_public_profile(
+        repository,
+        user,
+        nickname="饭饭",
+        avatar_url="cloud://cloud-test.avatar/avatars/1/avatar.png",
+    )
+
+    assert updated.nickname == "饭饭"
+    assert updated.avatar_url.startswith("cloud://")
+    write = client.write_calls[-1]
+    assert write[0:2] == ("update", "users")
+    assert write[2]["filters"] == (RdbFilter("id", "eq", user.id),)
+
+
 def test_core_services_run_without_sqlalchemy_session() -> None:
     repository = CloudBaseRepository(MemoryRdbClient())
     user = user_service.get_or_create_guest(repository, guest_id="rest-smoke")

@@ -6,7 +6,7 @@
  * - 前端 TS 类型用 camelCase（与 JS 社区惯例 + 微信小程序原生 API 一致）
  * - 后端 API 用 snake_case
  * - request.ts 拦截层做双向转换：发送前 camelToSnake，接收后 snakeToCamel
- * - 例外：UserRead（id/nickname/avatar_url）是 T04 直接对后端字段的映射，保留 snake_case 避免回归
+ * - UserRead 也使用 camelCase；旧版缓存由 profile-onboarding.ts 迁移。
  */
 
 export interface ApiResult<T> {
@@ -92,7 +92,13 @@ export interface UserWithProfile {
 export interface UserRead {
   id: number
   nickname: string
-  avatar_url?: string
+  avatarUrl?: string
+  profileComplete: boolean
+}
+
+export interface AccountProfilePatch {
+  nickname?: string
+  avatarUrl?: string
 }
 
 /** POST /auth/wx-login 成功响应的 data。 */
