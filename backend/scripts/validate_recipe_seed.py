@@ -1,4 +1,4 @@
-"""Validate the fixed 60-recipe MVP dataset."""
+"""Validate the production 120-recipe dataset before import."""
 
 import argparse
 import json
@@ -10,14 +10,45 @@ RECIPE_PATH = Path(__file__).resolve().parent.parent / 'data' / 'recipe_seed.jso
 FOOD_PATH = Path(__file__).resolve().parent.parent / 'data' / 'food_seed.json'
 ROLES = {'main', 'vegetable', 'staple'}
 NUTRITION_KEYS = {'energy_kcal', 'protein_g', 'fat_g', 'carb_g'}
+EXPECTED_ROLE_COUNTS = {'main': 50, 'vegetable': 50, 'staple': 20}
+OPTIONAL_CONDIMENTS = {
+    '盐', '白胡椒粉', '黑胡椒粉', '胡椒粉', '香油', '醋', '葱花', '香菜',
+}
+ANIMAL_FOOD_MARKERS = {
+    '肉', '排骨', '猪', '牛', '羊', '鸡', '鸭', '鹅', '蛋', '鱼', '虾', '蟹', '贝',
+    '蛤', '鱿鱼', '里脊', '肝', '腩', '翅',
+}
+DONENESS_MARKERS = {
+    '熟透', '全熟', '煮熟', '蒸熟', '炒熟', '炖熟', '煎熟', '烤熟', '凝固',
+    '无血色', '中心熟', '变色且熟', '肉汁清澈',
+}
+FORBIDDEN_CLAIMS = {
+    '治疗', '治愈', '根治', '保证减脂', '包瘦', '降血压', '降血糖', '排毒',
+}
+SMALL_INGREDIENT_MAX_G = {
+    '紫菜': 20,
+    '虾皮': 30,
+    '花生': 80,
+    '腰果': 100,
+    '松仁': 80,
+    '干辣椒': 50,
+    '花椒': 20,
+    '八角': 20,
+    '桂皮': 20,
+    '香叶': 20,
+    '盐': 15,
+    '枸杞': 30,
+    '桂圆': 50,
+    '红枣': 80,
+}
 
 
 def validate(recipes: Any, food_names: set[str]) -> list[str]:
     errors: list[str] = []
     if not isinstance(recipes, list):
         return ['顶层必须是 list']
-    if len(recipes) != 60:
-        errors.append(f'菜谱必须恰好 60 条，实际 {len(recipes)} 条')
+    if len(recipes) != 120:
+        errors.append(f'菜谱必须恰好 120 条，实际 {len(recipes)} 条')
 
     names: set[str] = set()
     role_counts = {role: 0 for role in ROLES}
@@ -47,6 +78,7 @@ def validate(recipes: Any, food_names: set[str]) -> list[str]:
             errors.append(f'{prefix} steps 必须为 4-6 步')
         elif any(not isinstance(step, str) or not step.strip() for step in steps):
             errors.append(f'{prefix} steps 含空步骤')
+        joined_steps = ''.join(steps) if isinstance(steps, list) else ''
 
         nutrition = item.get('nutrition_per_serving')
         if not isinstance(nutrition, dict) or not NUTRITION_KEYS.issubset(nutrition):
@@ -54,10 +86,13 @@ def validate(recipes: Any, food_names: set[str]) -> list[str]:
         else:
             for key in NUTRITION_KEYS:
                 value = nutrition[key]
-                if not isinstance(value, int | float) or value < 0:
-                    errors.append(f'{prefix} {key} 必须为非负数字')
-            if nutrition.get('energy_kcal', 0) <= 0:
-                errors.append(f'{prefix} energy_kcal 必须大于 0')
+                if not isinstance(value, int | float) or value <= 0:
+                    errors.append(f'{prefix} {key} 必须为正数')
+            bounds = {'energy_kcal': 1200, 'protein_g': 120, 'fat_g': 100, 'carb_g': 200}
+            for key, upper in bounds.items():
+                value = nutrition.get(key)
+                if isinstance(value, int | float) and value > upper:
+                    errors.append(f'{prefix} {key} 超出每份合理上界 {upper}')
 
         ingredients = item.get('ingredients')
         if not isinstance(ingredients, list) or not ingredients:
@@ -74,16 +109,64 @@ def validate(recipes: Any, food_names: set[str]) -> list[str]:
                     errors.append(f'{prefix} 非可选食材必须量化: {ingredient.get("name")}')
                 if amount is not None and (not isinstance(amount, int | float) or amount <= 0):
                     errors.append(f'{prefix} 食材数量必须大于 0: {ingredient.get("name")}')
+                ingredient_name = ingredient.get('name')
+                upper = SMALL_INGREDIENT_MAX_G.get(str(ingredient_name))
+                if (
+                    upper is not None
+                    and ingredient.get('unit') == 'g'
+                    and isinstance(amount, int | float)
+                    and amount > upper
+                ):
+                    errors.append(f'{prefix} {ingredient_name} 用量异常: {amount}g > {upper}g')
+                if (
+                    amount is None
+                    and isinstance(ingredient_name, str)
+                    and ingredient_name not in OPTIONAL_CONDIMENTS
+                ):
+                    errors.append(f'{prefix} 只有调味料可不定量: {ingredient_name}')
+                if (
+                    isinstance(ingredient_name, str)
+                    and not ingredient.get('optional')
+                    and ingredient_name not in joined_steps
+                ):
+                    errors.append(f'{prefix} 步骤未覆盖关键食材: {ingredient_name}')
+
+            ingredient_text = ''.join(
+                str(ingredient.get('name', ''))
+                for ingredient in ingredients
+                if isinstance(ingredient, dict)
+            )
+            if any(marker in ingredient_text for marker in ANIMAL_FOOD_MARKERS) and not any(
+                marker in joined_steps for marker in DONENESS_MARKERS
+            ):
+                errors.append(f'{prefix} 肉蛋水产缺少明确熟制提示')
+
+        for key, lower, upper in (
+            ('servings', 1, 8),
+            ('prep_time_min', 0, 120),
+            ('cook_time_min', 1, 240),
+            ('version', 1, 99),
+        ):
+            value = item.get(key)
+            if not isinstance(value, int) or not lower <= value <= upper:
+                errors.append(f'{prefix} {key} 必须为 {lower}-{upper} 的整数')
+        if item.get('difficulty') not in {'easy', 'medium', 'hard'}:
+            errors.append(f'{prefix} difficulty 非法')
 
         source = item.get('source_url')
         if source is not None and (not isinstance(source, str) or not source.startswith('https://')):
             errors.append(f'{prefix} source_url 必须为 HTTPS')
-        if not item.get('nutrition_basis'):
+        nutrition_basis = item.get('nutrition_basis')
+        if not isinstance(nutrition_basis, str) or '每份' not in nutrition_basis:
             errors.append(f'{prefix} nutrition_basis 缺失')
+        searchable_text = joined_steps + str(nutrition_basis or '')
+        for claim in FORBIDDEN_CLAIMS:
+            if claim in searchable_text:
+                errors.append(f'{prefix} 含不允许的疗效承诺: {claim}')
 
-    for role, minimum in {'main': 20, 'vegetable': 20, 'staple': 10}.items():
-        if role_counts[role] < minimum:
-            errors.append(f'{role} 数量不足: {role_counts[role]} < {minimum}')
+    for role, expected in EXPECTED_ROLE_COUNTS.items():
+        if role_counts[role] != expected:
+            errors.append(f'{role} 数量必须为 {expected}，实际 {role_counts[role]}')
     return errors
 
 
@@ -100,7 +183,7 @@ def main() -> int:
         for message in errors:
             print(f'  - {message}')
         return 1
-    print('[OK] 60 条菜谱通过结构、角色、营养、量化食材与来源校验')
+    print('[OK] 120 条菜谱通过结构、角色、营养、熟制、量化食材与来源校验')
     return 0
 
 
