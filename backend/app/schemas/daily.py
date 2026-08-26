@@ -77,7 +77,7 @@ class RecommendRequest(BaseModel):
     party_size: int = Field(default=1, ge=1, le=8, description="本次用餐人数")
     exclude_food_ids: list[int] = Field(
         default_factory=list,
-        max_length=12,
+        max_length=36,
         description="客户端最近展示的菜品，仅作轮换软排除",
     )
     weather_snapshot: WeatherData | None = Field(

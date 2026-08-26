@@ -16,6 +16,16 @@ FRESH_CACHE_SECONDS = 3600
 STALE_CACHE_SECONDS = 12 * 3600
 
 
+def normalize_qweather_host(host: str) -> str:
+    """Return a URL-safe QWeather API host without a trailing slash."""
+    normalized = host.strip().rstrip("/")
+    if not normalized:
+        return ""
+    if not normalized.startswith(("https://", "http://")):
+        normalized = f"https://{normalized}"
+    return normalized
+
+
 def neutral_weather(*, location_name: str = "天气暂不可用") -> WeatherData:
     """Neutral algorithm input; it is explicitly not presented as live weather."""
     return WeatherData(
@@ -89,7 +99,7 @@ class QWeatherClient:
             if api_key is None and configured_key is not None
             else api_key
         )
-        self._base_url = self._normalize_host(
+        self._base_url = normalize_qweather_host(
             settings.qweather_api_host if api_host is None else api_host
         )
         self._api_key = resolved_key or ""
@@ -98,15 +108,6 @@ class QWeatherClient:
         self._stale_cache_seconds = stale_cache_seconds
         self._cache: dict[tuple[float, float], tuple[datetime, WeatherData]] = {}
         self._locks: dict[tuple[float, float], asyncio.Lock] = {}
-
-    @staticmethod
-    def _normalize_host(host: str) -> str:
-        normalized = host.strip().rstrip("/")
-        if not normalized:
-            return ""
-        if not normalized.startswith(("https://", "http://")):
-            normalized = f"https://{normalized}"
-        return normalized
 
     @staticmethod
     def _round_key(lat: float, lng: float) -> tuple[float, float]:

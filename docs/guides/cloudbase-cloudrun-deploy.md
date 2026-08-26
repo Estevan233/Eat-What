@@ -92,7 +92,7 @@ PORT=8080
 WX_APPID=wx59c5620b7a894f8e
 CLOUDBASE_ENV_ID=cloud1-d8gz4jm8vb964a1c9
 ENABLE_CODE2SESSION=false
-QWEATHER_API_HOST=<和风天气控制台分配的专属 API Host，不含路径>
+QWEATHER_API_HOST=<和风天气控制台分配的专属 API Host 裸域名，不含路径>
 QWEATHER_TIMEOUT_SECONDS=2.5
 DATABASE_BACKEND=cloudbase_rest
 CLOUDBASE_DB_TIMEOUT_SECONDS=5
@@ -106,17 +106,17 @@ JWT_SECRET=<至少 32 字节的随机值>
 QWEATHER_API_KEY=<和风天气服务端 API Key>
 ```
 
-`QWEATHER_API_HOST` 与 `QWEATHER_API_KEY` 都只供 FastAPI 服务端使用。小程序不直接调用天气供应商，也不配置高德或 Open-Meteo。后端按 0.1° 网格复用 1 小时新鲜缓存；和风调用失败时最多复用 12 小时的最近成功数据并标记“缓存天气”，完全无缓存才返回中性天气，不阻断餐食推荐。
+`QWEATHER_API_HOST` 与 `QWEATHER_API_KEY` 都只供 FastAPI 服务端使用。API Host 可直接粘贴控制台展示的裸域名；应用会自动补 `https://`。小程序不直接调用天气供应商，也不配置高德或 Open-Meteo。后端按 0.1° 网格复用 1 小时新鲜缓存；和风调用失败时最多复用 12 小时的最近成功数据并标记“缓存天气”，完全无缓存才返回中性天气，不阻断餐食推荐。
 
 当前为减少凭据数量，使用仍受支持的 WebAPI v7 API Key 请求头鉴权。和风已提示 v7 城市实况“即将弃用”；升级到 v1 前应先在测试环境验证其 JWT/Ed25519 鉴权，再替换接口，不能把私钥下发到小程序。页面需持续显示“天气服务：和风天气 · qweather.com”来源标注。
 
-发布后在 Cloud Run WebShell 做一次不打印密钥的连通性检查（只显示 HTTP 状态和总耗时）：
+发布后在 Cloud Run WebShell 运行随发布包提供的安全验收脚本；它只显示 HTTP 状态、和风业务码和总耗时，不打印密钥、天气正文或响应头：
 
 ```sh
-python -c "import os,time,httpx; h=os.environ['QWEATHER_API_HOST'].rstrip('/'); k=os.environ['QWEATHER_API_KEY']; t=time.perf_counter(); r=httpx.get(f'{h}/v7/weather/now', params={'location':'116.41,39.92','lang':'zh','unit':'m'}, headers={'X-QW-Api-Key':k}, timeout=2.5); print('status=',r.status_code,'elapsed_ms=',round((time.perf_counter()-t)*1000))"
+python /app/scripts/verify_qweather.py
 ```
 
-成功门槛是 `status=200`，并连续执行 3 次记录耗时。不要打印响应头、完整响应或环境变量值；若超时，应用仍会使用 12 小时 last-good/neutral 降级，但本次版本不能宣称真实天气链路已验收。
+成功输出形如 `qweather_ok status=200 provider_code=200 elapsed_ms=...`，并连续执行 3 次记录耗时。若超时，应用仍会使用 12 小时 last-good/neutral 降级，但本次版本不能宣称真实天气链路已验收。若旧的一行式检查命令出现 `UnsupportedProtocol`，说明旧命令没有给裸 Host 补协议头，并非 API Key 失效；不要为了规避它把密钥或完整响应打印出来。
 
 在部署版本页面打开“API Key 设置”，选择已创建的 `Eat-What` Server API Key。平台会自动注入标准环境变量 `CLOUDBASE_APIKEY`，不需要也不应在普通 Key-Value 环境变量中再复制一份明文。代码也兼容显式变量 `CLOUDBASE_DB_API_KEY`，但它只用于本地验证或平台自动注入不可用时的回退。
 

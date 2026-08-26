@@ -24,7 +24,15 @@ def test_recommend_request_rejects_invalid_client_exclusions() -> None:
         RecommendRequest(exclude_food_ids=[0])
 
     with pytest.raises(PydanticValidationError):
-        RecommendRequest(exclude_food_ids=list(range(1, 14)))
+        RecommendRequest(exclude_food_ids=list(range(1, 38)))
+
+
+def test_recommend_request_accepts_six_recent_large_family_meals() -> None:
+    recent_food_ids = list(range(1, 37))
+
+    request = RecommendRequest(exclude_food_ids=recent_food_ids)
+
+    assert request.exclude_food_ids == recent_food_ids
 
 
 def test_family_accepts_two_to_eight_people() -> None:

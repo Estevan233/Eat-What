@@ -291,19 +291,20 @@ describe('daily complete meal store', () => {
     expect(getTodayLogMock).not.toHaveBeenCalled()
   })
 
-  it('keeps up to twelve recent cook ids for larger family batches', async () => {
+  it('keeps at least five prior batches when requesting the sixth recommendation', async () => {
     recommendMock
       .mockResolvedValueOnce(recommendationWithIds([1, 2, 3]))
       .mockResolvedValueOnce(recommendationWithIds([4, 5, 6]))
       .mockResolvedValueOnce(recommendationWithIds([7, 8, 9]))
       .mockResolvedValueOnce(recommendationWithIds([10, 11, 12]))
       .mockResolvedValueOnce(recommendationWithIds([13, 14, 15]))
+      .mockResolvedValueOnce(recommendationWithIds([16, 17, 18]))
     const store = useDailyStore()
 
-    for (let index = 0; index < 5; index += 1) await store.fetchRecommend()
+    for (let index = 0; index < 6; index += 1) await store.fetchRecommend()
 
-    expect(recommendMock).toHaveBeenNthCalledWith(5, expect.objectContaining({
-      excludeFoodIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    expect(recommendMock).toHaveBeenNthCalledWith(6, expect.objectContaining({
+      excludeFoodIds: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
     }))
   })
 
