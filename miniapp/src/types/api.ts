@@ -173,10 +173,13 @@ export type WeatherTag = 'cold' | 'hot' | 'rainy' | 'snowy' | 'dry' | 'mild' | '
  */
 export interface WeatherData {
   providerAvailable: boolean
+  source?: 'qweather' | 'cache' | 'neutral'
+  isStale?: boolean
+  observedAt?: string | null
   locationName: string
   tempC: number
   feelsLikeC: number
-  /** 晴/多云/小雨/雪/阵雨/雷暴 - 后端映射的 WMO code 中文 */
+  /** 晴/多云/小雨/雪/雷暴 - 和风天气描述 */
   text: string
   windDir: string
   windScale: string
@@ -245,6 +248,18 @@ export interface RecommendRequest {
   partySize: number
   excludeFoodIds?: number[]
   weatherSnapshot?: WeatherData
+  mealIntent?: MealIntent
+}
+
+export type MealGoal = 'balanced' | 'weight_control' | 'high_protein'
+
+export interface MealIntent {
+  availableIngredients: string[]
+  excludedIngredients: string[]
+  maxTimeMinutes: number | null
+  goal: MealGoal | null
+  diningModeHint: DiningMode | null
+  summary: string
 }
 
 export type MealRole = 'main' | 'vegetable' | 'staple'

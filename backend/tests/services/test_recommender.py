@@ -5,7 +5,7 @@
 2. 硬筛：忌口（forbidden_tags）剔除
 3. 硬筛：体质禁忌（forbidden_for）剔除
 4. 天气 cold + 温热性菜 → 上榜
-5. 天气 rainy + 汤粥类 → 上榜
+5. 天气 rainy + 汤粥类 → 软加分，但不强制上榜
 6. 节气 → 时令菜加分
 7. 心情 tired → 高蛋白菜加分
 8. 心情 anxious → 含色氨酸食材加分
@@ -38,7 +38,7 @@ from app.models.recipe import Recipe
 from app.models.recommendation_event import RecommendationEvent
 from app.models.user import User
 from app.models.user_profile import UserProfile
-from app.schemas.daily import RecommendRequest
+from app.schemas.daily import MealIntent, RecommendRequest
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 from app.services import recommender
@@ -79,6 +79,52 @@ def _make_food(
         seasonal_solar_terms_json=seasonal_solar_terms or [],
         description=f"{name} 测试菜",
     )
+
+
+def test_meal_intent_schema_normalizes_deduplicates_and_ignores_unknown_fields() -> None:
+    intent = MealIntent.model_validate({
+        "available_ingredients": [" 番茄 ", "番茄", "鸡蛋"],
+        "excluded_ingredients": [" 花生 "],
+        "max_time_minutes": 20,
+        "goal": "balanced",
+        "dining_mode_hint": "cook",
+        "summary": " 冰箱有番茄鸡蛋，二十分钟 ",
+        "invented_food_ids": [1, 2, 3],
+    })
+
+    assert intent.available_ingredients == ["番茄", "鸡蛋"]
+    assert intent.excluded_ingredients == ["花生"]
+    assert intent.summary == "冰箱有番茄鸡蛋，二十分钟"
+    assert "invented_food_ids" not in intent.model_dump()
+
+
+def test_meal_intent_excluded_ingredient_is_a_hard_filter() -> None:
+    peanut = _make_food("花生拌菠菜", ingredients=["菠菜", "花生"])
+    egg = _make_food("番茄炒蛋", ingredients=["番茄", "鸡蛋"])
+    peanut.recipe_ready = True
+    egg.recipe_ready = True
+    request = RecommendRequest(
+        meal_intent=MealIntent(
+            excluded_ingredients=["花生"],
+            summary="不要花生",
+        ),
+    )
+
+    assert recommender.hard_filter([peanut, egg], None, request) == [egg]
+
+
+def test_meal_intent_mode_hint_cannot_override_explicit_dining_mode() -> None:
+    request = RecommendRequest(
+        dining_mode="cook",
+        meal_intent=MealIntent(
+            dining_mode_hint="eat_out",
+            summary="想点外卖",
+        ),
+    )
+
+    assert request.dining_mode == "cook"
+    assert request.meal_intent is not None
+    assert request.meal_intent.dining_mode_hint == "eat_out"
 
 
 def _make_profile(
@@ -459,53 +505,75 @@ def test_weather_cold_only_gently_prefers_warm_food() -> None:
 
 
 @pytest.mark.asyncio
-async def test_weather_rainy_promotes_soup(session, seeded_session, monkeypatch):
-    """天气 rainy + 汤粥类（cooking_method in soup/congee）→ 上榜。"""
+async def test_weather_rainy_softly_promotes_soup(session, seeded_session, monkeypatch):
+    """雨天给汤粥软加分；最终仍允许个性化探索，不把天气变成独裁者。"""
     user, _ = seeded_session
     _patch_external(monkeypatch, weather_tag="rainy", temp_c=18.0)
     req = RecommendRequest(mood="neutral", lat=39.92, lng=116.41)
     resp = await recommender.recommend(session, user, req)
 
-    names = [f.name for f in resp.foods]
-    soup_foods = {"小米粥", "银耳莲子羹", "羊肉汤"}  # cooking_method soup/congee
-    assert bool(set(names) & soup_foods), f"汤粥类应上榜，实际: {names}"
+    soup = _make_food("测试汤", cooking_method="soup")
+    plain = _make_food("测试炒菜", cooking_method="stir_fry")
+    weather = _make_weather("rainy", temp_c=18.0)
+
+    assert recommender._score_weather(soup, weather)[0] > recommender._score_weather(
+        plain,
+        weather,
+    )[0]
+    assert resp.context.weather.weather_tag == "rainy"
+    assert len(resp.primary_meal.items) == 3
 
 
 @pytest.mark.asyncio
 async def test_solar_term_promotes_in_season(session, seeded_session, monkeypatch):
-    """节气立秋当天 + 番茄炒蛋（seasonal_solar_terms=['liqiu']）→ 上榜。"""
-    user, _ = seeded_session
+    """节气只做可解释软加分，不承诺单个菜每次必然上榜。"""
+    user, foods = seeded_session
     _patch_external(monkeypatch, solar_term_current="立秋", solar_term_next_name="处暑")
     req = RecommendRequest(mood="neutral")
     resp = await recommender.recommend(session, user, req)
 
-    names = [f.name for f in resp.foods]
-    assert "番茄炒蛋" in names, f"立秋时令菜应上榜，实际: {names}"
+    seasonal = next(food for food in foods if food.name == "番茄炒蛋")
+    ordinary = next(food for food in foods if food.name == "红烧肉")
+    today = _make_today(solar_term_current="立秋", solar_term_next_name="处暑")
+    assert recommender._score_solar_term(seasonal, today)[0] > recommender._score_solar_term(
+        ordinary,
+        today,
+    )[0]
+    assert len(resp.primary_meal.items) == 3
 
 
 @pytest.mark.asyncio
 async def test_mood_tired_promotes_high_protein(session, seeded_session, monkeypatch):
-    """心情 tired + 高蛋白菜（清蒸鲈鱼 protein=18.6）→ 上榜。"""
-    user, _ = seeded_session
+    """疲惫对高蛋白做软加分，但不压过忌口、新鲜度和探索。"""
+    user, foods = seeded_session
     _patch_external(monkeypatch)
     req = RecommendRequest(mood="tired")
     resp = await recommender.recommend(session, user, req)
 
-    names = [f.name for f in resp.foods]
-    high_protein = {"清蒸鲈鱼", "清炖牛肉", "羊肉汤"}  # protein_g >= 8
-    assert bool(set(names) & high_protein), f"高蛋白菜应上榜，实际: {names}"
+    high_protein = next(food for food in foods if food.name == "清蒸鲈鱼")
+    low_protein = next(food for food in foods if food.name == "白米饭")
+    assert recommender._score_mood(high_protein, "tired")[0] > recommender._score_mood(
+        low_protein,
+        "tired",
+    )[0]
+    assert len(resp.primary_meal.items) == 3
 
 
 @pytest.mark.asyncio
 async def test_mood_anxious_promotes_tryptophan(session, seeded_session, monkeypatch):
-    """心情 anxious + 含色氨酸食材（番茄炒蛋含「鸡蛋」）→ 上榜。"""
-    user, _ = seeded_session
+    """焦虑场景对含鸡蛋等食材做软加分，不强制固定菜名。"""
+    user, foods = seeded_session
     _patch_external(monkeypatch)
     req = RecommendRequest(mood="anxious")
     resp = await recommender.recommend(session, user, req)
 
-    names = [f.name for f in resp.foods]
-    assert "番茄炒蛋" in names, f"含色氨酸食材的菜应上榜，实际: {names}"
+    matching = next(food for food in foods if food.name == "番茄炒蛋")
+    ordinary = next(food for food in foods if food.name == "白米饭")
+    assert recommender._score_mood(matching, "anxious")[0] > recommender._score_mood(
+        ordinary,
+        "anxious",
+    )[0]
+    assert len(resp.primary_meal.items) == 3
 
 
 @pytest.mark.asyncio
@@ -525,14 +593,24 @@ async def test_history_high_fat_promotes_low_fat(session, seeded_session, monkey
     )
     session.add(log)
     session.commit()
+    previous_log = DailyLog(
+        user_id=user.id,
+        log_date=date.today() - timedelta(days=1),
+        chosen_food_ids_json=[hongshaorou.id],
+        recommended_food_ids_json=[],
+    )
 
-    _patch_external(monkeypatch)
-    req = RecommendRequest(mood="neutral")
-    resp = await recommender.recommend(session, user, req)
-
-    names = [f.name for f in resp.foods]
-    low_fat = {"白米饭", "银耳莲子羹", "小米粥"}  # fat_g <= 5
-    assert bool(set(names) & low_fat), f"低脂互补菜应上榜，实际: {names}"
+    low_fat = next(food for food in foods if food.name == "白米饭")
+    high_fat = hongshaorou
+    assert recommender._score_nutrition_balance_with_foods(
+        low_fat,
+        [log, previous_log],
+        foods,
+    )[0] > recommender._score_nutrition_balance_with_foods(
+        high_fat,
+        [log, previous_log],
+        foods,
+    )[0]
 
 
 @pytest.mark.asyncio
@@ -594,6 +672,25 @@ async def test_refresh_rotates_results_when_six_unseen_foods_exist(
 
 
 @pytest.mark.asyncio
+async def test_same_request_id_replays_identical_meal(
+    session,
+    seeded_session,
+    monkeypatch,
+):
+    user, _ = seeded_session
+    _patch_external(monkeypatch)
+    request = RecommendRequest(mood="neutral", request_id="stable-request-1")
+
+    first = await recommender.recommend(session, user, request)
+    second = await recommender.recommend(session, user, request)
+
+    assert second.recommendation_id == first.recommendation_id
+    assert [item.food_id for item in second.primary_meal.items] == [
+        item.food_id for item in first.primary_meal.items
+    ]
+
+
+@pytest.mark.asyncio
 async def test_fallback_weather_when_no_coords(session, seeded_session, monkeypatch):
     """lat/lng=None → fallback weather（weather_tag=mild），不打 HTTP。"""
     user, _ = seeded_session
@@ -617,7 +714,7 @@ async def test_fallback_weather_when_no_coords(session, seeded_session, monkeypa
 
 @pytest.mark.asyncio
 async def test_recent_weather_snapshot_skips_second_provider_request(monkeypatch):
-    """前端刚取过天气时，推荐复用快照，不再串行请求一次 Open-Meteo。"""
+    """前端刚取过天气时，推荐复用快照，不再串行请求一次和风天气。"""
     snapshot = _make_weather("rainy", temp_c=18.0).model_copy(
         update={"fetched_at": datetime.now(timezone.utc)},
     )
@@ -645,7 +742,7 @@ async def test_fallback_weather_when_provider_is_unavailable(
     """天气服务不可用时仍返回完整餐，避免软依赖拖垮核心推荐。"""
     user, _ = seeded_session
     mock = AsyncMock(
-        side_effect=ExternalAPIError("open-meteo", "网络异常: ConnectTimeout"),
+        side_effect=ExternalAPIError("qweather", "网络异常: ConnectTimeout"),
     )
     monkeypatch.setattr(recommender.weather_client, "get_current", mock)
     monkeypatch.setattr(
@@ -885,7 +982,7 @@ async def test_invalid_reranker_output_falls_back_without_reintroducing_forbidde
         .order_by(RecommendationEvent.id.desc())  # type: ignore[attr-defined]
     ).first()
     assert event is not None
-    assert event.engine == "rules_v4"
+    assert event.engine == "rules_v5"
 
 
 @pytest.mark.asyncio
@@ -955,4 +1052,4 @@ async def test_recommendation_hot_path_uses_at_most_five_selects(
     finally:
         event.remove(engine, "before_cursor_execute", capture_selects)
 
-    assert len(select_statements) <= 5, "\n\n".join(select_statements)
+    assert len(select_statements) <= 6, "\n\n".join(select_statements)

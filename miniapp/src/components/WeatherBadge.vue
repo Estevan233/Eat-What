@@ -33,6 +33,9 @@
         </text>
       </template>
     </view>
+    <text v-if="weather?.providerAvailable" class="weather-attribution">
+      天气服务：和风天气 · qweather.com
+    </text>
   </view>
 </template>
 
@@ -41,8 +44,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useDailyStore } from '@/stores/daily'
 import { useUserStore } from '@/stores/user'
 import { ZODIAC_NAMES_ZH, daysUntilSolarTerm } from '@/constants/zodiac'
-import { WEATHER_TAG_COLOR, WEATHER_TAG_LABEL } from '@/constants/weather'
+import { WEATHER_TAG_COLOR } from '@/constants/weather'
 import { useLocation, type Coords } from '@/composables/useLocation'
+import { formatWeatherChip } from '@/domain/weather'
 import type { TodayContext } from '@/types/api'
 
 const userStore = useUserStore()
@@ -67,12 +71,7 @@ const solarTermText = computed(() => {
 })
 
 const weather = computed(() => dailyStore.weather)
-const weatherChipText = computed(() => {
-  if (!weather.value) return ''
-  if (!weather.value.providerAvailable) return '天气暂不可用'
-  const temp = Math.round(weather.value.tempC)
-  return `${temp}° ${weather.value.text} · ${WEATHER_TAG_LABEL[weather.value.weatherTag]}`
-})
+const weatherChipText = computed(() => formatWeatherChip(weather.value))
 const weatherColor = computed(() => {
   if (!weather.value) return '#e8590c'
   return WEATHER_TAG_COLOR[weather.value.weatherTag]
@@ -122,11 +121,20 @@ defineExpose({ refreshWeather })
 <style lang="scss" scoped>
 .badge {
   display: inline-flex;
+  flex-direction: column;
   align-items: center;
   padding: 12rpx 24rpx;
   background: $brand-light;
   border-radius: 32rpx;
   border: 1rpx solid $brand-soft;
+}
+
+.weather-attribution {
+  align-self: flex-end;
+  margin-top: 4rpx;
+  font-size: 18rpx;
+  line-height: 1.2;
+  color: $ink-3;
 }
 
 .ctx-row {

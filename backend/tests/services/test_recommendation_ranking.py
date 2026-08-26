@@ -4,17 +4,23 @@ import pytest
 
 from app.models.daily_log import DailyLog
 from app.models.recommendation_event import RecommendationEvent
+from app.schemas.daily import MealIntent
 from app.services.recommendation_ranking import (
     MAX_RULE_SCORE,
     RULE_V4_WEIGHTS,
     IdentityReranker,
+    PreferenceSnapshot,
     RankedCandidate,
     RecommendationHistory,
     RerankAdjustment,
     ScoreBreakdown,
+    apply_bounded_exploration,
     apply_novelty,
     apply_rerank_adjustments,
+    build_preference_snapshot,
     build_recommendation_history,
+    meal_intent_adjustment,
+    preference_history_score,
     select_diverse,
     with_client_exclusions,
 )
@@ -50,6 +56,38 @@ def test_rule_v4_weights_match_the_confirmed_product_model() -> None:
     }
     assert sum(RULE_V4_WEIGHTS.values()) == 100
     assert MAX_RULE_SCORE == 100.0
+
+
+def test_meal_intent_soft_adjustment_is_bounded_and_explainable() -> None:
+    matching = _make_food(
+        "番茄鸡蛋",
+        ingredients=["番茄", "鸡蛋"],
+        nutrition={"protein_g": 18, "fat_g": 6, "carb_g": 8},
+    )
+    matching.cooking_time_min = 18
+    intent = MealIntent(
+        available_ingredients=["番茄", "鸡蛋"],
+        max_time_minutes=20,
+        goal="high_protein",
+        summary="番茄鸡蛋，二十分钟，高蛋白",
+    )
+
+    delta, phrase = meal_intent_adjustment(matching, intent)
+
+    assert 0 < delta <= 6
+    assert "现有食材" in phrase
+
+
+def test_meal_intent_time_overrun_is_only_a_bounded_soft_penalty() -> None:
+    slow = _make_food("慢炖牛肉", ingredients=["牛肉"])
+    slow.cooking_time_min = 90
+
+    delta, _ = meal_intent_adjustment(
+        slow,
+        MealIntent(max_time_minutes=15, summary="十五分钟"),
+    )
+
+    assert -6 <= delta < 0
 
 
 def test_normalized_score_is_clamped_to_zero_and_one_hundred():
@@ -285,3 +323,99 @@ def test_select_diverse_relaxes_constraints_when_pool_is_small():
         candidate.food.cooking_method = "soup"
     result = select_diverse(candidates, top_n=3)
     assert [candidate.food.id for candidate in result] == [1, 2]
+
+
+def test_history_can_exclude_the_same_idempotency_request() -> None:
+    today = date(2026, 8, 11)
+    history = build_recommendation_history(
+        [],
+        [
+            RecommendationEvent(
+                request_id="same-request",
+                user_id=1,
+                event_date=today,
+                recommended_food_ids_json=[1, 2, 3],
+            ),
+            RecommendationEvent(
+                request_id="previous-request",
+                user_id=1,
+                event_date=today,
+                recommended_food_ids_json=[4],
+            ),
+        ],
+        as_of=today,
+        exclude_request_id="same-request",
+    )
+
+    assert history.seen_today == frozenset({4})
+
+
+def test_preference_snapshot_boosts_similar_food_without_unbounded_repeat() -> None:
+    favorite = _candidate(1).food
+    favorite.category = "soup"
+    favorite.cooking_method = "stew"
+    favorite.ingredients_json = ["番茄", "牛肉"]
+    similar = _candidate(2).food
+    similar.category = "soup"
+    similar.cooking_method = "stew"
+    similar.ingredients_json = ["番茄", "鸡蛋"]
+    unrelated = _candidate(3).food
+    unrelated.category = "cold_dish"
+    unrelated.cooking_method = "cold"
+    unrelated.ingredients_json = ["黄瓜"]
+
+    snapshot = build_preference_snapshot(
+        [favorite, similar, unrelated],
+        [],
+        favorite_food_ids=[1],
+    )
+
+    assert isinstance(snapshot, PreferenceSnapshot)
+    assert preference_history_score(similar, snapshot) > preference_history_score(
+        unrelated, snapshot
+    )
+    assert 0 <= preference_history_score(favorite, snapshot) <= 15
+
+
+def test_bounded_exploration_is_stable_and_never_leaves_quality_band_first() -> None:
+    candidates = [_candidate(1, score=100), _candidate(2, score=97), _candidate(3, score=94)]
+
+    first = apply_bounded_exploration(
+        candidates,
+        user_id=7,
+        event_date=date(2026, 8, 11),
+        request_id="request-a",
+        meal_role="main",
+    )
+    repeated = apply_bounded_exploration(
+        candidates,
+        user_id=7,
+        event_date=date(2026, 8, 11),
+        request_id="request-a",
+        meal_role="main",
+    )
+
+    assert [item.food.id for item in first] == [item.food.id for item in repeated]
+    assert {item.food.id for item in first[:2]} == {1, 2}
+    assert first[-1].food.id == 3
+
+
+def test_bounded_exploration_varies_by_user_inside_same_quality_band() -> None:
+    candidates = [_candidate(food_id, score=100) for food_id in range(1, 9)]
+
+    first = apply_bounded_exploration(
+        candidates,
+        user_id=101,
+        event_date=date(2026, 8, 11),
+        request_id="same-request",
+        meal_role="main",
+    )
+    second = apply_bounded_exploration(
+        candidates,
+        user_id=202,
+        event_date=date(2026, 8, 11),
+        request_id="same-request",
+        meal_role="main",
+    )
+
+    assert [item.food.id for item in first] != [item.food.id for item in second]

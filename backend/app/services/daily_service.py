@@ -157,6 +157,7 @@ def record_recommendation(
     audience: str = "personal",
     party_size: int = 1,
     request_id: str | None = None,
+    check_idempotency: bool = True,
 ) -> tuple[DailyLog, RecommendationEvent]:
     """原子更新当天日志并追加一次推荐曝光事件。
 
@@ -164,7 +165,7 @@ def record_recommendation(
     REST Repository 的“事件为真相、日报为投影”写入流程提供幂等基础。
     """
     normalized_request_id = _normalize_request_id(request_id)
-    if request_id is not None:
+    if request_id is not None and check_idempotency:
         existing = _load_idempotent_recommendation(
             session,
             user_id,

@@ -20,7 +20,7 @@ from app.services import weather_client as wc_mod
 
 # 模拟一份北京温和天气
 MOCK_WEATHER = WeatherData(
-    location_name="Open-Meteo @ 39.92,116.41",
+    location_name="和风天气 @ 39.9,116.4",
     temp_c=8.0,
     feels_like_c=5.0,
     text="晴",

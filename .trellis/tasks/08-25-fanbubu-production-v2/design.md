@@ -11,7 +11,7 @@ uni-app / Vue 3 小程序
 FastAPI / Cloud Run
   ├─ trusted CloudBase identity headers -> JWT
   ├─ rule recommender + bounded personalization
-  ├─ QWeather -> AMap fallback -> last-good cache -> neutral
+  ├─ QWeather -> fresh/stale cache -> neutral
   └─ Repository -> CloudBase HTTP 数据网关 -> MySQL 数据表
 ```
 
@@ -68,20 +68,18 @@ FastAPI / Cloud Run
 ### 4.1 组件
 
 - `QWeatherClient`：`GET https://{QWEATHER_API_HOST}/v7/weather/now`，`location=lng,lat`（最多两位小数），Header `X-QW-Api-Key`。
-- `AMapWeatherClient`：仅在主源失败时先请求逆地理编码取得 adcode，再请求天气；缓存网格到 adcode 的映射。
-- `OpenMeteoClient`：保留代码和诊断能力，但生产默认关闭，不进入请求时间预算。
-- `WeatherService`：负责缓存、顺序调用、时间预算、来源标记与降级。
+- `QWeatherClient` 同时负责单供应商调用、同城网格缓存、时间预算、来源标记与降级；当前版本不实现第二 provider。
 
 ### 4.2 时间预算与缓存
 
 一次推荐不能被两个第三方 API 串行拖成“加载动画观赏大会”。默认预算：
 
 - 新鲜缓存 TTL 60 分钟；陈旧缓存上限 12 小时；坐标按 0.1° 网格化作为 key，降低调用量且不落精确位置。
-- QWeather 连接/总超时约 1.0/1.8 秒；高德逆地理和天气共用约 1.8 秒剩余预算；服务层总预算约 3.5 秒。
-- 成功即写 last-good；主源失败才调高德；双失败读 stale；无 stale 返回 neutral。Open-Meteo 只有显式诊断开关开启时才可调用。
+- QWeather 总超时 2.5 秒，推荐服务层上限 3 秒；不在一次用户请求内串行重试第二供应商。
+- 成功即写 last-good；失败读 stale；无 stale 返回 neutral。
 - 结构化日志只写 provider、阶段、异常类、耗时、粗粒度网格与 request id，不写 key 和完整坐标。
 
-WeatherData 新增字段有默认值，旧快照仍可反序列化：`source=qweather|amap|open_meteo|cache|neutral`、`is_stale`、`observed_at?`。前端只缓存 providerAvailable 的真实结果。
+WeatherData 新增字段有默认值，旧快照仍可反序列化：`source=qweather|cache|neutral`、`is_stale`、`observed_at?`。前端只缓存 providerAvailable 的真实结果。
 
 ## 5. AI 用餐意图
 
@@ -132,6 +130,6 @@ RecommendRequest 新增可选 `meal_intent`。后端再次验证：`excludedIngr
 
 - 登录资料：关闭前端入口即可，cloud-login/JWT 不变。
 - 菜谱：种子 upsert 可回退旧 60 数据版本，但不做删除式回滚；推荐器按 recipe-ready 数据运行。
-- 天气：清空 QWeather 配置后自动回到高德；关闭两组配置后使用 stale/neutral，不会暗中调用 Open-Meteo。
+- 天气：清空 QWeather 配置后仅使用已有 stale/neutral，不会暗中调用其他供应商。
 - AI：关闭功能开关即可，后端可选字段保持兼容。
 - 任何线上异常先回滚 Cloud Run 版本和小程序体验版，不修改生产数据以“救火”。
