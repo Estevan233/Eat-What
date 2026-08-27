@@ -384,6 +384,7 @@ export interface DiningMemoryList {
 }
 
 export interface ExternalDiningRequest {
+  requestId?: string
   mood: Mood
   activityLevel: ActivityLevel
   audience: Audience

@@ -115,11 +115,12 @@ describe('external dining store', () => {
     expect(store.memories).toEqual([])
   })
 
-  it('sends the previous two external batches and caps history at six', async () => {
+  it('sends four fresh request ids and retains thirty recent external directions', async () => {
     recommendExternalMock
       .mockResolvedValueOnce(externalResultWithKeys(['rule-1', 'rule-2', 'rule-3']))
       .mockResolvedValueOnce(externalResultWithKeys(['rule-4', 'rule-5', 'rule-6']))
       .mockResolvedValueOnce(externalResultWithKeys(['rule-7', 'rule-8', 'rule-9']))
+      .mockResolvedValueOnce(externalResultWithKeys(['rule-10', 'rule-11', 'rule-12']))
     const store = useDiningStore()
     const request = {
       mood: 'neutral' as const,
@@ -131,14 +132,27 @@ describe('external dining store', () => {
     await store.fetchRecommendation(request)
     await store.fetchRecommendation(request)
     await store.fetchRecommendation(request)
+    await store.fetchRecommendation(request)
 
-    expect(recommendExternalMock).toHaveBeenNthCalledWith(3, {
+    expect(recommendExternalMock).toHaveBeenNthCalledWith(4, {
       ...request,
-      excludeKeys: ['rule-1', 'rule-2', 'rule-3', 'rule-4', 'rule-5', 'rule-6'],
+      requestId: expect.any(String),
+      excludeKeys: [
+        'rule-1', 'rule-2', 'rule-3',
+        'rule-4', 'rule-5', 'rule-6',
+        'rule-7', 'rule-8', 'rule-9',
+      ],
     })
+    const requestIds = recommendExternalMock.mock.calls.map(([body]) => body.requestId)
+    expect(new Set(requestIds).size).toBe(4)
     expect(uni.setStorageSync).toHaveBeenLastCalledWith(
       'eat_what_recent_dining_keys_v1',
-      JSON.stringify(['rule-4', 'rule-5', 'rule-6', 'rule-7', 'rule-8', 'rule-9']),
+      JSON.stringify([
+        'rule-1', 'rule-2', 'rule-3',
+        'rule-4', 'rule-5', 'rule-6',
+        'rule-7', 'rule-8', 'rule-9',
+        'rule-10', 'rule-11', 'rule-12',
+      ]),
     )
   })
 })

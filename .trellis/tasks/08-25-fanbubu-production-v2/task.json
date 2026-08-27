@@ -30,6 +30,6 @@
     "backend/app/services/weather_client.py",
     "backend/data/recipe_seed.json"
   ],
-  "notes": "规划完成后等待用户审阅；未获二次确认不得 task.py start 或实施。",
+  "notes": "规格已确认并进入实施；资料、120 道菜谱、QWeather、自己做与外食多样性已完成本地自动化和容器验证，线上部署与开发者工具/真机验收仍需用户确认。",
   "meta": {}
 }

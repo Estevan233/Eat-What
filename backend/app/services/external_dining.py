@@ -1,13 +1,22 @@
-"""Deterministic rotating dining suggestions without merchant or LLM dependencies."""
+"""Exposure-aware dining directions without merchant or LLM dependencies."""
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
-from hashlib import sha1
+from datetime import date, timedelta
+from hashlib import sha1, sha256
 from typing import Literal
+from uuid import uuid4
 
-from sqlmodel import Session
+import structlog
+from sqlalchemy.exc import IntegrityError
+from sqlmodel import select
 
+from app.core.errors import ValidationError
 from app.models.dining_memory import DiningMemory
+from app.models.recommendation_event import RecommendationEvent
+from app.repositories.cloudbase_rdb import RdbFilter, RdbOrder
+from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
 from app.schemas.dining import (
     ExternalDiningRequest,
     ExternalDiningResponse,
@@ -15,6 +24,11 @@ from app.schemas.dining import (
 )
 from app.services import dining_memory_service, profile_service
 from app.services.solar_terms import get_today_context_cached
+
+log = structlog.get_logger()
+EXTERNAL_ENGINE = "external_rules_v2"
+EXTERNAL_HISTORY_DAYS = 7
+EXTERNAL_QUALITY_BAND = 5
 
 
 @dataclass(frozen=True)
@@ -45,6 +59,30 @@ RULE_CANDIDATES: tuple[RuleCandidate, ...] = (
     RuleCandidate("香菇鸡肉焖饭", "焖饭", 500, 700, frozenset(), "鸡肉、香菇和米饭一碗组合，建议额外搭配一份深色蔬菜。", high_protein=True, warming=True, meal_format="braised_rice"),
     RuleCandidate("鸡蛋蔬菜卷配玉米", "轻简套餐", 420, 600, frozenset({"gluten"}), "蛋类和蔬菜卷搭配玉米，适合作为分量清楚的一人餐。", high_protein=True, meal_format="wrap_set"),
     RuleCandidate("番茄牛腩粉", "汤粉", 520, 740, frozenset({"beef"}), "牛腩补充蛋白质，番茄汤底注意盐分，粉量按活动量调整。", high_protein=True, warming=True, meal_format="rice_noodle_soup"),
+    RuleCandidate("鸡腿肉蔬菜糙米饭", "谷物套餐", 520, 720, frozenset(), "鸡腿肉、蔬菜和糙米构成完整一餐，酱汁分装更容易控制油盐。", high_protein=True, meal_format="grain_bowl"),
+    RuleCandidate("海南鸡饭配青菜", "东南亚简餐", 560, 760, frozenset(), "鸡肉提供蛋白质，米饭和蘸料能量不低，建议加青菜并按需减饭。", high_protein=True, meal_format="hainanese_set"),
+    RuleCandidate("虾仁滑蛋饭配时蔬", "滑蛋饭", 520, 720, frozenset({"seafood"}), "虾仁和鸡蛋提供蛋白质，搭配时蔬后结构更完整。", high_protein=True, meal_format="egg_rice_set"),
+    RuleCandidate("烤鲭鱼定食", "烤鱼定食", 520, 740, frozenset({"seafood"}), "鱼类、米饭和小菜组成定食，注意酱汁与腌菜的钠含量。", high_protein=True, meal_format="grilled_fish_set"),
+    RuleCandidate("香煎豆腐杂蔬饭", "豆腐简餐", 440, 640, frozenset(), "豆腐搭配多种蔬菜和主食，煎制用油量决定实际能量。", meal_format="tofu_bowl"),
+    RuleCandidate("番茄鸡蛋面配青菜", "家常汤面", 480, 680, frozenset({"gluten"}), "番茄鸡蛋面容易执行，额外加青菜并少喝汤更均衡。", warming=True, meal_format="homestyle_noodle"),
+    RuleCandidate("三鲜米线配青菜", "米线", 480, 700, frozenset({"seafood"}), "米线提供主食，三鲜配料与青菜补充蛋白质和蔬菜，汤底宜少盐。", warming=True, meal_format="rice_noodle_set"),
+    RuleCandidate("鸡肉蔬菜河粉", "清汤河粉", 500, 700, frozenset(), "鸡肉、河粉和蔬菜组成清汤简餐，可要求少汤少盐。", high_protein=True, meal_format="pho_set"),
+    RuleCandidate("牛肉蔬菜卷饼", "卷饼套餐", 500, 720, frozenset({"beef", "gluten"}), "牛肉和蔬菜卷入饼中，酱料分装并搭配无糖饮品更稳妥。", high_protein=True, meal_format="beef_wrap"),
+    RuleCandidate("鹰嘴豆蔬菜卷配玉米", "素食卷饼", 430, 620, frozenset({"gluten"}), "鹰嘴豆提供植物蛋白，蔬菜卷与玉米组合成分量清楚的一餐。", meal_format="legume_wrap"),
+    RuleCandidate("莲藕排骨汤配时蔬饭", "汤菜套餐", 560, 780, frozenset({"pork"}), "排骨、莲藕、时蔬和米饭组成套餐，汤不必全部喝完。", high_protein=True, warming=True, meal_format="pork_soup_set"),
+    RuleCandidate("冬瓜虾仁汤配杂粮饭", "清汤套餐", 460, 660, frozenset({"seafood"}), "虾仁补充蛋白质，冬瓜汤和杂粮饭组成较清爽的一餐。", high_protein=True, cooling=True, meal_format="light_soup_set"),
+    RuleCandidate("麻婆豆腐饭配青菜", "川味豆腐饭", 560, 780, frozenset({"spicy"}), "豆腐搭配米饭和青菜，实际油盐差异较大，可备注少油少辣。", meal_format="spicy_tofu_rice"),
+    RuleCandidate("咖喱鸡肉饭配蔬菜", "咖喱饭", 600, 820, frozenset(), "鸡肉提供蛋白质，咖喱酱和米饭较易超量，建议酱汁减半并加蔬菜。", high_protein=True, warming=True, meal_format="curry_rice"),
+    RuleCandidate("黑椒牛柳饭配彩椒", "铁板牛肉饭", 620, 840, frozenset({"beef"}), "牛柳和彩椒提供蛋白质与蔬菜，黑椒汁宜分装以控制油盐。", high_protein=True, meal_format="beef_rice_set"),
+    RuleCandidate("红烧豆腐杂粮饭", "家常素套餐", 460, 660, frozenset(), "豆腐、蔬菜和杂粮饭组成家常套餐，红烧汁少一些更合适。", meal_format="vegetarian_set"),
+    RuleCandidate("云吞面配白灼菜", "粤式面食", 520, 720, frozenset({"pork", "gluten"}), "云吞和面提供主食与蛋白质，另配白灼菜并少喝汤。", warming=True, meal_format="wonton_noodle"),
+    RuleCandidate("鸡肉蔬菜沙拉配玉米", "轻食套餐", 400, 620, frozenset({"raw_cold"}), "鸡肉、蔬菜和玉米组成轻食，沙拉酱另放，避免只吃菜不吃主食。", high_protein=True, cooling=True, meal_format="salad_set"),
+    RuleCandidate("烤鸡腿土豆时蔬套餐", "烤物套餐", 560, 780, frozenset(), "烤鸡腿、土豆和时蔬结构完整，选择非油炸并减少重口酱料。", high_protein=True, meal_format="roast_set"),
+    RuleCandidate("韩式杂蔬拌饭", "拌饭", 520, 740, frozenset({"spicy"}), "多种蔬菜、鸡蛋和米饭组合，辣酱分装可减少盐和糖。", meal_format="bibimbap"),
+    RuleCandidate("腊味煲仔饭配青菜", "煲仔饭", 680, 900, frozenset({"pork", "greasy"}), "腊味和锅巴使能量、钠含量偏高，适合偶尔选择并加一份青菜。", warming=True, meal_format="claypot_rice"),
+    RuleCandidate("酸汤鱼片粉", "酸汤粉", 540, 760, frozenset({"seafood", "spicy"}), "鱼片补充蛋白质，酸汤和配料钠含量可能较高，少喝汤更稳妥。", high_protein=True, meal_format="sour_fish_noodle"),
+    RuleCandidate("肉末茄子饭配青菜", "家常盖浇饭", 600, 820, frozenset({"pork", "greasy"}), "茄子吸油，建议备注少油并搭配一份清淡青菜。", meal_format="minced_pork_rice"),
+    RuleCandidate("香菇鸡肉蒸饭", "蒸饭", 500, 700, frozenset(), "鸡肉、香菇和米饭同蒸，搭配一份蔬菜即可形成完整简餐。", high_protein=True, warming=True, meal_format="steamed_rice"),
     RuleCandidate(
         "番茄炒蛋＋菌菇豆腐＋时蔬＋杂粮饭",
         "家常合菜",
@@ -145,6 +183,137 @@ RULE_CANDIDATES: tuple[RuleCandidate, ...] = (
         meal_format="homestyle_stew",
         serving_style="shared",
     ),
+    RuleCandidate(
+        "白切鸡＋白灼时蔬＋例汤＋米饭",
+        "粤式合菜",
+        520,
+        760,
+        frozenset(),
+        "白切鸡和白灼菜适合共享，蘸料分装、米饭按人数添加。",
+        high_protein=True,
+        meal_format="cantonese_set",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "客家酿豆腐＋时蔬小炒＋杂粮饭",
+        "客家合菜",
+        520,
+        760,
+        frozenset({"pork"}),
+        "酿豆腐兼有豆制品和肉类，搭配时蔬与主食组成共享餐。",
+        high_protein=True,
+        meal_format="hakka_set",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "小鸡炖蘑菇＋凉拌菜＋杂粮饭",
+        "东北炖菜",
+        560,
+        800,
+        frozenset(),
+        "炖鸡和蘑菇适合多人共享，另配清爽蔬菜，主食按需选择。",
+        high_protein=True,
+        warming=True,
+        meal_format="northeast_stew",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "清炖狮子头＋双份时蔬＋米饭",
+        "江浙合菜",
+        620,
+        850,
+        frozenset({"pork"}),
+        "狮子头分食并搭配两种蔬菜，减少浓汁拌饭可控制能量。",
+        meal_format="jiangnan_set",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "湘味小炒肉＋蒸蛋＋时蔬＋米饭",
+        "湘菜合餐",
+        650,
+        880,
+        frozenset({"pork", "spicy", "greasy"}),
+        "小炒肉口味较重，以蒸蛋和时蔬平衡，备注少油少辣。",
+        meal_format="hunan_set",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "烧味双拼＋白灼菜＋例汤＋米饭",
+        "烧味合餐",
+        650,
+        900,
+        frozenset({"pork", "greasy"}),
+        "烧味便于多人分食但钠和脂肪偏高，搭配白灼菜且少淋汁。",
+        meal_format="roast_meat_set",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "清汤牛肉锅＋菌菇蔬菜拼盘＋主食",
+        "牛肉锅",
+        580,
+        820,
+        frozenset({"beef"}),
+        "清汤牛肉锅适合共享，蔬菜和菌菇先点足，蘸料少油少盐。",
+        high_protein=True,
+        warming=True,
+        meal_format="beef_hotpot",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "酸菜鱼小份＋时蔬＋豆腐＋米饭",
+        "酸菜鱼合餐",
+        620,
+        860,
+        frozenset({"seafood", "spicy"}),
+        "鱼片、豆腐和蔬菜可共享，酸菜汤钠含量高，不建议大量喝汤。",
+        high_protein=True,
+        meal_format="pickled_fish_set",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "烤鱼小份＋双拼蔬菜＋主食",
+        "烤鱼合餐",
+        650,
+        900,
+        frozenset({"seafood", "spicy", "greasy"}),
+        "烤鱼适合多人分享，选择小份并加两种蔬菜，避免额外油炸小吃。",
+        high_protein=True,
+        meal_format="grilled_fish_share",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "家常豆腐＋地三鲜少油版＋蒸蛋＋杂粮饭",
+        "素菜合餐",
+        520,
+        760,
+        frozenset(),
+        "豆腐、鸡蛋和多种蔬菜适合共享，地三鲜可备注少油。",
+        meal_format="vegetarian_share",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "大盘鸡小份＋拌青菜＋面或米饭",
+        "西北合餐",
+        650,
+        900,
+        frozenset({"gluten", "spicy"}),
+        "鸡肉和土豆适合共享，主食二选一并加一份清淡蔬菜。",
+        high_protein=True,
+        warming=True,
+        meal_format="northwest_share",
+        serving_style="shared",
+    ),
+    RuleCandidate(
+        "铁板豆腐＋清炒虾仁＋双份时蔬＋米饭",
+        "海陆合菜",
+        560,
+        800,
+        frozenset({"seafood"}),
+        "豆腐、虾仁和两种蔬菜覆盖多类食材，酱汁分装更易控制油盐。",
+        high_protein=True,
+        meal_format="seafood_share",
+        serving_style="shared",
+    ),
 )
 
 
@@ -228,6 +397,198 @@ def _rule_suggestion(
     )
 
 
+def _load_request_event(
+    session: DatabaseSession,
+    request_id: str,
+) -> RecommendationEvent | None:
+    if is_cloudbase_repository(session):
+        return session.first(
+            RecommendationEvent,
+            filters=(RdbFilter("request_id", "eq", request_id),),
+        )
+    return session.exec(
+        select(RecommendationEvent).where(
+            RecommendationEvent.request_id == request_id,
+        )
+    ).first()
+
+
+def _suggestion_keys_from_event(
+    event: RecommendationEvent,
+    *,
+    user_id: int,
+) -> list[str] | None:
+    if event.user_id != user_id:
+        raise ValidationError("推荐请求号已被占用")
+    payload = event.primary_meal_json or {}
+    if payload.get("kind") != "external_dining_v2":
+        return None
+    raw_keys = payload.get("suggestion_keys")
+    if not isinstance(raw_keys, list):
+        return None
+    keys = [value for value in raw_keys if isinstance(value, str)]
+    if len(keys) != len(raw_keys):
+        return None
+    return keys
+
+
+def _load_recent_external_events(
+    session: DatabaseSession,
+    user_id: int,
+    *,
+    as_of: date,
+) -> list[RecommendationEvent]:
+    start = as_of - timedelta(days=EXTERNAL_HISTORY_DAYS - 1)
+    if is_cloudbase_repository(session):
+        return session.list(
+            RecommendationEvent,
+            filters=(
+                RdbFilter("user_id", "eq", user_id),
+                RdbFilter("event_date", "gte", start),
+                RdbFilter("event_date", "lte", as_of),
+                RdbFilter("dining_mode", "eq", "eat_out"),
+            ),
+            order=(RdbOrder("created_at", "desc"),),
+        )
+    stmt = (
+        select(RecommendationEvent)
+        .where(RecommendationEvent.user_id == user_id)
+        .where(RecommendationEvent.event_date >= start)
+        .where(RecommendationEvent.event_date <= as_of)
+        .where(RecommendationEvent.dining_mode == "eat_out")
+        .order_by(RecommendationEvent.created_at.desc())  # type: ignore[attr-defined]
+    )
+    return list(session.exec(stmt).all())
+
+
+def _recent_external_keys(events: Sequence[RecommendationEvent]) -> set[str]:
+    keys: set[str] = set()
+    for event in events:
+        summary = event.summary_json or {}
+        raw_keys = summary.get("suggestion_keys", [])
+        if not isinstance(raw_keys, list):
+            continue
+        keys.update(value for value in raw_keys if isinstance(value, str))
+    return keys
+
+
+def _exploration_key(
+    suggestion: ExternalDiningSuggestion,
+    *,
+    base_score: int,
+    floor_score: int,
+    user_id: int,
+    event_date: date,
+    request_id: str,
+) -> float:
+    payload = (
+        f"{user_id}|{event_date.isoformat()}|{request_id}|"
+        f"{EXTERNAL_ENGINE}|{suggestion.key}"
+    )
+    digest = sha256(payload.encode()).digest()
+    uniform = (int.from_bytes(digest[:8], "big") + 1) / (2**64 + 1)
+    quality_weight = 1.0 + max(0, base_score - floor_score)
+    return -math.log(uniform) / quality_weight
+
+
+def _stable_exploration_order(
+    scored: Sequence[tuple[ExternalDiningSuggestion, int]],
+    *,
+    user_id: int,
+    event_date: date,
+    request_id: str,
+) -> list[ExternalDiningSuggestion]:
+    """只在质量带内探索；同用户同 request_id 可复现，不同用户不锁死。"""
+    if not scored:
+        return []
+    highest = max(score for _, score in scored)
+    floor_score = highest - EXTERNAL_QUALITY_BAND
+    in_band = [(item, score) for item, score in scored if score >= floor_score]
+    outside = [(item, score) for item, score in scored if score < floor_score]
+    in_band.sort(
+        key=lambda pair: _exploration_key(
+            pair[0],
+            base_score=pair[1],
+            floor_score=floor_score,
+            user_id=user_id,
+            event_date=event_date,
+            request_id=request_id,
+        )
+    )
+    outside.sort(
+        key=lambda pair: (
+            -pair[1],
+            _exploration_key(
+                pair[0],
+                base_score=pair[1],
+                floor_score=pair[1],
+                user_id=user_id,
+                event_date=event_date,
+                request_id=request_id,
+            ),
+        )
+    )
+    return [item for item, _ in (*in_band, *outside)]
+
+
+def _record_external_response(
+    session: DatabaseSession,
+    user_id: int,
+    request: ExternalDiningRequest,
+    response: ExternalDiningResponse,
+    *,
+    request_id: str,
+    event_date: date,
+) -> None:
+    suggestions = response.suggestions
+    event = RecommendationEvent(
+        request_id=request_id,
+        user_id=user_id,
+        event_date=event_date,
+        recommended_food_ids_json=[],
+        primary_food_ids_json=[],
+        substitution_options_json=[],
+        primary_meal_json={
+            "kind": "external_dining_v2",
+            # 只保存匿名方向 key，不保存城市、坐标或搜索关键词。
+            "suggestion_keys": [item.key for item in suggestions],
+        },
+        mood=request.mood,
+        activity_level=request.activity_level,
+        weather_tag=None,
+        dining_mode="eat_out",
+        audience=request.audience,
+        party_size=request.party_size,
+        engine=EXTERNAL_ENGINE,
+        scorer_version=EXTERNAL_ENGINE,
+        builder_version="external_builder_v2",
+        summary_json={
+            "suggestion_keys": [item.key for item in suggestions],
+            "meal_formats": [item.meal_format for item in suggestions],
+        },
+    )
+    try:
+        if is_cloudbase_repository(session):
+            session.insert(event)
+            return
+        session.add(event)
+        session.commit()
+    except IntegrityError:
+        if not is_cloudbase_repository(session):
+            session.rollback()
+        # 并发重试可能已写入同一 request_id；调用方下一次会直接重放。
+        return
+    except Exception as exc:  # 推荐可用性优先，曝光写入失败不阻断本次结果
+        if not is_cloudbase_repository(session):
+            session.rollback()
+        log.warning(
+            "external_recommendation_event_write_failed",
+            user_id=user_id,
+            request_id=request_id,
+            error_type=type(exc).__name__,
+        )
+
+
 def select_rotating_suggestions(
     ordered: Sequence[ExternalDiningSuggestion],
     excluded_keys: set[str],
@@ -262,17 +623,54 @@ def select_rotating_suggestions(
     return selected, rotation_restarted
 
 
+def _select_response_suggestions(
+    session: DatabaseSession,
+    user_id: int,
+    request: ExternalDiningRequest,
+    ordered_suggestions: Sequence[ExternalDiningSuggestion],
+    replay_keys: Sequence[str] | None,
+    *,
+    event_date: date,
+) -> tuple[list[ExternalDiningSuggestion], bool]:
+    """Replay an idempotent request or select a fresh exposure-aware batch."""
+    if replay_keys is not None:
+        by_key = {item.key: item for item in ordered_suggestions}
+        suggestions = [by_key[key] for key in replay_keys if key in by_key]
+        if len(suggestions) != len(replay_keys):
+            raise ValidationError("原推荐方向已失效，请使用新的请求号重试")
+        return suggestions, False
+
+    recent_events = _load_recent_external_events(
+        session,
+        user_id,
+        as_of=event_date,
+    )
+    excluded_keys = _recent_external_keys(recent_events)
+    excluded_keys.update(request.exclude_keys)
+    return select_rotating_suggestions(ordered_suggestions, excluded_keys)
+
+
 def recommend_external(
-    session: Session,
+    session: DatabaseSession,
     user_id: int,
     request: ExternalDiningRequest,
 ) -> ExternalDiningResponse:
+    effective_request_id = request.request_id or str(uuid4())
+    replay_keys: list[str] | None = None
+    if request.request_id is not None:
+        existing = _load_request_event(session, effective_request_id)
+        if existing is not None:
+            replay_keys = _suggestion_keys_from_event(existing, user_id=user_id)
+            if replay_keys is None:
+                raise ValidationError("推荐请求号已用于其他类型的推荐")
+
     profile = profile_service.get_profile(session, user_id)
     forbidden = set(profile.forbidden_tags if profile else [])
     memories = dining_memory_service.all_memories(session, user_id)
-    liked = next((item for item in memories if item.verdict == "liked"), None)
+    liked = [item for item in memories if item.verdict == "liked"]
 
     today = get_today_context_cached()
+    event_date = today.date
     month = today.date.month
     solar_term = today.solar_term_current or today.solar_term_next_name
     seasonal_note = _seasonal_note(month, solar_term)
@@ -283,37 +681,56 @@ def recommend_external(
     else:
         city_label = "未设置城市"
 
-    ordered_suggestions: list[ExternalDiningSuggestion] = []
-    if liked is not None and request.audience == "personal":
-        ordered_suggestions.append(
-            _memory_suggestion(liked, request, seasonal_note, city_label)
+    scored_suggestions: list[tuple[ExternalDiningSuggestion, int]] = []
+    if request.audience == "personal":
+        scored_suggestions.extend(
+            (
+                _memory_suggestion(memory, request, seasonal_note, city_label),
+                54,
+            )
+            for memory in liked
         )
 
     serving_style = "shared" if request.audience == "family" else "individual"
-    ordered = sorted(
+    scored_suggestions.extend(
         (
-            candidate
-            for candidate in RULE_CANDIDATES
-            if candidate.serving_style == serving_style
-            and not (candidate.forbidden_tags & forbidden)
-        ),
-        key=lambda item: (-_rule_score(item, request, month), item.meal_format, item.dish_name),
-    )
-    used_formats: set[str] = set()
-    for candidate in ordered:
-        if candidate.meal_format in used_formats:
-            continue
-        ordered_suggestions.append(
-            _rule_suggestion(candidate, request, seasonal_note, city_label)
+            _rule_suggestion(candidate, request, seasonal_note, city_label),
+            _rule_score(candidate, request, month),
         )
-        used_formats.add(candidate.meal_format)
+        for candidate in RULE_CANDIDATES
+        if candidate.serving_style == serving_style
+        and not (candidate.forbidden_tags & forbidden)
+    )
+    ordered_suggestions = _stable_exploration_order(
+        scored_suggestions,
+        user_id=user_id,
+        event_date=event_date,
+        request_id=effective_request_id,
+    )
+    # 用户明确标记“喜欢”的真实店＋菜在未曝光时优先一次；之后仍受七日历史约束，
+    # 避免“个性化”退化为每天重复同一家。
+    memory_suggestions = [
+        suggestion
+        for suggestion, _ in scored_suggestions
+        if suggestion.source == "memory"
+    ]
+    if memory_suggestions:
+        memory_keys = {item.key for item in memory_suggestions}
+        ordered_suggestions = [
+            *memory_suggestions,
+            *(item for item in ordered_suggestions if item.key not in memory_keys),
+        ]
 
-    suggestions, rotation_restarted = select_rotating_suggestions(
+    suggestions, rotation_restarted = _select_response_suggestions(
+        session,
+        user_id,
+        request,
         ordered_suggestions,
-        set(request.exclude_keys),
+        replay_keys,
+        event_date=event_date,
     )
 
-    return ExternalDiningResponse(
+    response = ExternalDiningResponse(
         audience=request.audience,
         party_size=request.party_size,
         city_label=city_label,
@@ -321,3 +738,13 @@ def recommend_external(
         rotation_restarted=rotation_restarted,
         disclaimer="门店、价格和营养会随实际情况变化；本结果是决策辅助，不是医疗或下单承诺。",
     )
+    if replay_keys is None:
+        _record_external_response(
+            session,
+            user_id,
+            request,
+            response,
+            request_id=effective_request_id,
+            event_date=event_date,
+        )
+    return response
