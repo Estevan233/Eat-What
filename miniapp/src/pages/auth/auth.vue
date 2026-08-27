@@ -32,16 +32,24 @@
 import { ref } from 'vue'
 import { shouldShowAuthErrorToast, toAuthErrorMessage } from '@/auth/error'
 import { resolvePostLoginNavigation } from '@/auth/navigation'
+import {
+  buildProfileOnboardingUrl,
+  shouldOfferProfileOnboarding,
+} from '@/auth/profile-onboarding'
 import { APP_NAME, BRAND_SUBTITLE, HERO_TITLE } from '@/config/brand'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore()
 const loading = ref(false)
 
-function goNext() {
+function getEncodedRedirect(): string | undefined {
   const pages = getCurrentPages()
   const last = pages[pages.length - 1]
-  const redirect = (last as unknown as { options?: { redirect?: string } }).options?.redirect
+  return (last as unknown as { options?: { redirect?: string } }).options?.redirect
+}
+
+function goNext() {
+  const redirect = getEncodedRedirect()
   const navigation = resolvePostLoginNavigation(redirect)
   if (navigation.method === 'switchTab') uni.switchTab({ url: navigation.url })
   else uni.redirectTo({ url: navigation.url })
@@ -58,9 +66,13 @@ async function onLogin() {
   if (loading.value) return
   loading.value = true
   try {
-    await userStore.login()
+    const user = await userStore.login()
     uni.showToast({ title: '登录成功', icon: 'success' })
-    goNext()
+    if (shouldOfferProfileOnboarding(user, userStore.isGuest)) {
+      uni.redirectTo({ url: buildProfileOnboardingUrl(getEncodedRedirect()) })
+    } else {
+      goNext()
+    }
   } catch (error) {
     handleLoginError('wx-login', error)
   } finally {

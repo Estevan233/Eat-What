@@ -53,6 +53,7 @@ class DiningMemoryList(BaseModel):
 
 
 class ExternalDiningRequest(BaseModel):
+    request_id: str | None = Field(default=None, min_length=1, max_length=64)
     mood: Mood = "neutral"
     activity_level: ActivityLevel = "normal"
     audience: Audience = "personal"
@@ -60,7 +61,17 @@ class ExternalDiningRequest(BaseModel):
     city: str | None = Field(default=None, max_length=64)
     lat: float | None = Field(default=None, ge=-90, le=90)
     lng: float | None = Field(default=None, ge=-180, le=180)
-    exclude_keys: list[str] = Field(default_factory=list, max_length=12)
+    exclude_keys: list[str] = Field(default_factory=list, max_length=30)
+
+    @field_validator("request_id")
+    @classmethod
+    def normalize_request_id(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("request_id 不能为空")
+        return cleaned
 
     @field_validator("city")
     @classmethod

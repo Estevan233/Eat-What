@@ -13,6 +13,10 @@
       "style": { "navigationBarTitleText": "档案" }
     },
     {
+      "path": "pages/account-profile/account-profile",
+      "style": { "navigationBarTitleText": "完善资料" }
+    },
+    {
       "path": "pages/constitution/constitution",
       "style": { "navigationBarTitleText": "体质测试" }
     },

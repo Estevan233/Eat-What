@@ -39,8 +39,10 @@ class Settings(BaseSettings):
     enable_code2session: bool = False
     port: int = 8080
 
-    # Open-Meteo（免 key、免注册）
-    open_meteo_api: str = "https://api.open-meteo.com/v1/forecast"
+    # 和风天气：API Host 与 API Key 必须来自同一个 Project，只在服务端配置。
+    qweather_api_host: str = ""
+    qweather_api_key: SecretStr | None = None
+    qweather_timeout_seconds: float = 2.5
 
     @field_validator("database_url", mode="before")
     @classmethod

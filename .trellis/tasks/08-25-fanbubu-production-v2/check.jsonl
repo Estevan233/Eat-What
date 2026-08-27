@@ -1,0 +1,4 @@
+{"file":".trellis/spec/guides/index.md","reason":"检查前后端契约同步、推荐逻辑归属和数据种子边界。"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"检查身份、天气和 AI 跨层错误处理及兼容性。"}
+{"file":".trellis/tasks/08-25-fanbubu-production-v2/research/platform-decisions.md","reason":"核对官方平台限制、秘密管理和降级行为。"}
+{"file":".trellis/tasks/08-25-fanbubu-production-v2/research/code-baseline.md","reason":"核对测试数量、生产 Repository 和既有功能没有回归。"}

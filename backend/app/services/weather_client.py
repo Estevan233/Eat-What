@@ -1,13 +1,4 @@
-"""Open-Meteo 天气 client - 坐标直查当前实况，进程内缓存 1 小时。
-
-学习点：
-- Open-Meteo 免 key 免注册，GET 坐标直查返回 JSON，无多个端点
-- WMO weather code 是统一标准，自行映射中文描述
-- 蒲福风级 + 8 方位风向：纯查表，不引第三方库
-- weather_tag 是算法可用离散值，把 WMO code + 温度湿度归类到 6+1 种
-- 进程内 dict+TTL 缓存，key 用 6 位小数 round（~11m 精度），同坐标 1h 内不重打
-- 客户端实例化时调 get_settings()，便于测试用 monkeypatch 替换配置
-"""
+"""QWeather current conditions client with bounded server-side caching."""
 import asyncio
 from datetime import datetime, timezone
 from typing import Any
@@ -21,106 +12,54 @@ from app.schemas.weather import WeatherData, WeatherTag
 
 log = structlog.get_logger()
 
-# Open-Meteo current= 参数一次性拿所有需要的变量
-_CURRENT_VARS = (
-    "temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,"
-    "wind_speed_10m,wind_direction_10m,precipitation"
-)
-
-# ---- WMO weather code → 中文描述 ----
-# 详参 https://open-meteo.com/en/docs WMO weather interpretation codes
-WMO_TEXT_MAP: dict[int, str] = {
-    0: "晴", 1: "多云", 2: "多云", 3: "阴",
-    45: "雾", 48: "雾凇",
-    51: "小雨", 53: "小雨", 55: "中雨",
-    56: "冻雨", 57: "冻雨",
-    61: "小雨", 63: "中雨", 65: "大雨",
-    66: "冻雨", 67: "冻雨",
-    71: "小雪", 73: "中雪", 75: "大雪",
-    77: "冰粒",
-    80: "阵雨", 81: "阵雨", 82: "强阵雨",
-    85: "阵雪", 86: "阵雪",
-    95: "雷暴", 96: "雷暴冰雹", 99: "强雷暴冰雹",
-}
-
-WMO_SNOW_CODES = {71, 73, 75, 77, 85, 86}
-WMO_RAIN_CODES = {51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99}
-
-# ---- 蒲福风级（km/h 范围 → 中文描述）----
-# (max_kmh, label)
-BEAUFORT_SCALE: tuple[tuple[float, str], ...] = (
-    (1.0, "0级 无风"),
-    (5.0, "1级 软风"),
-    (11.0, "2级 轻风"),
-    (19.0, "3级 微风"),
-    (28.0, "4级 和风"),
-    (38.0, "5级 清风"),
-    (49.0, "6级 强风"),
-    (61.0, "7级 疾风"),
-    (74.0, "8级 大风"),
-    (88.0, "9级 烈风"),
-    (102.0, "10级 狂风"),
-    (117.0, "11级 暴风"),
-    (float("inf"), "12级 飓风"),
-)
-
-# ---- 风向 8 方位（deg → 中文方位）----
-# 北/东北/东/东南/南/西南/西/西北
-WIND_DIRECTIONS = ("北", "东北", "东", "东南", "南", "西南", "西", "西北")
+FRESH_CACHE_SECONDS = 3600
+STALE_CACHE_SECONDS = 12 * 3600
 
 
-def beaufort_label(speed_kmh: float) -> str:
-    """按 km/h 返回蒲福风级中文标签。"""
-    for max_kmh, label in BEAUFORT_SCALE:
-        if speed_kmh < max_kmh:
-            return label
-    return "12级 飓风"
+def normalize_qweather_host(host: str) -> str:
+    """Return a URL-safe QWeather API host without a trailing slash."""
+    normalized = host.strip().rstrip("/")
+    if not normalized:
+        return ""
+    if not normalized.startswith(("https://", "http://")):
+        normalized = f"https://{normalized}"
+    return normalized
 
 
-def wind_dir_label(deg: float) -> str:
-    """180°/方位 8 等分，返回中文方位。"""
-    deg = deg % 360.0
-    # (deg + 22.5) / 45 简化边界对齐
-    idx = int((deg + 22.5) // 45) % 8
-    return WIND_DIRECTIONS[idx]
-
-
-def neutral_weather(*, location_name: str = '天气暂不可用') -> WeatherData:
-    '''外部天气不可用时的中性算法输入；明确标记，不冒充实时观测。'''
+def neutral_weather(*, location_name: str = "天气暂不可用") -> WeatherData:
+    """Neutral algorithm input; it is explicitly not presented as live weather."""
     return WeatherData(
         provider_available=False,
+        source="neutral",
         location_name=location_name,
         temp_c=22.0,
         feels_like_c=22.0,
-        text='暂不可用',
-        wind_dir='无',
-        wind_scale='0级 无风',
+        text="暂不可用",
+        wind_dir="无",
+        wind_scale="0级 无风",
         humidity=50,
         precipitation_mm=0.0,
-        weather_tag='mild',
+        weather_tag="mild",
         fetched_at=datetime.now(timezone.utc),
     )
 
 
 def classify_weather_tag(
-    weather_code: int,
+    icon_code: int,
     temp_c: float,
     humidity: int,
     precipitation_mm: float,
+    *,
+    text: str = "",
 ) -> WeatherTag:
-    """把当前实况映射到 6+1 种 weather_tag。
-
-    按优先级互斥判断：
-    1. snowy：WMO code 雪类，或气温<0 且降水>5mm
-    2. rainy：WMO code 雨类，或 precipitation > 0.5mm
-    3. cold：temp_c < 10
-    4. hot：temp_c >= 28
-    5. dry：humidity < 35 且无降水
-    6. mild：上述都不命中
-    """
-    if weather_code in WMO_SNOW_CODES or (temp_c < 0 and precipitation_mm > 5):
+    """Map QWeather icon/current values to the small ranking vocabulary."""
+    if 400 <= icon_code < 500 or "雪" in text or "冰粒" in text:
         return "snowy"
-    if weather_code in WMO_RAIN_CODES or precipitation_mm > 0.5:
+    if (
+        300 <= icon_code < 400
+        or precipitation_mm > 0.5
+        or any(token in text for token in ("雨", "雷暴"))
+    ):
         return "rainy"
     if temp_c < 10:
         return "cold"
@@ -131,157 +70,203 @@ def classify_weather_tag(
     return "mild"
 
 
-class OpenMeteoClient:
-    """Open-Meteo API 客户端 + 1h 进程内缓存。
+def _number(value: Any, *, default: float = 0.0) -> float:
+    if value in (None, "", "-"):
+        return default
+    return float(value)
 
-    用法：
-        client = OpenMeteoClient()            # 模块级单例
-        data = await client.get_current(lat, lng)
-    缓存 key 用 round(6) 坐标，避免近邻重复打 HTTP。
+
+class QWeatherClient:
+    """QWeather API client.
+
+    Cache keys use a 0.1-degree city grid. Fresh data is reused for one hour;
+    provider failures may reuse the last observation for up to twelve hours.
     """
 
-    def __init__(self, *, timeout: float = 8.0, cache_ttl_seconds: int = 3600) -> None:
-        self._settings = get_settings()
-        self._base_url = self._settings.open_meteo_api
-        self._timeout = timeout
-        self._cache_ttl = cache_ttl_seconds
-        # cache: (lat_r, lng_r) -> (fetched_at_utc, WeatherData)
+    def __init__(
+        self,
+        *,
+        api_host: str | None = None,
+        api_key: str | None = None,
+        timeout: float | None = None,
+        fresh_cache_seconds: int = FRESH_CACHE_SECONDS,
+        stale_cache_seconds: int = STALE_CACHE_SECONDS,
+    ) -> None:
+        settings = get_settings()
+        configured_key = settings.qweather_api_key
+        resolved_key = (
+            configured_key.get_secret_value()
+            if api_key is None and configured_key is not None
+            else api_key
+        )
+        self._base_url = normalize_qweather_host(
+            settings.qweather_api_host if api_host is None else api_host
+        )
+        self._api_key = resolved_key or ""
+        self._timeout = timeout or settings.qweather_timeout_seconds
+        self._fresh_cache_seconds = fresh_cache_seconds
+        self._stale_cache_seconds = stale_cache_seconds
         self._cache: dict[tuple[float, float], tuple[datetime, WeatherData]] = {}
+        self._locks: dict[tuple[float, float], asyncio.Lock] = {}
 
     @staticmethod
     def _round_key(lat: float, lng: float) -> tuple[float, float]:
-        """坐标 6 位小数 round（~11m），同区命中缓存。"""
-        return (round(lat, 6), round(lng, 6))
+        return round(lat, 1), round(lng, 1)
 
-    def _cache_get(self, key: tuple[float, float]) -> WeatherData | None:
+    def _cache_get(
+        self,
+        key: tuple[float, float],
+        *,
+        max_age_seconds: int,
+    ) -> WeatherData | None:
         cached = self._cache.get(key)
         if cached is None:
             return None
-        fetched_at, data = cached
-        age = (datetime.now(timezone.utc) - fetched_at).total_seconds()
-        if age < self._cache_ttl:
-            return data
-        # 过期：删
-        self._cache.pop(key, None)
+        cached_at, weather = cached
+        age = (datetime.now(timezone.utc) - cached_at).total_seconds()
+        if age <= max_age_seconds:
+            return weather
         return None
 
-    def _cache_put(self, key: tuple[float, float], data: WeatherData) -> None:
-        self._cache[key] = (datetime.now(timezone.utc), data)
+    def _cache_put(self, key: tuple[float, float], weather: WeatherData) -> None:
+        self._cache[key] = (datetime.now(timezone.utc), weather)
 
     def cache_clear(self) -> None:
-        """测试用：清缓存后重打 HTTP。"""
         self._cache.clear()
 
     async def get_current(self, lat: float, lng: float) -> WeatherData:
-        """按坐标取当前实况天气。1h 内同坐标命中缓存不发请求。
-
-        Raises:
-            ExternalAPIError: 网络/非 200/响应格式异常
-            RateLimitError: 429
-        """
         key = self._round_key(lat, lng)
-        cached = self._cache_get(key)
-        if cached is not None:
-            log.info("weather_cache_hit", lat=lat, lng=lng)
-            return cached
+        fresh = self._cache_get(key, max_age_seconds=self._fresh_cache_seconds)
+        if fresh is not None:
+            log.info("weather_cache_hit", provider="qweather", grid=key)
+            return fresh
+        if not self._base_url or not self._api_key:
+            raise ExternalAPIError("qweather", "服务端未配置 QWEATHER_API_HOST/API_KEY")
 
-        params: dict[str, str | float] = {
-            "latitude": lat,
-            "longitude": lng,
-            "current": _CURRENT_VARS,
-            "timezone": "Asia/Shanghai",
-            "temperature_unit": "celsius",
-            "wind_speed_unit": "kmh",
-        }
-        log.info("weather_fetch_start", lat=lat, lng=lng, url=self._base_url)
-
-        resp = await self._get_with_retry(params)
-        if resp.status_code == 429:
-            raise RateLimitError("open-meteo")
-        if resp.status_code != 200:
-            log.warning("weather_http_error", status=resp.status_code, body=resp.text[:200])
-            raise ExternalAPIError("open-meteo", f"HTTP {resp.status_code}")
-
-        try:
-            data = resp.json()
-        except ValueError as e:
-            raise ExternalAPIError("open-meteo", f"非 JSON 响应: {e}") from None
-
-        weather = self._parse(data, lat, lng)
-        self._cache_put(key, weather)
-        log.info("weather_fetch_ok", lat=lat, lng=lng, tag=weather.weather_tag)
-        return weather
-
-    async def _get_with_retry(
-        self,
-        params: dict[str, str | float],
-        *,
-        max_attempts: int = 2,
-    ) -> httpx.Response:
-        """带连接级重试的 GET。只重试连接失败（DNS/TLS/建连），
-        不在超时上重试，避免叠加等待让调用方（推荐 3s 预算）雪上加霜。
-        """
-        last_exc: httpx.HTTPError | None = None
-        for attempt in range(max_attempts):
+        lock = self._locks.setdefault(key, asyncio.Lock())
+        async with lock:
+            fresh = self._cache_get(key, max_age_seconds=self._fresh_cache_seconds)
+            if fresh is not None:
+                return fresh
             try:
-                async with httpx.AsyncClient(timeout=self._timeout) as client:
-                    return await client.get(self._base_url, params=params)
-            except (httpx.ConnectError, httpx.ConnectTimeout) as e:
-                # 连接级失败常是瞬时（DNS/TLS 抖动），退避后重试一次
-                last_exc = e
-                if attempt + 1 < max_attempts:
-                    await asyncio.sleep(0.25 * (attempt + 1))
-                    continue
-                break
-            except httpx.HTTPError as e:
-                last_exc = e
-                break
+                weather = await self._fetch(lat, lng, key)
+            except (ExternalAPIError, RateLimitError):
+                stale = self._cache_get(key, max_age_seconds=self._stale_cache_seconds)
+                if stale is None:
+                    raise
+                log.warning("weather_stale_cache_hit", provider="qweather", grid=key)
+                return stale.model_copy(update={"source": "cache", "is_stale": True})
+            self._cache_put(key, weather)
+            return weather
 
-        error_type = type(last_exc).__name__ if last_exc else "HTTPError"
-        error_detail = str(last_exc).strip() if last_exc else error_type
-        log.warning(
-            "weather_network_error",
-            error_type=error_type,
-            error=error_detail,
-        )
-        raise ExternalAPIError(
-            "open-meteo",
-            f"网络异常({error_type}): {error_detail}",
-        ) from None
-
-    def _parse(self, data: dict[str, Any], lat: float, lng: float) -> WeatherData:
-        """把 Open-Meteo 响应解析为 WeatherData。字段缺失抛 ExternalAPIError。"""
-        current = data.get("current")
-        if not isinstance(current, dict):
-            raise ExternalAPIError("open-meteo", f"响应缺 current 字段: {data}")
-
+    async def _fetch(
+        self,
+        lat: float,
+        lng: float,
+        grid: tuple[float, float],
+    ) -> WeatherData:
+        url = f"{self._base_url}/v7/weather/now"
+        params = {
+            # v7 城市实况坐标格式最多支持两位小数，顺序为经度,纬度。
+            "location": f"{lng:.2f},{lat:.2f}",
+            "lang": "zh",
+            "unit": "m",
+        }
+        headers = {"X-QW-Api-Key": self._api_key}
+        log.info("weather_fetch_start", provider="qweather", grid=grid)
         try:
-            temp_c = float(current["temperature_2m"])
-            humidity = int(current["relative_humidity_2m"])
-            feels_like_c = float(current["apparent_temperature"])
-            weather_code = int(current["weather_code"])
-            wind_speed = float(current["wind_speed_10m"])
-            wind_dir_deg = float(current["wind_direction_10m"])
-            precipitation = float(current.get("precipitation", 0.0))
-        except KeyError as e:
-            raise ExternalAPIError("open-meteo", f"current 缺字段 {e}: {current}") from None
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                response = await client.get(url, params=params, headers=headers)
+        except httpx.HTTPError as exc:
+            error_type = type(exc).__name__
+            log.warning(
+                "weather_network_error",
+                provider="qweather",
+                error_type=error_type,
+                grid=grid,
+            )
+            raise ExternalAPIError("qweather", f"网络异常({error_type})") from None
 
-        text = WMO_TEXT_MAP.get(weather_code, f"WMO code {weather_code}")
-        tag = classify_weather_tag(weather_code, temp_c, humidity, precipitation)
+        if response.status_code == 429:
+            raise RateLimitError("qweather")
+        if response.status_code != 200:
+            raise ExternalAPIError("qweather", f"HTTP {response.status_code}")
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise ExternalAPIError("qweather", f"非 JSON 响应: {type(exc).__name__}") from None
 
-        return WeatherData(
-            location_name=f"Open-Meteo @ {lat:.4f},{lng:.4f}",
+        code = str(payload.get("code", ""))
+        if code == "429":
+            raise RateLimitError("qweather")
+        if code != "200":
+            raise ExternalAPIError("qweather", f"业务响应 code={code or 'missing'}")
+        return self._parse(payload, grid)
+
+    def _parse(
+        self,
+        payload: dict[str, Any],
+        grid: tuple[float, float],
+    ) -> WeatherData:
+        now = payload.get("now")
+        if not isinstance(now, dict):
+            raise ExternalAPIError("qweather", "响应缺 now 字段")
+        try:
+            temp_c = _number(now["temp"])
+            feels_like_c = _number(now["feelsLike"])
+            icon_code = int(now["icon"])
+            text = str(now["text"])
+            humidity = int(_number(now["humidity"]))
+            precipitation = _number(now.get("precip"))
+            wind_dir = str(now["windDir"])
+            wind_scale_value = str(now["windScale"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ExternalAPIError(
+                "qweather",
+                f"now 字段无效: {type(exc).__name__}",
+            ) from None
+
+        wind_scale = (
+            wind_scale_value
+            if wind_scale_value.endswith("级")
+            else f"{wind_scale_value}级"
+        )
+        observed_at = None
+        observed_value = now.get("obsTime") or payload.get("updateTime")
+        if isinstance(observed_value, str):
+            try:
+                observed_at = datetime.fromisoformat(observed_value)
+            except ValueError:
+                observed_at = None
+        weather = WeatherData(
+            provider_available=True,
+            source="qweather",
+            is_stale=False,
+            observed_at=observed_at,
+            location_name=f"和风天气 @ {grid[0]:.1f},{grid[1]:.1f}",
             temp_c=temp_c,
             feels_like_c=feels_like_c,
             text=text,
-            wind_dir=wind_dir_label(wind_dir_deg),
-            wind_scale=beaufort_label(wind_speed),
+            wind_dir=wind_dir,
+            wind_scale=wind_scale,
             humidity=humidity,
-            precipitation_mm=precipitation,
-            weather_tag=tag,
+            precipitation_mm=max(0.0, precipitation),
+            weather_tag=classify_weather_tag(
+                icon_code,
+                temp_c,
+                humidity,
+                precipitation,
+                text=text,
+            ),
             fetched_at=datetime.now(timezone.utc),
         )
+        log.info(
+            "weather_fetch_ok",
+            provider="qweather",
+            grid=grid,
+            tag=weather.weather_tag,
+        )
+        return weather
 
 
-# 模块级单例 - 路由直接 import，测试 monkeypatch 替换
-weather_client = OpenMeteoClient()
+weather_client = QWeatherClient()

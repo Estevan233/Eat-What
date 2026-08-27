@@ -1,0 +1,5 @@
+{"file":".trellis/spec/guides/index.md","reason":"本任务横跨小程序、FastAPI、天气、AI 和数据种子，必须遵守前后端类型同步与算法边界。"}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"新增登录资料、WeatherData 与 MealIntent 都会跨 API、服务、状态和 UI。"}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"复用现有 Request、Repository、配置、缓存和组件模式，避免重复实现。"}
+{"file":".trellis/tasks/08-25-fanbubu-production-v2/research/platform-decisions.md","reason":"实现必须遵守已核对的 CloudBase AI、可信身份、QWeather 与公网出访约束。"}
+{"file":".trellis/tasks/08-25-fanbubu-production-v2/research/code-baseline.md","reason":"保护已上线的 CloudBase REST 数据路径和现有测试基线。"}

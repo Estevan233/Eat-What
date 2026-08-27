@@ -27,7 +27,7 @@ describe('auth storage', () => {
   })
 
   it('persists and restores a login session', () => {
-    const user = { id: 7, nickname: '测试用户' }
+    const user = { id: 7, nickname: '测试用户', profileComplete: false }
 
     saveLoginSession('token-7', user)
 
@@ -36,7 +36,7 @@ describe('auth storage', () => {
   })
 
   it('clears session data while preserving the guest identity after a 401', () => {
-    saveLoginSession('expired-token', { id: 8, nickname: '游客' })
+    saveLoginSession('expired-token', { id: 8, nickname: '游客', profileComplete: false })
     writeStoredString(AUTH_STORAGE_KEYS.guestId, 'guest-8')
     const listener = vi.fn()
     const unsubscribe = subscribeAuthClear(listener)

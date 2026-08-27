@@ -1,0 +1,751 @@
+{
+  "dataset_version": 2,
+  "new_recipe_count": 60,
+  "recipe_sha256": "fad33a5eb75b2e0698abb16e9d6b3147be9977720f5fa848bef6f1fa88007df8",
+  "review_method": "Codex-assisted manual QA plus strict automated validation",
+  "review_scope": "ingredient-step coverage, timing, doneness, nutrition basis, wording",
+  "items": [
+    {
+      "food_name": "韭菜炒鸡蛋",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "蒜泥白肉",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "口水鸡",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "盐水鸭",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "凉拌牛肉",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "五香卤牛肉",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "蒜蓉粉丝蒸扇贝",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "剁椒鱼头",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "马蹄蒸肉饼",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "肉末蒸蛋",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "啤酒鸭",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "板栗烧鸡",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "可乐鸡翅",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "香菇炖鸡",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "红烧鱼块",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "土豆烧排骨",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "红烧牛肉",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "砂锅豆腐",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "辣子鸡",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "葱姜炒蟹",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "清炒虾仁",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "葱爆羊肉",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "孜然羊肉",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "腰果虾仁",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "菠菜炒猪肝",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "凉拌海带丝",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "水煮毛豆",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "麻酱拌豆腐",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "凉拌豆腐丝",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "白灼秋葵",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "紫菜蛋花汤",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "番茄蛋花汤",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "豆腐青菜汤",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "菌菇汤",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "冬瓜薏米汤",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "蒜蓉蒸茄子",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "鱼香茄子煲",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "香煎豆腐",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "干锅千叶豆腐",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "铁板豆腐",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "双菇炒青菜",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "素炒豌豆苗",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "清炒空心菜",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "素炒三丝",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "松仁玉米",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "虎皮青椒",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "清炒茼蒿",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "蒜蓉豆角丝",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "糖藕",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "葱花土豆泥",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "牛肉面",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "炸酱面",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "扬州炒饭",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "小笼包",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "葱花饼",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "韭菜盒子",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "煎饺",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "杂粮饭",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "葱花鸡蛋饼",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    },
+    {
+      "food_name": "韭菜猪肉水饺",
+      "status": "reviewed",
+      "checks": [
+        "ingredients_and_steps",
+        "time_feasibility",
+        "doneness_safety",
+        "nutrition_basis",
+        "non_medical_wording"
+      ],
+      "notes": "按两人份家常做法复核；营养为食物库成品口径估算，不作医疗承诺。"
+    }
+  ],
+  "manual_sample": [
+    "韭菜炒鸡蛋",
+    "蒜泥白肉",
+    "口水鸡",
+    "盐水鸭",
+    "五香卤牛肉",
+    "蒜蓉粉丝蒸扇贝",
+    "剁椒鱼头",
+    "马蹄蒸肉饼",
+    "啤酒鸭",
+    "可乐鸡翅",
+    "红烧牛肉",
+    "葱姜炒蟹",
+    "菠菜炒猪肝",
+    "凉拌海带丝",
+    "白灼秋葵",
+    "紫菜蛋花汤",
+    "蒜蓉蒸茄子",
+    "牛肉面",
+    "扬州炒饭",
+    "韭菜猪肉水饺"
+  ]
+}

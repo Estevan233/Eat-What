@@ -38,7 +38,7 @@ def mock_weather():
     from app.services import weather_client as mod
 
     sample = WeatherData(
-        location_name="Open-Meteo @ 39.92,116.41",
+        location_name="和风天气 @ 39.9,116.4",
         temp_c=22.5,
         feels_like_c=24.0,
         text="小雨",

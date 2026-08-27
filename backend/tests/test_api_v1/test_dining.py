@@ -192,7 +192,7 @@ def test_external_recommendation_rejects_too_many_or_blank_exclusions(client) ->
     too_many = client.post(
         "/api/v1/dining/recommend",
         headers=headers,
-        json={"exclude_keys": [f"rule-{index}" for index in range(13)]},
+        json={"exclude_keys": [f"rule-{index}" for index in range(31)]},
     )
     blank = client.post(
         "/api/v1/dining/recommend",

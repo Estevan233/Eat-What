@@ -9,6 +9,7 @@ from app.services.recipe_seed import DEFAULT_RECIPE_SEED_PATH, import_recipe_see
 from scripts.validate_recipe_seed import validate
 
 ORIGINAL_NAMES_SHA256 = '73cf37af0628f0deef3d175d6f42ccd2ccae6e13413a9fa325b92b7b7afb3e9b'
+REVIEW_MANIFEST_PATH = DEFAULT_RECIPE_SEED_PATH.with_name('recipe_review_manifest.json')
 
 
 def _load_recipes() -> list[dict[str, object]]:
@@ -18,15 +19,32 @@ def _load_recipes() -> list[dict[str, object]]:
 def test_recipe_seed_quality_shape() -> None:
     recipes = _load_recipes()
 
-    assert len(recipes) == 60
-    assert len({item['food_name'] for item in recipes}) == 60
-    assert sum(item['meal_role'] == 'main' for item in recipes) >= 20
-    assert sum(item['meal_role'] == 'vegetable' for item in recipes) >= 20
-    assert sum(item['meal_role'] == 'staple' for item in recipes) >= 10
+    assert len(recipes) == 120
+    assert len({item['food_name'] for item in recipes}) == 120
+    assert sum(item['meal_role'] == 'main' for item in recipes) == 50
+    assert sum(item['meal_role'] == 'vegetable' for item in recipes) == 50
+    assert sum(item['meal_role'] == 'staple' for item in recipes) == 20
     for item in recipes:
         assert 4 <= len(item['steps']) <= 6
         assert item['nutrition_per_serving']['energy_kcal'] > 0
         assert item['nutrition_basis']
+
+
+def test_new_recipe_review_manifest_is_complete() -> None:
+    recipes = _load_recipes()
+    manifest = json.loads(REVIEW_MANIFEST_PATH.read_text(encoding='utf-8'))
+    new_names = {item['food_name'] for item in recipes[60:]}
+    recipe_digest = hashlib.sha256(DEFAULT_RECIPE_SEED_PATH.read_bytes()).hexdigest()
+
+    assert manifest['dataset_version'] == 2
+    assert manifest['new_recipe_count'] == 60
+    assert manifest['recipe_sha256'] == recipe_digest
+    assert len(manifest['items']) == 60
+    assert {item['food_name'] for item in manifest['items']} == new_names
+    assert all(item['status'] == 'reviewed' for item in manifest['items'])
+    assert all(len(item['checks']) >= 4 for item in manifest['items'])
+    assert len(manifest['manual_sample']) >= 20
+    assert set(manifest['manual_sample']) <= new_names
 
 
 def test_recipe_seed_passes_strict_validator() -> None:
@@ -68,4 +86,4 @@ def test_recipe_import_is_idempotent(session) -> None:
     first = import_recipe_seed(session)
     second = import_recipe_seed(session)
 
-    assert first == second == 60
+    assert first == second == 120

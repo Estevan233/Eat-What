@@ -127,7 +127,7 @@ def seed_profile_and_foods(client, auth_token):
 def mock_weather():
     """替换 weather_client 单例的 get_current。"""
     sample = WeatherData(
-        location_name="Open-Meteo @ 39.92,116.41",
+        location_name="和风天气 @ 39.9,116.4",
         temp_c=22.5,
         feels_like_c=24.0,
         text="温和",

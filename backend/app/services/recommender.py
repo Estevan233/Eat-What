@@ -10,6 +10,7 @@ import asyncio
 from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from typing import Any
+from uuid import uuid4
 
 import structlog
 from sqlmodel import Session
@@ -24,6 +25,7 @@ from app.models.user_profile import UserProfile
 from app.schemas.daily import (
     ActivityLevel,
     FoodWithReason,
+    MealIntent,
     Mood,
     RecommendationWeightProfile,
     RecommendContext,
@@ -33,19 +35,25 @@ from app.schemas.daily import (
 from app.schemas.meal import MealBuildResult, MealRole
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData, WeatherTag
-from app.services import daily_service, food_service, profile_service
+from app.services import daily_service, favorite_service, food_service, profile_service
 from app.services.meal_builder import MealCandidate, build_meal, meal_role_targets
 from app.services.recommendation_ranking import (
     RULE_V4_WEIGHTS,
     CandidateReranker,
     IdentityReranker,
+    PreferenceSnapshot,
     RankedCandidate,
     RecommendationHistory,
     RecommendationRankingContext,
     ScoreBreakdown,
+    apply_bounded_exploration,
     apply_novelty,
     apply_rerank_adjustments,
+    build_preference_snapshot,
     build_recommendation_history,
+    food_matches_ingredient,
+    meal_intent_adjustment,
+    preference_history_score,
     with_client_exclusions,
 )
 from app.services.solar_terms import get_today_context_cached
@@ -148,8 +156,7 @@ async def _resolve_weather(req: RecommendRequest) -> WeatherData:
         log.warning(
             "recommend_weather_fallback",
             error_type=type(exc).__name__,
-            lat=req.lat,
-            lng=req.lng,
+            location_grid=(round(req.lat, 1), round(req.lng, 1)),
         )
         return _fallback_weather(provider_unavailable=True)
 
@@ -170,6 +177,12 @@ def _is_forbidden(food: Food, profile: UserProfile | None, req: RecommendRequest
     1. 用户的 forbidden_tags（忌口）∩ food.tags 非空
     2. 用户的体质（主+兼夹）∩ food.forbidden_for_json 非空
     """
+    if req.meal_intent is not None and any(
+        food_matches_ingredient(food, ingredient)
+        for ingredient in req.meal_intent.excluded_ingredients
+    ):
+        return True
+
     if profile is None:
         return False
 
@@ -424,6 +437,8 @@ def _score_food(
     all_foods: list[Food],
     mood: Mood,
     activity_level: ActivityLevel,
+    preference: PreferenceSnapshot | None = None,
+    meal_intent: MealIntent | None = None,
 ) -> RankedCandidate:
     """计算单道菜的 75 分规则分项和解释短语。"""
     w_score, w_phrase = _score_weather(food, weather)
@@ -443,7 +458,11 @@ def _score_food(
         nutrition=_scale_score(n_score, 15.0, float(RULE_V4_WEIGHTS["nutrition"])),
         seasonal_wellness=seasonal_wellness,
         personal_family=min(float(RULE_V4_WEIGHTS["personal_family"]), personal_family),
-        preference_history=float(RULE_V4_WEIGHTS["preference_history"]),
+        preference_history=(
+            float(RULE_V4_WEIGHTS["preference_history"])
+            if preference is None
+            else preference_history_score(food, preference)
+        ),
         feasibility=_scale_score(
             _score_method_time(food),
             13.0,
@@ -452,16 +471,19 @@ def _score_food(
         diversity=float(RULE_V4_WEIGHTS["diversity"]),
         weather_modifier=weather_modifier,
     )
+    intent_delta, intent_phrase = meal_intent_adjustment(food, meal_intent)
     return RankedCandidate(
         food=food,
         base_score=breakdown.total,
         breakdown=breakdown,
+        meal_intent_adjustment=intent_delta,
         reason_phrases={
             "weather": w_phrase,
             "solar_term": s_phrase,
             "mood": m_phrase,
             "nutrition": n_phrase,
             "constitution": c_phrase,
+            "meal_intent": intent_phrase,
         },
     )
 
@@ -490,6 +512,9 @@ def _make_reason(phrases: dict[str, str], food: Food, mood: Mood) -> str:
     constitution_phrase = phrases.get("constitution", "")
     if constitution_phrase:
         parts.append(constitution_phrase)
+    meal_intent_phrase = phrases.get("meal_intent", "")
+    if meal_intent_phrase:
+        parts.append(meal_intent_phrase)
 
     if not parts:
         return f"今天品尝{food.name}很合适"
@@ -505,6 +530,11 @@ def _build_complete_meal(
     ranking_history: RecommendationHistory,
     mood: Mood,
     role_targets: tuple[MealRole, ...],
+    *,
+    user_id: int,
+    event_date: date,
+    request_id: str,
+    engine_version: str,
 ) -> tuple[MealBuildResult, list[RankedCandidate]]:
     fresh_candidates: list[RankedCandidate] = []
     for meal_role, required_count in Counter(role_targets).items():
@@ -512,8 +542,20 @@ def _build_complete_meal(
             candidate for candidate in candidates
             if candidate.food.meal_role == meal_role
         ]
+        novel_candidates = apply_novelty(
+            role_candidates,
+            ranking_history,
+            top_n=required_count,
+        )
         fresh_candidates.extend(
-            apply_novelty(role_candidates, ranking_history, top_n=required_count)
+            apply_bounded_exploration(
+                novel_candidates,
+                user_id=user_id,
+                event_date=event_date,
+                request_id=request_id,
+                meal_role=meal_role,
+                engine_version=engine_version,
+            )
         )
 
     meal_candidates = [
@@ -552,6 +594,7 @@ async def recommend(
     trace = timing or TimingTrace()
     if user.id is None:  # pragma: no cover
         raise RuntimeError("user.id 不应为 None")
+    effective_request_id = req.request_id or str(uuid4())
 
     stage_started = trace.start()
     profile = profile_service.get_profile_record(session, user.id)
@@ -582,12 +625,18 @@ async def recommend(
 
     stage_started = trace.start()
     foods, recipes_by_food_id = food_service.get_recommendation_catalog(session)
+    favorite_food_ids = favorite_service.list_favorited_ids(session, user.id)
     trace.stop("catalog", stage_started)
 
     stage_started = trace.start()
     kept = hard_filter(foods, profile, req)
     if not kept:
         raise ValidationError("没有可选菜（全部被忌口/体质禁忌过滤）")
+    preference = build_preference_snapshot(
+        foods,
+        history_7d,
+        favorite_food_ids=favorite_food_ids,
+    )
 
     candidates = [
         _score_food(
@@ -599,6 +648,8 @@ async def recommend(
             foods,
             req.mood,
             req.activity_level,
+            preference,
+            req.meal_intent,
         )
         for food in kept
     ]
@@ -616,7 +667,11 @@ async def recommend(
     try:
         adjustments = await active_reranker.rerank(candidates, ranking_context)
         candidates = apply_rerank_adjustments(candidates, adjustments)
-        engine_name = active_reranker.engine_name
+        engine_name = (
+            "rules_v5"
+            if active_reranker.engine_name == "rules_v4"
+            else active_reranker.engine_name
+        )
     except Exception as exc:
         log.warning(
             "recommend_reranker_fallback",
@@ -624,12 +679,13 @@ async def recommend(
             reranker=active_reranker.engine_name,
             error_type=type(exc).__name__,
         )
-        engine_name = "rules_v4"
+        engine_name = "rules_v5"
 
     ranking_history = build_recommendation_history(
         history_7d,
         events_7d,
         as_of=today,
+        exclude_request_id=req.request_id,
     )
     ranking_history = with_client_exclusions(
         ranking_history,
@@ -642,6 +698,10 @@ async def recommend(
         ranking_history,
         req.mood,
         targets,
+        user_id=user.id,
+        event_date=today,
+        request_id=effective_request_id,
+        engine_version=engine_name,
     )
     trace.stop("rank", stage_started)
 
@@ -663,7 +723,8 @@ async def recommend(
         dining_mode=req.dining_mode,
         audience=req.audience,
         party_size=req.party_size,
-        request_id=req.request_id,
+        request_id=effective_request_id,
+        check_idempotency=req.request_id is not None,
     )
     trace.stop("write", stage_started)
 

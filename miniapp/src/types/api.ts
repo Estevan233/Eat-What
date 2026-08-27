@@ -6,7 +6,7 @@
  * - 前端 TS 类型用 camelCase（与 JS 社区惯例 + 微信小程序原生 API 一致）
  * - 后端 API 用 snake_case
  * - request.ts 拦截层做双向转换：发送前 camelToSnake，接收后 snakeToCamel
- * - 例外：UserRead（id/nickname/avatar_url）是 T04 直接对后端字段的映射，保留 snake_case 避免回归
+ * - UserRead 也使用 camelCase；旧版缓存由 profile-onboarding.ts 迁移。
  */
 
 export interface ApiResult<T> {
@@ -92,7 +92,13 @@ export interface UserWithProfile {
 export interface UserRead {
   id: number
   nickname: string
-  avatar_url?: string
+  avatarUrl?: string
+  profileComplete: boolean
+}
+
+export interface AccountProfilePatch {
+  nickname?: string
+  avatarUrl?: string
 }
 
 /** POST /auth/wx-login 成功响应的 data。 */
@@ -167,10 +173,13 @@ export type WeatherTag = 'cold' | 'hot' | 'rainy' | 'snowy' | 'dry' | 'mild' | '
  */
 export interface WeatherData {
   providerAvailable: boolean
+  source?: 'qweather' | 'cache' | 'neutral'
+  isStale?: boolean
+  observedAt?: string | null
   locationName: string
   tempC: number
   feelsLikeC: number
-  /** 晴/多云/小雨/雪/阵雨/雷暴 - 后端映射的 WMO code 中文 */
+  /** 晴/多云/小雨/雪/雷暴 - 和风天气描述 */
   text: string
   windDir: string
   windScale: string
@@ -239,6 +248,18 @@ export interface RecommendRequest {
   partySize: number
   excludeFoodIds?: number[]
   weatherSnapshot?: WeatherData
+  mealIntent?: MealIntent
+}
+
+export type MealGoal = 'balanced' | 'weight_control' | 'high_protein'
+
+export interface MealIntent {
+  availableIngredients: string[]
+  excludedIngredients: string[]
+  maxTimeMinutes: number | null
+  goal: MealGoal | null
+  diningModeHint: DiningMode | null
+  summary: string
 }
 
 export type MealRole = 'main' | 'vegetable' | 'staple'
@@ -363,6 +384,7 @@ export interface DiningMemoryList {
 }
 
 export interface ExternalDiningRequest {
+  requestId?: string
   mood: Mood
   activityLevel: ActivityLevel
   audience: Audience

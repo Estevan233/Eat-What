@@ -84,7 +84,7 @@ def _choose_primary(
 ) -> list[MealCandidate]:
     ordered = sorted(
         candidates,
-        key=lambda candidate: (-candidate.ranked.final_raw_score, candidate.ranked.food.id or 0),
+        key=_selection_key,
     )
     selected: list[MealCandidate] = []
     used_ids: set[int] = set()
@@ -107,6 +107,17 @@ def _choose_primary(
             used_ids.add(chosen.ranked.food.id)
         used_methods.add(chosen.ranked.food.cooking_method)
     return selected
+
+
+def _selection_key(candidate: MealCandidate) -> tuple[int, int, float, int]:
+    """Use bounded-exploration order when present, otherwise preserve score order."""
+    selection_order = candidate.ranked.selection_order
+    return (
+        0 if selection_order is not None else 1,
+        selection_order or 0,
+        -candidate.ranked.final_raw_score,
+        candidate.ranked.food.id or 0,
+    )
 
 
 def _meal_snapshot(items: list[MealItem]) -> MealSnapshot:
@@ -164,7 +175,7 @@ def build_meal(
             _to_item(candidate)
             for candidate in sorted(
                 candidates,
-                key=lambda candidate: (-candidate.ranked.final_raw_score, candidate.ranked.food.id or 0),
+                key=_selection_key,
             )
             if candidate.ranked.food.meal_role == role
             and candidate.ranked.food.id not in primary_ids

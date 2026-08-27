@@ -14,7 +14,8 @@ def test_get_recipe_by_food_id(session) -> None:
     assert recipe is not None
     assert recipe.food_name == '冬瓜香菜汤'
     assert recipe.meal_role == 'vegetable'
-    assert recipe.nutrition_per_serving.energy_kcal == 78
+    assert recipe.nutrition_per_serving.energy_kcal == 77
+    assert recipe.version == 2
     assert len(recipe.steps) == 4
     assert recipe.ingredients[0].amount == 400
 

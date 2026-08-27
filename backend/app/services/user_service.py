@@ -100,6 +100,35 @@ def upsert_by_openid(
     return user
 
 
+def update_public_profile(
+    session: DatabaseSession,
+    user: User,
+    *,
+    nickname: str | None = None,
+    avatar_url: str | None = None,
+) -> User:
+    """仅按已认证用户 id 更新公开资料，兼容 SQLAlchemy 与 HTTP Repository。"""
+    if user.id is None:
+        raise RuntimeError("已认证用户的 user.id 不应为 None")
+
+    if nickname is not None:
+        user.nickname = nickname
+    if avatar_url is not None:
+        user.avatar_url = avatar_url
+    user.updated_at = datetime.utcnow()
+
+    if is_cloudbase_repository(session):
+        return session.update(
+            user,
+            filters=(RdbFilter("id", "eq", user.id),),
+        )
+
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+
 GUEST_OPENID_PREFIX = "guest:"
 GUEST_DEFAULT_NICKNAME = "游客"
 

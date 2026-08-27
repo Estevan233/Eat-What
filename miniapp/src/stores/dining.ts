@@ -8,6 +8,7 @@ import {
   upsertDiningMemory,
 } from '@/api/dining'
 import { ApiError } from '@/types/api'
+import { createRequestId } from '@/utils/id'
 import type {
   DiningMemoryRead,
   DiningMemoryUpsert,
@@ -17,7 +18,8 @@ import type {
 } from '@/types/api'
 
 const RECENT_DINING_KEYS_KEY = 'eat_what_recent_dining_keys_v1'
-const MAX_RECENT_RESULT_KEYS = 6
+// 十轮三方向的本地保险；服务端同时读取七日曝光，不能再只记住两轮。
+const MAX_RECENT_RESULT_KEYS = 30
 
 function readRecentKeys(): string[] {
   const value = uni.getStorageSync(RECENT_DINING_KEYS_KEY)
@@ -59,7 +61,11 @@ export const useDiningStore = defineStore('dining', () => {
     try {
       const data = await recommendExternal({
         ...body,
-        excludeKeys: [...recentKeys.value],
+        requestId: createRequestId('external'),
+        excludeKeys: appendRecentKeys(
+          body.excludeKeys || [],
+          recentKeys.value,
+        ),
       })
       recommendation.value = data
       recentKeys.value = appendRecentKeys(

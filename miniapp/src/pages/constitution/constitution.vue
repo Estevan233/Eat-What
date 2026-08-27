@@ -126,6 +126,7 @@ import {
 import type {
   ConstitutionOption,
   ConstitutionQuestion,
+  ConstitutionResult,
   ConstitutionType,
 } from '@/types/api'
 
@@ -149,7 +150,9 @@ const answeredCount = computed(
 )
 const canSubmit = computed(() => answeredCount.value === 9)
 
-const result = computed(() => userStore.constitution)
+const result = computed<ConstitutionResult | null>(
+  () => userStore.constitution as ConstitutionResult | null,
+)
 const primaryLabel = computed(() =>
   result.value ? CONSTITUTION_NAMES[result.value.primary] : '',
 )

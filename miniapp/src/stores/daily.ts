@@ -37,7 +37,8 @@ const CITY_KEY = 'eat_what_city'
 const MEAL_CACHE_KEY = 'eat_what_meal_recommendation_v2'
 const RECENT_COOK_IDS_KEY = 'eat_what_recent_cook_ids_v1'
 const MEAL_CACHE_VERSION = 2
-const MAX_RECENT_RESULT_IDS = 12
+// 覆盖 6 次最大家庭套餐（每套至多 6 道），给 CloudBase 事件读取延迟留出余量。
+const MAX_RECENT_RESULT_IDS = 36
 const WEATHER_SNAPSHOT_TTL_MS = 2 * 60 * 60 * 1000
 
 interface MealCache {
@@ -79,7 +80,7 @@ function appendRecentIds(existing: number[], latest: number[]): number[] {
 function freshWeatherSnapshot(value: WeatherData | null): WeatherData | undefined {
   if (!value) return undefined
   // 中性 fallback（providerAvailable=false）不算新鲜：
-  // 否则一次 Open-Meteo 失败会被缓存 2 小时，期间一直显示"天气暂不可用"且不重试。
+  // 否则一次供应商失败会被前端缓存 2 小时，期间一直显示"天气暂不可用"且不重试。
   if (!value.providerAvailable) return undefined
   const fetchedAt = Date.parse(value.fetchedAt)
   if (!Number.isFinite(fetchedAt)) return undefined

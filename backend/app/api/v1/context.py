@@ -2,7 +2,7 @@
 
 学习点：
 - /today 公开无需登录（首页节气卡片）：用 service 层进程内缓存
-- /weather 需登录（PRD：防滥用），POST body 含 lat/lng，调 Open-Meteo
+- /weather 需登录（PRD：防滥用），POST body 含 lat/lng，调和风天气
 - response_model 用 dict[str, Any] + success() 包
 """
 from typing import Any
@@ -41,7 +41,7 @@ async def get_weather_route(
 
     Body: {"lat": float, "lng": float}
     Returns: {"ok": true, "data": WeatherData}
-    1h 内同坐标进程内缓存命中，不发外部 HTTP。
+    1h 内同城网格缓存命中不发外部 HTTP；失败时可用 12h 内最近实况。
     """
     if user.id is None:  # pragma: no cover - DB 行必有 id
         raise RuntimeError("get_current_user 返回的 user.id 不应为 None")

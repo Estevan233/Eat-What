@@ -7,7 +7,7 @@
 - from_orm 把 ORM 对象转 Pydantic 模型
 """
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class WxLoginRequest(BaseModel):
@@ -40,6 +40,17 @@ class AuthUserRead(BaseModel):
     id: int
     nickname: str
     avatar_url: str | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def profile_complete(self) -> bool:
+        """头像和非默认昵称齐全才算公开资料完成；不影响登录状态。"""
+        nickname = self.nickname.strip()
+        return bool(
+            self.avatar_url
+            and nickname
+            and nickname not in {"微信用户", "用户"}
+        )
 
 
 class LoginResponse(BaseModel):

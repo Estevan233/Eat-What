@@ -22,6 +22,7 @@ def test_cloud_login_creates_and_reuses_user(client: TestClient) -> None:
     assert second.status_code == 200
     assert first.json()["data"]["user"]["id"] == second.json()["data"]["user"]["id"]
     assert first.json()["data"]["token"]
+    assert first.json()["data"]["user"]["profile_complete"] is False
 
 
 def test_cloud_login_rejects_missing_openid(client: TestClient) -> None:

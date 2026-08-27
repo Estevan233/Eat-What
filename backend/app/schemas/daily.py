@@ -17,6 +17,46 @@ Mood = Literal["happy", "neutral", "tired", "stressed", "anxious"]
 ActivityLevel = Literal["light", "normal", "high"]
 DiningMode = Literal["cook", "eat_out"]
 Audience = Literal["personal", "family"]
+MealGoal = Literal["balanced", "weight_control", "high_protein"]
+
+
+class MealIntent(BaseModel):
+    """AI 只负责抽取的结构化用餐意图；不接受菜品 ID 或营养结论。"""
+
+    model_config = ConfigDict(extra="ignore")
+
+    available_ingredients: list[str] = Field(default_factory=list, max_length=12)
+    excluded_ingredients: list[str] = Field(default_factory=list, max_length=12)
+    max_time_minutes: int | None = Field(default=None, ge=5, le=180)
+    goal: MealGoal | None = None
+    dining_mode_hint: DiningMode | None = None
+    summary: str = Field(min_length=1, max_length=80)
+
+    @field_validator("available_ingredients", "excluded_ingredients")
+    @classmethod
+    def normalize_ingredients(cls, values: list[str]) -> list[str]:
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for raw_value in values:
+            value = raw_value.strip()
+            if not value:
+                continue
+            if len(value) > 24:
+                raise ValueError("食材名称不能超过 24 个字符")
+            key = value.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(value)
+        return normalized
+
+    @field_validator("summary")
+    @classmethod
+    def normalize_summary(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("用餐意图摘要不能为空")
+        return normalized
 
 
 class RecommendRequest(BaseModel):
@@ -37,12 +77,16 @@ class RecommendRequest(BaseModel):
     party_size: int = Field(default=1, ge=1, le=8, description="本次用餐人数")
     exclude_food_ids: list[int] = Field(
         default_factory=list,
-        max_length=12,
+        max_length=36,
         description="客户端最近展示的菜品，仅作轮换软排除",
     )
     weather_snapshot: WeatherData | None = Field(
         default=None,
         description="客户端刚获取的天气快照；服务端仅复用短时有效数据",
+    )
+    meal_intent: MealIntent | None = Field(
+        default=None,
+        description="可选的结构化用餐意图；旧客户端不传时行为不变",
     )
 
     @field_validator("exclude_food_ids")

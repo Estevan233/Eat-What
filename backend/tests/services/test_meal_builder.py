@@ -123,3 +123,28 @@ def test_family_meal_supports_repeated_roles_with_distinct_foods() -> None:
     assert [item.meal_role for item in result.primary_meal.items] == list(targets)
     assert len({item.food_id for item in result.primary_meal.items}) == 6
     assert result.substitutions == []
+
+
+def test_selection_order_wins_inside_prequalified_candidate_pool() -> None:
+    high_score = _candidate(1, 'main', 300, 90)
+    explored_first = _candidate(2, 'main', 280, 87)
+    vegetable = _candidate(3, 'vegetable', 100, 85)
+    staple = _candidate(4, 'staple', 250, 80)
+    high_score = MealCandidate(
+        ranked=high_score.ranked.__class__(
+            **{**high_score.ranked.__dict__, 'selection_order': 1}
+        ),
+        recipe=high_score.recipe,
+        reason=high_score.reason,
+    )
+    explored_first = MealCandidate(
+        ranked=explored_first.ranked.__class__(
+            **{**explored_first.ranked.__dict__, 'selection_order': 0}
+        ),
+        recipe=explored_first.recipe,
+        reason=explored_first.reason,
+    )
+
+    result = build_meal([high_score, explored_first, vegetable, staple])
+
+    assert result.primary_meal.items[0].food_id == 2
