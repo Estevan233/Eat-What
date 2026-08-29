@@ -13,6 +13,9 @@
 - 验证 JWT 能解码出 user_id
 """
 import uuid
+from datetime import datetime
+
+import pytest
 
 from app.core.security import decode_token
 from app.models.user import User
@@ -33,6 +36,7 @@ def test_first_guest_login_creates_user(client, session):
     assert "token" in data and len(data["token"]) > 0
     assert data["user"]["nickname"] == "体验员"
     assert data["user"]["avatar_url"] is None
+    assert data["user"]["account_kind"] == "guest"
 
     # JWT 能解出 user_id
     payload = decode_token(data["token"])
@@ -44,6 +48,11 @@ def test_first_guest_login_creates_user(client, session):
     assert db_user.openid == f"{GUEST_OPENID_PREFIX}{guest_id}"
     assert db_user.nickname == "体验员"
     assert db_user.unionid is None
+    assert db_user.account_kind == "guest"
+    assert db_user.account_status == "active"
+    assert db_user.merged_into_user_id is None
+    assert db_user.merge_started_at is None
+    assert db_user.merged_at is None
 
 
 def test_same_guest_id_reuses_same_user(client, session):
@@ -136,6 +145,46 @@ def test_guest_token_works_for_protected_endpoint(client):
     assert res_profile.json()["data"]["profile"] is None
 
 
+@pytest.mark.parametrize("account_status", ["merging", "merged"])
+def test_upgraded_guest_token_is_rejected_by_protected_endpoint(
+    client,
+    session,
+    account_status: str,
+) -> None:
+    guest_id = f"old-token-{account_status}"
+    login = client.post(
+        "/api/v1/auth/guest-login",
+        json={"guest_id": guest_id},
+    )
+    token = login.json()["data"]["token"]
+    guest_id_in_db = login.json()["data"]["user"]["id"]
+
+    target = User(openid=f"wechat-old-token-target-{account_status}")
+    session.add(target)
+    session.commit()
+    session.refresh(target)
+    assert target.id is not None
+
+    guest = session.get(User, guest_id_in_db)
+    assert guest is not None
+    guest.account_status = account_status
+    guest.merged_into_user_id = target.id
+    guest.merge_started_at = datetime.utcnow()
+    guest.merged_at = datetime.utcnow() if account_status == "merged" else None
+    session.add(guest)
+    session.commit()
+
+    response = client.get(
+        "/api/v1/profile",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["code"] == "AUTH_ERROR"
+    assert guest_id not in response.text
+    assert token not in response.text
+
+
 def test_guest_login_does_not_call_wechat(client, monkeypatch):
     """游客登录不应触发任何微信 API 调用。
 
@@ -152,3 +201,39 @@ def test_guest_login_does_not_call_wechat(client, monkeypatch):
         json={"guest_id": str(uuid.uuid4())},
     )
     assert res.status_code == 200
+
+
+@pytest.mark.parametrize("account_status", ["merging", "merged"])
+def test_guest_login_rejects_upgraded_account(
+    client,
+    session,
+    account_status: str,
+) -> None:
+    target = User(openid=f"wechat-target-{account_status}")
+    session.add(target)
+    session.commit()
+    session.refresh(target)
+    assert target.id is not None
+
+    guest_id = f"upgraded-{account_status}"
+    guest = User(
+        openid=f"{GUEST_OPENID_PREFIX}{guest_id}",
+        account_kind="guest",
+        account_status=account_status,
+        merged_into_user_id=target.id,
+        merge_started_at=datetime.utcnow(),
+        merged_at=datetime.utcnow() if account_status == "merged" else None,
+        nickname="墓碑账户",
+    )
+    session.add(guest)
+    session.commit()
+
+    response = client.post(
+        "/api/v1/auth/guest-login",
+        json={"guest_id": guest_id, "nickname": "不应更新"},
+    )
+
+    assert response.status_code == 409
+    assert response.json()["code"] == "GUEST_ACCOUNT_UPGRADED"
+    session.refresh(guest)
+    assert guest.nickname == "墓碑账户"

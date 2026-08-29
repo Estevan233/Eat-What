@@ -2,6 +2,9 @@
 
 import json
 from datetime import datetime
+from types import MappingProxyType
+
+import pytest
 
 from app.models.user import User
 from app.models.user_profile import UserProfile
@@ -133,3 +136,87 @@ def test_update_omits_primary_key_from_patch_body() -> None:
     assert saved.id == 9
     _, _, payload = client.calls[-1]
     assert "id" not in payload["values"]
+
+
+def test_update_fields_sends_only_requested_columns_and_allows_no_match() -> None:
+    client = StubClient()
+
+    def update(table, values, *, filters):
+        client.calls.append(
+            ("update", table, {"values": values, "filters": filters}),
+        )
+        return RdbResult(rows=[], status_code=200, affected=0)
+
+    client.update = update
+    repository = CloudBaseRepository(client)
+    updated_at = datetime(2026, 8, 28, 12, 30)
+
+    saved = repository.update_fields(
+        User,
+        values=MappingProxyType(
+            {"nickname": "只改昵称", "updated_at": updated_at}
+        ),
+        filters=(RdbFilter("id", "eq", 9),),
+    )
+
+    assert saved is None
+    _, table, payload = client.calls[-1]
+    assert table == "users"
+    assert payload["values"] == {
+        "nickname": "只改昵称",
+        "updated_at": "2026-08-28T12:30:00",
+    }
+
+
+def test_update_fields_rejects_multiple_returned_rows() -> None:
+    client = StubClient()
+
+    def update(table, values, *, filters):
+        client.calls.append(
+            ("update", table, {"values": values, "filters": filters}),
+        )
+        return RdbResult(
+            rows=[
+                {"id": 9, "openid": "openid-9", **values},
+                {"id": 10, "openid": "openid-10", **values},
+            ],
+            status_code=200,
+            affected=2,
+        )
+
+    client.update = update
+    repository = CloudBaseRepository(client)
+
+    with pytest.raises(RuntimeError, match="multiple rows"):
+        repository.update_fields(
+            User,
+            values={"nickname": "不应批量更新"},
+            filters=(RdbFilter("account_status", "eq", "active"),),
+        )
+
+
+@pytest.mark.parametrize(
+    ("values", "message"),
+    [
+        ({"unknown_field": "value"}, "unknown columns"),
+        ({"id": 9}, "primary key columns"),
+    ],
+)
+def test_update_fields_rejects_unknown_and_primary_key_columns(
+    values: dict[str, object],
+    message: str,
+) -> None:
+    client = StubClient()
+
+    def unexpected_update(table, values, *, filters):
+        raise AssertionError("invalid partial values must not reach the REST client")
+
+    client.update = unexpected_update
+    repository = CloudBaseRepository(client)
+
+    with pytest.raises(ValueError, match=message):
+        repository.update_fields(
+            User,
+            values=values,
+            filters=(RdbFilter("id", "eq", 9),),
+        )

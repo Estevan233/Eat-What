@@ -149,6 +149,7 @@ def test_patch_account_trims_and_updates_public_profile(client, auth_token, meth
         "id": response.json()["data"]["id"],
         "nickname": "饭饭",
         "avatar_url": "cloud://cloud-test.avatar/avatars/1/avatar.png",
+        "account_kind": "guest",
         "profile_complete": True,
     }
 

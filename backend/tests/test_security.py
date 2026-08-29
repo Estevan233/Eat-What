@@ -7,6 +7,7 @@ import jwt
 import app.core.security as security
 from app.core.errors import AuthError
 from app.core.security import create_access_token, decode_token, hash_password, verify_password
+from app.models.user import User
 
 
 def test_create_and_decode_token_roundtrip():
@@ -88,3 +89,23 @@ def test_hash_and_verify_password():
     assert hashed != raw
     assert verify_password(raw, hashed) is True
     assert verify_password("wrong", hashed) is False
+
+
+def test_current_user_rejects_unknown_account_kind(client, session) -> None:
+    user = User(
+        openid="invalid-kind-user",
+        account_kind="robot",
+        account_status="active",
+    )
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    assert user.id is not None
+
+    response = client.get(
+        "/api/v1/profile",
+        headers={"Authorization": f"Bearer {create_access_token(user.id)}"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["code"] == "AUTH_ERROR"

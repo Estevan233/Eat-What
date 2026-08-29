@@ -9,14 +9,15 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, Request
-from sqlmodel import Session
 
 from app.core.cloud_context import read_cloud_identity
 from app.core.config import get_settings
-from app.core.deps import get_db
-from app.core.errors import AppError
+from app.core.deps import get_db, optional_bearer_token, resolve_token_user
+from app.core.errors import AppError, SessionIdentityConflictError
 from app.core.security import create_access_token
-from app.schemas.auth import AuthUserRead, GuestLoginRequest, WxLoginRequest
+from app.repositories.cloudbase_repository import DatabaseSession
+from app.schemas.auth import AuthUserRead, GuestLoginRequest, LoginResponse, WxLoginRequest
+from app.services.account_merge_service import merge_guest_into_wechat
 from app.services.user_service import get_or_create_guest, upsert_by_openid
 from app.services.wx_client import wx_client
 from app.utils.response import success
@@ -27,11 +28,23 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/cloud-login", response_model=dict[str, Any])
 def cloud_login(
     request: Request,
-    session: Session = Depends(get_db),
+    session: DatabaseSession = Depends(get_db),
 ) -> dict[str, object]:
     """使用 CloudBase 私有链路注入的 openid 登录。"""
 
     identity = read_cloud_identity(request, get_settings())
+    source_token = optional_bearer_token(request.headers.get("Authorization"))
+    source_user = (
+        resolve_token_user(session, source_token, require_active=False)
+        if source_token is not None
+        else None
+    )
+    if (
+        source_user is not None
+        and source_user.account_kind == "wechat"
+        and source_user.openid != identity.openid
+    ):
+        raise SessionIdentityConflictError
     user = upsert_by_openid(
         session,
         openid=identity.openid,
@@ -39,19 +52,26 @@ def cloud_login(
         nickname=None,
         avatar_url=None,
     )
+    merge_status = "not_requested"
+    if source_user is not None and source_user.id != user.id:
+        if source_user.account_kind != "guest":
+            raise SessionIdentityConflictError
+        merge_guest_into_wechat(session, source_user, user)
+        merge_status = "completed"
     if user.id is None:
         raise RuntimeError("upsert 后 user.id 不应为 None")
     token = create_access_token(user.id)
     return success(
-        data={
-            "token": token,
-            "user": AuthUserRead.model_validate(user).model_dump(),
-        }
+        data=LoginResponse(
+            token=token,
+            user=AuthUserRead.model_validate(user),
+            merge_status=merge_status,
+        ).model_dump()
     )
 
 
 @router.post("/wx-login", response_model=dict[str, Any])
-async def wx_login(req: WxLoginRequest, request: Request, session: Session = Depends(get_db)) -> dict[str, object]:
+async def wx_login(req: WxLoginRequest, request: Request, session: DatabaseSession = Depends(get_db)) -> dict[str, object]:
     """小程序登录入口。
 
     Body: {"code": "...", "nickname"?: "...", "avatar_url"?: "..."}
@@ -88,7 +108,7 @@ async def wx_login(req: WxLoginRequest, request: Request, session: Session = Dep
 
 
 @router.post("/guest-login", response_model=dict[str, Any])
-def guest_login(req: GuestLoginRequest, session: Session = Depends(get_db)) -> dict[str, object]:
+def guest_login(req: GuestLoginRequest, session: DatabaseSession = Depends(get_db)) -> dict[str, object]:
     """游客登录入口 - 不调微信，直接按 guest_id 复用 / 创建用户。
 
     用于小程序体验：用户不想授权微信也能进入应用。
