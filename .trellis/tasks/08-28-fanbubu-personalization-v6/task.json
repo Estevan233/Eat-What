@@ -1,0 +1,30 @@
+{
+  "id": "fanbubu-personalization-v6",
+  "name": "fanbubu-personalization-v6",
+  "title": "饭卜卜个性化推荐与身份基础",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": "miniapp",
+  "priority": "P2",
+  "creator": "codex",
+  "assignee": "codex",
+  "createdAt": "2026-08-28",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "08-28-wechat-account-merge",
+    "08-28-recommendation-v6",
+    "08-28-candidate-catalog-500"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}
