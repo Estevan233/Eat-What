@@ -12,6 +12,11 @@ node_modules
 dist
 *.local
 
+# 本地环境变量（密钥不得进仓库；.env.example 作为模板保留）
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .idea
 *.suo
