@@ -970,3 +970,39 @@ T10 推荐算法核心 / T11 推荐UI+历史+收藏。
 ### Next Steps
 
 - None - task complete
+
+
+## Session 12: 微信账户合并真实验收与小程序分享能力
+
+**Date**: 2026-08-29
+**Task**: 微信账户合并真实验收与小程序分享能力
+**Package**: miniapp
+**Branch**: `codex/recommendation-v6-auth`
+
+### Summary
+
+迁移 07 在真实 CloudBase 执行并验证；REST 读写与账户合并合同测试通过；部署 eat-what-api-022 承载 100% 流量并通过登录冒烟与幂等验证；为 8 个页面补充 onShareAppMessage/onShareTimeline；完成 AI 文本模型预检（cloudbase 与 hunyuan-exp 组无可用模型，功能保持关闭）；清理 4 个卡 merging 的脏账户。
+
+### Main Changes
+
+- Detailed change bullets were not supplied; see the summary above.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `21a6af7` | (see git log) |
+| `d2518f0` | (see git log) |
+| `2ae93c6` | (see git log) |
+
+### Testing
+
+- Validation was not recorded for this session.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

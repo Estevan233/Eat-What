@@ -7,6 +7,8 @@
 - from_orm 把 ORM 对象转 Pydantic 模型
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
@@ -40,6 +42,7 @@ class AuthUserRead(BaseModel):
     id: int
     nickname: str
     avatar_url: str | None = None
+    account_kind: Literal["guest", "wechat"]
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -57,3 +60,4 @@ class LoginResponse(BaseModel):
     """登录成功响应。"""
     token: str
     user: AuthUserRead
+    merge_status: Literal["not_requested", "completed"] = "not_requested"

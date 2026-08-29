@@ -2,12 +2,23 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from copy import deepcopy
 from datetime import date, datetime
 from typing import Any, ClassVar
 
+import pytest
+
+from app.core.deps import get_current_user
+from app.core.errors import (
+    AccountStateConflictError,
+    AuthError,
+    GuestAccountUpgradedError,
+)
+from app.core.security import create_access_token
 from app.models.food import Food
 from app.models.recipe import Recipe
+from app.models.user import User
 from app.repositories.cloudbase_rdb import RdbFilter, RdbResult
 from app.repositories.cloudbase_repository import CloudBaseRepository
 from app.schemas.constitution import ConstitutionResult
@@ -47,6 +58,7 @@ class MemoryRdbClient:
         self.select_calls = 0
         self.select_requests: list[tuple[str, tuple[RdbFilter, ...]]] = []
         self.write_calls: list[tuple[str, str, Any]] = []
+        self.before_update: Callable[[], None] | None = None
 
     def close(self) -> None:
         return None
@@ -114,6 +126,10 @@ class MemoryRdbClient:
         self.write_calls.append(
             ("update", table, {"values": deepcopy(values), "filters": filters}),
         )
+        before_update = self.before_update
+        self.before_update = None
+        if before_update is not None:
+            before_update()
         changed = []
         for row in self.tables.get(table, []):
             if all(self._matches(row, item) for item in filters):
@@ -179,11 +195,144 @@ def test_user_creation_uses_insert_and_existing_login_uses_filtered_update() -> 
 
     assert created.id == updated.id == 1
     assert updated.nickname == "再次登录"
+    assert created.account_kind == updated.account_kind == "guest"
+    assert created.account_status == updated.account_status == "active"
     user_writes = [call for call in client.write_calls if call[1] == "users"]
     assert [call[0] for call in user_writes] == ["insert", "update"]
     update_payload = user_writes[1][2]
-    assert update_payload["filters"] == (RdbFilter("id", "eq", 1),)
-    assert "id" not in update_payload["values"]
+    assert update_payload["filters"] == (
+        RdbFilter("id", "eq", 1),
+        RdbFilter("account_kind", "eq", "guest"),
+        RdbFilter("account_status", "eq", "active"),
+    )
+    assert set(update_payload["values"]) == {"nickname", "updated_at"}
+
+
+def test_account_state_guards_are_equivalent_on_cloudbase_rest() -> None:
+    client = MemoryRdbClient()
+    repository = CloudBaseRepository(client)
+    guest = user_service.get_or_create_guest(
+        repository,
+        guest_id="rest-upgraded",
+    )
+    assert guest.id is not None
+    token = create_access_token(guest.id)
+
+    stored_guest = client.tables["users"][0]
+    stored_guest["account_status"] = "merged"
+    stored_guest["merged_into_user_id"] = 999
+    stored_guest["merge_started_at"] = datetime.utcnow().isoformat()
+    stored_guest["merged_at"] = datetime.utcnow().isoformat()
+    write_count = len(client.write_calls)
+
+    with pytest.raises(AuthError):
+        get_current_user(token=token, session=repository)
+    with pytest.raises(GuestAccountUpgradedError) as raised:
+        user_service.get_or_create_guest(
+            repository,
+            guest_id="rest-upgraded",
+        )
+
+    assert raised.value.code == "GUEST_ACCOUNT_UPGRADED"
+    assert len(client.write_calls) == write_count
+
+
+def test_guest_rest_late_relogin_returns_upgraded_conflict() -> None:
+    client = MemoryRdbClient()
+    repository = CloudBaseRepository(client)
+    guest = user_service.get_or_create_guest(
+        repository,
+        guest_id="guest-race",
+        nickname="合并前游客",
+    )
+    target = user_service.upsert_by_openid(
+        repository,
+        openid="guest-race-target",
+    )
+    assert guest.id is not None
+    assert target.id is not None
+    stored_guest = next(
+        row for row in client.tables["users"] if row["id"] == guest.id
+    )
+
+    def finish_merge_before_late_relogin() -> None:
+        stored_guest["account_status"] = "merged"
+        stored_guest["merged_into_user_id"] = target.id
+        stored_guest["merge_started_at"] = datetime.utcnow().isoformat()
+        stored_guest["merged_at"] = datetime.utcnow().isoformat()
+
+    client.before_update = finish_merge_before_late_relogin
+
+    with pytest.raises(GuestAccountUpgradedError) as raised:
+        user_service.get_or_create_guest(
+            repository,
+            guest_id="guest-race",
+            nickname="迟到游客",
+        )
+
+    assert raised.value.code == "GUEST_ACCOUNT_UPGRADED"
+    assert stored_guest["account_status"] == "merged"
+    assert stored_guest["merged_into_user_id"] == target.id
+    assert stored_guest["nickname"] == "合并前游客"
+
+
+def test_formal_login_state_guard_is_equivalent_on_cloudbase_rest() -> None:
+    client = MemoryRdbClient()
+    repository = CloudBaseRepository(client)
+
+    wechat = user_service.upsert_by_openid(
+        repository,
+        openid="rest-wechat",
+    )
+    assert wechat.account_kind == "wechat"
+    assert wechat.account_status == "active"
+
+    repository.insert(
+        User(
+            openid="rest-inconsistent",
+            account_kind="guest",
+            account_status="active",
+        )
+    )
+    with pytest.raises(AccountStateConflictError) as raised:
+        user_service.upsert_by_openid(
+            repository,
+            openid="rest-inconsistent",
+        )
+
+    assert raised.value.code == "ACCOUNT_STATE_CONFLICT"
+
+
+def test_formal_rest_login_updates_only_public_fields_with_state_guard() -> None:
+    client = MemoryRdbClient()
+    repository = CloudBaseRepository(client)
+    user = user_service.upsert_by_openid(
+        repository,
+        openid="rest-wechat-update",
+    )
+
+    updated = user_service.upsert_by_openid(
+        repository,
+        openid="rest-wechat-update",
+        unionid="union-rest",
+        nickname="微信饭友",
+        avatar_url="cloud://avatar/rest.png",
+    )
+
+    assert updated.nickname == "微信饭友"
+    write = client.write_calls[-1]
+    assert write[0:2] == ("update", "users")
+    assert write[2]["filters"] == (
+        RdbFilter("id", "eq", user.id),
+        RdbFilter("account_kind", "eq", "wechat"),
+        RdbFilter("account_status", "eq", "active"),
+    )
+    assert set(write[2]["values"]) == {
+        "unionid",
+        "nickname",
+        "avatar_url",
+        "updated_at",
+    }
 
 
 def test_public_profile_update_uses_authenticated_id_filter() -> None:
@@ -205,7 +354,55 @@ def test_public_profile_update_uses_authenticated_id_filter() -> None:
     assert updated.avatar_url.startswith("cloud://")
     write = client.write_calls[-1]
     assert write[0:2] == ("update", "users")
-    assert write[2]["filters"] == (RdbFilter("id", "eq", user.id),)
+    assert write[2]["filters"] == (
+        RdbFilter("id", "eq", user.id),
+        RdbFilter("account_kind", "eq", "guest"),
+        RdbFilter("account_status", "eq", "active"),
+    )
+    assert set(write[2]["values"]) == {
+        "nickname",
+        "avatar_url",
+        "updated_at",
+    }
+
+
+def test_public_profile_rest_late_update_cannot_reactivate_merged_user() -> None:
+    client = MemoryRdbClient()
+    repository = CloudBaseRepository(client)
+    guest = user_service.get_or_create_guest(
+        repository,
+        guest_id="profile-race",
+        nickname="合并前昵称",
+    )
+    target = user_service.upsert_by_openid(
+        repository,
+        openid="profile-race-target",
+    )
+    assert guest.id is not None
+    assert target.id is not None
+    stored_guest = next(
+        row for row in client.tables["users"] if row["id"] == guest.id
+    )
+
+    def finish_merge_before_late_update() -> None:
+        stored_guest["account_status"] = "merged"
+        stored_guest["merged_into_user_id"] = target.id
+        stored_guest["merge_started_at"] = datetime.utcnow().isoformat()
+        stored_guest["merged_at"] = datetime.utcnow().isoformat()
+
+    client.before_update = finish_merge_before_late_update
+
+    with pytest.raises(AccountStateConflictError) as raised:
+        user_service.update_public_profile(
+            repository,
+            guest,
+            nickname="迟到的昵称",
+        )
+
+    assert raised.value.code == "ACCOUNT_STATE_CONFLICT"
+    assert stored_guest["account_status"] == "merged"
+    assert stored_guest["merged_into_user_id"] == target.id
+    assert stored_guest["nickname"] == "合并前昵称"
 
 
 def test_core_services_run_without_sqlalchemy_session() -> None:

@@ -52,6 +52,13 @@ export function saveLoginSession(token: string, user: UserRead): void {
   writeStoredJson(AUTH_STORAGE_KEYS.profile, user)
 }
 
+export function promoteToWechatSession(token: string, user: UserRead): void {
+  saveLoginSession(token, user)
+  removeStoredValue(AUTH_STORAGE_KEYS.guestId)
+  removeStoredValue(AUTH_STORAGE_KEYS.userProfile)
+  removeStoredValue(AUTH_STORAGE_KEYS.constitution)
+}
+
 export function subscribeAuthClear(listener: AuthClearListener): () => void {
   authClearListeners.add(listener)
   return () => {

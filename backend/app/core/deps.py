@@ -10,15 +10,16 @@ from functools import lru_cache
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.security.utils import get_authorization_scheme_param
 from sqlmodel import Session
 
 from app.core.config import get_settings
 from app.core.errors import AuthError
 from app.core.security import decode_token
 from app.db import SessionLocal
-from app.models.user import User
+from app.models.user import ACCOUNT_KINDS, ACCOUNT_STATUSES, User
 from app.repositories.cloudbase_rdb import CloudBaseRdbClient
-from app.repositories.cloudbase_repository import CloudBaseRepository
+from app.repositories.cloudbase_repository import CloudBaseRepository, DatabaseSession
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/wx-login", auto_error=False)
 
@@ -52,12 +53,32 @@ def get_db() -> Generator[Session | CloudBaseRepository, None, None]:
 
 def get_current_user(
     token: str | None = Depends(oauth2_scheme),
-    session: Session = Depends(get_db),
+    session: DatabaseSession = Depends(get_db),
 ) -> User:
     """解析 JWT，查 User，失败抛 AuthError。
 
     路由用 Depends(get_current_user) 即可拿到当前 User 对象。
     """
+    return resolve_token_user(session, token, require_active=True)
+
+
+def optional_bearer_token(authorization: str | None) -> str | None:
+    """Return a Bearer token when present, rejecting malformed credentials."""
+    if authorization is None or not authorization.strip():
+        return None
+    scheme, token = get_authorization_scheme_param(authorization)
+    if scheme.lower() != "bearer" or not token:
+        raise AuthError("Authorization 格式无效")
+    return token
+
+
+def resolve_token_user(
+    session: DatabaseSession,
+    token: str | None,
+    *,
+    require_active: bool,
+) -> User:
+    """Resolve a signed business token to its current database identity."""
     if not token:
         raise AuthError("缺少 Authorization 头")
 
@@ -74,5 +95,11 @@ def get_current_user(
     user = session.get(User, user_id)
     if user is None:
         raise AuthError(f"用户不存在: id={user_id}")
+    if user.account_kind not in ACCOUNT_KINDS or user.account_status not in ACCOUNT_STATUSES:
+        raise AuthError("账户状态无效")
+    if require_active and (
+        user.account_status != "active"
+    ):
+        raise AuthError("账户不可用")
 
     return user

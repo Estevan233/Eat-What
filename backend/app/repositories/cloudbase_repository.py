@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import builtins
 import json
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from datetime import date, datetime
 from time import monotonic
 from typing import Any, TypeAlias, TypeVar, cast
 
@@ -125,6 +126,25 @@ class CloudBaseRepository:
         )
         return self._written_model(type(record), result.rows)
 
+    def update_fields(
+        self,
+        model: type[ModelT],
+        *,
+        values: Mapping[str, object],
+        filters: Sequence[RdbFilter],
+    ) -> ModelT | None:
+        """Conditionally PATCH only explicitly allowed model columns."""
+        result = self.client.update(
+            self._table(model),
+            self._partial_values(model, values),
+            filters=filters,
+        )
+        if not result.rows:
+            return None
+        if len(result.rows) > 1:
+            raise RuntimeError("CloudBase REST conditional update returned multiple rows")
+        return self._model(model, result.rows[0])
+
     def delete(
         self,
         model: type[ModelT],
@@ -165,6 +185,38 @@ class CloudBaseRepository:
             if key in primary_keys and (omit_primary_keys or values[key] is None):
                 values.pop(key)
         return values
+
+    @staticmethod
+    def _partial_values(
+        model: type[SQLModel],
+        values: Mapping[str, object],
+    ) -> dict[str, object]:
+        table = cast(Any, model).__table__
+        columns = {column.name: column for column in table.columns}
+        unknown = set(values) - set(columns)
+        if unknown:
+            raise ValueError(f"unknown columns: {sorted(unknown)}")
+        primary_keys = {column.name for column in table.primary_key.columns}
+        forbidden = set(values) & primary_keys
+        if forbidden:
+            raise ValueError(f"primary key columns cannot be patched: {sorted(forbidden)}")
+        if not values:
+            raise ValueError("partial update requires at least one column")
+
+        payload: dict[str, object] = {}
+        for name, value in values.items():
+            column = columns[name]
+            if isinstance(column.type, JSON) and value is not None:
+                payload[name] = json.dumps(
+                    value,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
+            elif isinstance(value, date | datetime):
+                payload[name] = value.isoformat()
+            else:
+                payload[name] = value
+        return payload
 
     @classmethod
     def _written_model(

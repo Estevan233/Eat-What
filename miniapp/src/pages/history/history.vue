@@ -40,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useDailyStore } from '@/stores/daily'
@@ -74,6 +75,20 @@ function weatherLabel(tag: string): string {
 function format(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1)
 }
+
+onShareAppMessage(() => {
+  return {
+    title: '饭卜卜 · 我的餐单历史',
+    path: '/pages/history/history',
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: '饭卜卜 · 我的餐单历史',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

@@ -39,7 +39,13 @@ describe('user store cloud login', () => {
     wxLoginMock.mockReset()
     cloudLoginMock.mockResolvedValue({
       token: 'cloud-token',
-      user: { id: 7, nickname: '微信用户', profileComplete: false },
+      user: {
+        id: 7,
+        nickname: '微信用户',
+        accountKind: 'wechat',
+        profileComplete: false,
+      },
+      mergeStatus: 'not_requested',
     })
     vi.stubGlobal('uni', {
       getStorageSync: vi.fn(() => ''),
@@ -57,6 +63,7 @@ describe('user store cloud login', () => {
     await expect(store.login()).resolves.toEqual({
       id: 7,
       nickname: '微信用户',
+      accountKind: 'wechat',
       profileComplete: false,
     })
 
@@ -65,7 +72,7 @@ describe('user store cloud login', () => {
     expect(store.token).toBe('cloud-token')
   })
 
-  it('clears the local guest identity after trusted WeChat login without merging accounts', async () => {
+  it('promotes the local guest session after a successful trusted WeChat merge', async () => {
     vi.mocked(uni.getStorageSync).mockImplementation((key: string) => (
       key === 'eat_what_guest_id' ? 'old-guest-id' : ''
     ))
@@ -74,7 +81,10 @@ describe('user store cloud login', () => {
     await store.login()
 
     expect(store.guestId).toBe('')
+    expect(store.isGuest).toBe(false)
     expect(uni.removeStorageSync).toHaveBeenCalledWith('eat_what_guest_id')
+    expect(uni.removeStorageSync).toHaveBeenCalledWith('eat_what_user_profile')
+    expect(uni.removeStorageSync).toHaveBeenCalledWith('eat_what_constitution')
   })
 
   it('updates the public user summary and persistent session after profile completion', async () => {
@@ -82,6 +92,7 @@ describe('user store cloud login', () => {
       id: 7,
       nickname: '饭饭',
       avatarUrl: 'cloud://avatar.png',
+      accountKind: 'wechat',
       profileComplete: true,
     })
     const store = useUserStore()

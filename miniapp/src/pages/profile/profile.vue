@@ -78,6 +78,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { requireLogin } from '@/utils/auth-guard'
@@ -206,6 +207,20 @@ async function onSubmit() {
     submitting.value = false
   }
 }
+
+onShareAppMessage(() => {
+  return {
+    title: '饭卜卜 · 我的健康档案',
+    path: '/pages/profile/profile',
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: '饭卜卜 · 我的健康档案',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

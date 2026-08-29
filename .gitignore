@@ -17,3 +17,12 @@
 /project.private.config.json
 /.trellis/project.config.json
 /.trellis/project.private.config.json
+
+# CloudBase CLI 本地部署配置（含环境标识 envId 与服务名，不便公开）
+cloudbaserc.json
+
+# 微信开发者工具私有配置（任意被导入的目录都会生成）
+project.private.config.json
+
+# 本机 IDE / Agent 运行状态；保留在本地，不参与协作
+/.codebuddy/

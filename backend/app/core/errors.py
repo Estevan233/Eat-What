@@ -22,6 +22,46 @@ class AuthError(AppError):
         super().__init__(message, "AUTH_ERROR", 401)
 
 
+class GuestAccountUpgradedError(AppError):
+    """游客账户已进入升级流程，旧游客凭据不再可签发。"""
+
+    def __init__(self) -> None:
+        super().__init__("游客账户已升级", "GUEST_ACCOUNT_UPGRADED", 409)
+
+
+class AccountStateConflictError(AppError):
+    """正式身份命中了不一致的账户类型或状态。"""
+
+    def __init__(self) -> None:
+        super().__init__("账户身份状态冲突", "ACCOUNT_STATE_CONFLICT", 409)
+
+
+class MergeTargetConflict(AppError):
+    """A guest merge is permanently bound to a different formal account."""
+
+    def __init__(self) -> None:
+        super().__init__("游客账户已绑定其他正式账户", "MERGE_TARGET_CONFLICT", 409)
+
+
+class SessionIdentityConflictError(AppError):
+    """An existing formal session belongs to a different WeChat identity."""
+
+    def __init__(self) -> None:
+        super().__init__("当前登录态属于其他微信账户", "SESSION_IDENTITY_CONFLICT", 409)
+
+
+class MergeConsistency(AppError):
+    """Stored merge data violates an ownership or uniqueness invariant."""
+
+    def __init__(
+        self,
+        message: str = "账户合并数据不一致",
+        *,
+        status_code: int = 409,
+    ) -> None:
+        super().__init__(message, "MERGE_DATA_CONFLICT", status_code)
+
+
 class NotFoundError(AppError):
     def __init__(self, resource: str, ident: Any):
         super().__init__(f"{resource} 不存在: {ident}", "NOT_FOUND", 404)
