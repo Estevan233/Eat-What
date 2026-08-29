@@ -6,10 +6,29 @@
 
 - 功能分支：`codex/recommendation-v6-auth`
 - 基线：GitHub `main` 提交 `4c23bae`
-- 生产状态：已回退到上一正常版本
+- 生产状态：已回退到上一正常版本（`eat-what-api-020`，100% 流量，运行正常）
 - 失败版本：`eat-what-api-021`
 - 直接故障：生产 `users` 表未执行迁移 07，真实 REST 报 `column merged_at not found`
 - 禁止事项：没有执行迁移 07 前，不得再次给新后端分配生产流量
+
+**2026-08-29 更新：迁移 07 已在真实 CloudBase 执行并通过全部验收检查；REST 读写合同与账户合并合同测试均已通过真实网关验证。部署闸门已解除，剩余步骤为部署新版本与微信开发者工具实测。**
+
+**2026-08-29 部署更新：新版本 `eat-what-api-022`（镜像 20260829214839）已部署并承载 100% 流量（用户批准 MCP 直接部署）。`/health` 返回 200（prod/lazy-rest）；无凭证调用 `cloud-login` 返回 401；带可信头的诊断账号登录返回 200，`token`/`account_kind`/`profile_complete`/`merge_status` 字段齐全；同一诊断账号重复登录幂等（仅 1 行记录）；诊断用户已清理，`users` 表恢复 34 行。剩余：微信开发者工具游客→微信全链路实测（需前端重新构建导入后由开发者账号验证）。**
+
+## 迁移 07 与真实合同验证记录（2026-08-29）
+
+以下已在真实生产数据库（环境 `cloud1-d8gz4jm8vb964a1c9`）完成：
+
+1. 迁移前备份：`/root/db-backups/users_backup_20260829.json`（34 行完整快照 + 回滚 SQL）
+2. 执行迁移 07 等价 SQL：5 列（`account_kind/account_status/merged_into_user_id/merge_started_at/merged_at`）、外键 `fk_users_merged_into_user_id_users`、索引 `ix_users_account_kind_status` 与 `ix_users_merged_into_user_id`
+3. 数据标记：26 个 `guest:` 前缀用户 → `account_kind='guest'`；8 个微信用户默认 `wechat`；全部 `active`
+4. `alembic_version` 从 `20260820_06` 更新为 `20260828_07`，并已回读确认
+5. 真实 REST 合同（本地直连 HTTPS 网关运行 `scripts/verify_cloudbase_rdb.py --write`）：
+   `cloudbase_rdb_read_ok`、`cloudbase_rdb_write_ok`（插入/更新/删除均自清理）
+6. 真实账户合并合同（`scripts/verify_account_merge_cloudbase.py`）：
+   `cloudbase_account_merge_contract_ok`；`users` 表测试后仍为 34 行，无残留诊断数据
+
+注意事项：WSL 内直连网关需绕过本机代理 fake-ip（已在 WSL `/etc/hosts` 固定 `cloud1-d8gz4jm8vb964a1c9.api.tcloudbasegateway.com -> 81.69.216.233`；该 IP 为网关 CNAME `prod.paasgw.tencentcloudbase.com` 的 A 记录，TTL 较短，失效后需重新查询）。合同测试环境变量文件在 `/root/db-backups/contract-test.env`（含敏感凭据，勿入 Git）。
 
 ## 权威仓库与目录
 
@@ -152,9 +171,9 @@ cloudbase_account_merge_contract_ok
 
 ## 尚未完成
 
-- 未在真实 CloudBase 上通过迁移 07。
-- 未通过真实账户合并合同测试。
-- 未完成微信开发者工具游客→微信全链路。
+- 已完成（2026-08-29）：真实 CloudBase 迁移 07、真实 REST 读写合同、真实账户合并合同测试。
+- 未部署新后端版本（合同已通过，等待用户确认部署方式与流量策略）。
+- 未完成微信开发者工具游客→微信全链路实测。
 - 未合并 `main`。
 
 ## 同轮另外两个任务的真实状态
