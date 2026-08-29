@@ -38,7 +38,7 @@ from app.schemas.weather import WeatherData, WeatherTag
 from app.services import daily_service, favorite_service, food_service, profile_service
 from app.services.meal_builder import MealCandidate, build_meal, meal_role_targets
 from app.services.recommendation_ranking import (
-    RULE_V4_WEIGHTS,
+    RULE_V6_BASE_WEIGHTS,
     CandidateReranker,
     IdentityReranker,
     PreferenceSnapshot,
@@ -56,7 +56,11 @@ from app.services.recommendation_ranking import (
     preference_history_score,
     with_client_exclusions,
 )
-from app.services.solar_terms import get_today_context_cached
+from app.services.solar_terms import (
+    SolarTermCycle,
+    get_solar_term_cycle,
+    get_today_context_cached,
+)
 from app.services.weather_client import weather_client
 
 log = structlog.get_logger()
@@ -353,6 +357,36 @@ def _score_solar_term(food: Food, today: TodayContext) -> tuple[float, str]:
     return 0.0, ""
 
 
+# rules_v6 节气周期档位：active 节气前/中/后段 16/12/8，next 节气 0/4/8。
+_SOLAR_ACTIVE_PHASE_SCORES: tuple[float, float, float] = (16.0, 12.0, 8.0)
+_SOLAR_NEXT_PHASE_SCORES: tuple[float, float, float] = (0.0, 4.0, 8.0)
+
+
+def _score_solar_term_cycle(food: Food, cycle: SolarTermCycle) -> tuple[float, str]:
+    """rules_v6 节气周期评分；active 与 next 同时命中取较高档，不累加。"""
+    food_terms = set(food.seasonal_solar_terms_json or [])
+    if not food_terms:
+        return 0.0, ""
+    active_pinyin = SOLAR_TERM_ZH_TO_PINYIN.get(cycle.active_name, "")
+    next_pinyin = SOLAR_TERM_ZH_TO_PINYIN.get(cycle.next_name, "")
+    active_score = (
+        _SOLAR_ACTIVE_PHASE_SCORES[cycle.phase_index]
+        if active_pinyin and active_pinyin in food_terms
+        else 0.0
+    )
+    next_score = (
+        _SOLAR_NEXT_PHASE_SCORES[cycle.phase_index]
+        if next_pinyin and next_pinyin in food_terms
+        else 0.0
+    )
+    score = max(active_score, next_score)
+    if active_score >= next_score and active_score > 0:
+        return score, f"正值{cycle.active_name}"
+    if next_score > 0:
+        return score, f"临近{cycle.next_name}"
+    return score, ""
+
+
 def _score_zodiac(food: Food, today: TodayContext) -> tuple[float, str]:
     """星座趣味打分（满分 3）。仅彩蛋。"""
     element = ZODIAC_ELEMENTS.get(today.zodiac_sign, "")
@@ -440,49 +474,56 @@ def _score_food(
     preference: PreferenceSnapshot | None = None,
     meal_intent: MealIntent | None = None,
 ) -> RankedCandidate:
-    """计算单道菜的 75 分规则分项和解释短语。"""
+    """计算单道菜的 rules_v6 九项基础分（合计上限 85）与解释短语。
+
+    meal_intent 不再作为 85 之外的额外 ±6 分，而是缩放进 14 分 feasibility 预算内，
+    不得越出基础分上限。
+    """
     w_score, w_phrase = _score_weather(food, weather)
-    s_score, s_phrase = _score_solar_term(food, today)
+    cycle = get_solar_term_cycle(today.date)
+    s_score, s_phrase = _score_solar_term_cycle(food, cycle)
     m_score, m_phrase = _score_mood(food, mood)
     n_score, n_phrase = _score_nutrition_balance_with_foods(food, history, all_foods)
     c_score, c_phrase = _score_constitution(food, profile)
     a_score = _score_activity(food, activity_level)
-    seasonal_wellness, weather_modifier = _seasonal_wellness_score(s_score, w_score)
-    personal_family = round(
-        _scale_score(c_score, 10.0, 10.0)
-        + _scale_score(m_score, 12.0, 6.0)
-        + _scale_score(a_score, 5.0, 4.0),
-        2,
+    z_score, z_phrase = _score_zodiac(food, today)
+    intent_delta, intent_phrase = meal_intent_adjustment(food, meal_intent)
+    # meal_intent 的 ±6 对称缩放为 ±2 并入 feasibility 14 分；保留符号，不进 final。
+    intent_feasibility = round(max(-2.0, min(2.0, intent_delta / 6.0 * 2.0)), 2)
+    feasibility = max(
+        0.0,
+        min(
+            float(RULE_V6_BASE_WEIGHTS["feasibility"]),
+            _scale_score(_score_method_time(food), 13.0, 12.0) + intent_feasibility,
+        ),
+    )
+    preference_score = (
+        float(RULE_V6_BASE_WEIGHTS["preference"])
+        if preference is None
+        else preference_history_score(food, preference)
     )
     breakdown = ScoreBreakdown(
-        nutrition=_scale_score(n_score, 15.0, float(RULE_V4_WEIGHTS["nutrition"])),
-        seasonal_wellness=seasonal_wellness,
-        personal_family=min(float(RULE_V4_WEIGHTS["personal_family"]), personal_family),
-        preference_history=(
-            float(RULE_V4_WEIGHTS["preference_history"])
-            if preference is None
-            else preference_history_score(food, preference)
-        ),
-        feasibility=_scale_score(
-            _score_method_time(food),
-            13.0,
-            float(RULE_V4_WEIGHTS["feasibility"]),
-        ),
-        diversity=float(RULE_V4_WEIGHTS["diversity"]),
-        weather_modifier=weather_modifier,
+        nutrition=_scale_score(n_score, 15.0, float(RULE_V6_BASE_WEIGHTS["nutrition"])),
+        constitution=_scale_score(c_score, 10.0, float(RULE_V6_BASE_WEIGHTS["constitution"])),
+        solar_term=s_score,
+        weather=_scale_score(w_score, 15.0, float(RULE_V6_BASE_WEIGHTS["weather"])),
+        preference=preference_score,
+        feasibility=feasibility,
+        mood=_scale_score(m_score, 12.0, float(RULE_V6_BASE_WEIGHTS["mood"])),
+        activity=_scale_score(a_score, 5.0, float(RULE_V6_BASE_WEIGHTS["activity"])),
+        zodiac=_scale_score(z_score, 3.0, float(RULE_V6_BASE_WEIGHTS["zodiac"])),
     )
-    intent_delta, intent_phrase = meal_intent_adjustment(food, meal_intent)
     return RankedCandidate(
         food=food,
         base_score=breakdown.total,
         breakdown=breakdown,
-        meal_intent_adjustment=intent_delta,
         reason_phrases={
             "weather": w_phrase,
             "solar_term": s_phrase,
             "mood": m_phrase,
             "nutrition": n_phrase,
             "constitution": c_phrase,
+            "zodiac": z_phrase,
             "meal_intent": intent_phrase,
         },
     )
@@ -609,23 +650,28 @@ async def recommend(
     stage_started = trace.start()
     today_context = get_today_context_cached()
     today = date.today()
-    history_7d = daily_service.get_recent(session, user.id, days=7)
+    history_30d = daily_service.get_recent(session, user.id, days=30, as_of=today)
     nutrition_start = today - timedelta(days=2)
     nutrition_history = [
-        record for record in history_7d
+        record for record in history_30d
         if record.log_date >= nutrition_start
     ]
-    events_7d = daily_service.get_recent_recommendation_events(
+    events_30d = daily_service.get_recent_recommendation_events(
         session,
         user.id,
-        days=7,
+        days=30,
         as_of=today,
     )
     trace.stop("history", stage_started)
 
     stage_started = trace.start()
     foods, recipes_by_food_id = food_service.get_recommendation_catalog(session)
-    favorite_food_ids = favorite_service.list_favorited_ids(session, user.id)
+    favorites_30d = favorite_service.list_recent_favorites(
+        session,
+        user.id,
+        days=30,
+        as_of=today,
+    )
     trace.stop("catalog", stage_started)
 
     stage_started = trace.start()
@@ -634,8 +680,10 @@ async def recommend(
         raise ValidationError("没有可选菜（全部被忌口/体质禁忌过滤）")
     preference = build_preference_snapshot(
         foods,
-        history_7d,
-        favorite_food_ids=favorite_food_ids,
+        history_30d,
+        favorites_30d,
+        events_30d,
+        as_of=today,
     )
 
     candidates = [
@@ -668,7 +716,7 @@ async def recommend(
         adjustments = await active_reranker.rerank(candidates, ranking_context)
         candidates = apply_rerank_adjustments(candidates, adjustments)
         engine_name = (
-            "rules_v5"
+            "rules_v6"
             if active_reranker.engine_name == "rules_v4"
             else active_reranker.engine_name
         )
@@ -679,11 +727,11 @@ async def recommend(
             reranker=active_reranker.engine_name,
             error_type=type(exc).__name__,
         )
-        engine_name = "rules_v5"
+        engine_name = "rules_v6"
 
     ranking_history = build_recommendation_history(
-        history_7d,
-        events_7d,
+        history_30d,
+        events_30d,
         as_of=today,
         exclude_request_id=req.request_id,
     )

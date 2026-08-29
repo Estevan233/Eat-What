@@ -48,27 +48,32 @@ def _save_cloudbase_daily_log(
     )
 
 
-def get_recent(session: DatabaseSession, user_id: int, *, days: int = 3) -> list[DailyLog]:
-    """取最近 N 天的 DailyLog。
-
-    用于推荐算法第 4 步「营养均衡」：基于用户近 N 天实际选的菜，
-    计算营养偏差 → 给互补的菜加分。
+def get_recent(
+    session: DatabaseSession,
+    user_id: int,
+    *,
+    days: int = 3,
+    as_of: date | None = None,
+) -> list[DailyLog]:
+    """取包含 as_of 当天在内的最近 N 天 DailyLog（闭区间）。
 
     Args:
-        days: 回看天数，从今天往前数 N 天（含今天）
+        days: 回看天数，从 as_of 往前数 N 天（含 as_of）
+        as_of: 截止日期；None 表示今天。rules_v6 用 30 天窗口时注入固定日期，
+            避免函数内部读系统日期导致测试漂移。
 
     Returns:
         最近 days 天的 DailyLog 列表（可能为空）
     """
-    today = date.today()
-    start = today - timedelta(days=days - 1)
+    end = as_of or date.today()
+    start = end - timedelta(days=days - 1)
     if is_cloudbase_repository(session):
         return session.list(
             DailyLog,
             filters=(
                 RdbFilter('user_id', 'eq', user_id),
                 RdbFilter('log_date', 'gte', start),
-                RdbFilter('log_date', 'lte', today),
+                RdbFilter('log_date', 'lte', end),
             ),
             order=(RdbOrder('log_date', 'desc'),),
         )
@@ -76,7 +81,7 @@ def get_recent(session: DatabaseSession, user_id: int, *, days: int = 3) -> list
         select(DailyLog)
         .where(DailyLog.user_id == user_id)
         .where(DailyLog.log_date >= start)
-        .where(DailyLog.log_date <= today)
+        .where(DailyLog.log_date <= end)
         .order_by(DailyLog.log_date.desc())  # type: ignore[attr-defined]
     )
     return list(session.exec(stmt).all())

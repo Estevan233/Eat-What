@@ -1,13 +1,20 @@
-from datetime import date, timedelta
+from dataclasses import replace
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
 from app.models.daily_log import DailyLog
+from app.models.favorite import Favorite
+from app.models.food import Food
 from app.models.recommendation_event import RecommendationEvent
 from app.schemas.daily import MealIntent
 from app.services.recommendation_ranking import (
+    MAX_BASE_SCORE,
     MAX_RULE_SCORE,
     RULE_V4_WEIGHTS,
+    RULE_V6_BASE_WEIGHTS,
+    RULE_V6_RERANK_WEIGHTS,
+    ExplicitPreferenceSignal,
     IdentityReranker,
     PreferenceSnapshot,
     RankedCandidate,
@@ -35,11 +42,14 @@ def _candidate(food_id: int, *, score: float = 30.0) -> RankedCandidate:
         base_score=score,
         breakdown=ScoreBreakdown(
             nutrition=0,
-            seasonal_wellness=0,
-            personal_family=0,
-            preference_history=0,
+            constitution=0,
+            solar_term=0,
+            weather=0,
+            preference=0,
             feasibility=0,
-            diversity=0,
+            mood=0,
+            activity=0,
+            zodiac=0,
         ),
         reason_phrases={},
     )
@@ -56,6 +66,33 @@ def test_rule_v4_weights_match_the_confirmed_product_model() -> None:
     }
     assert sum(RULE_V4_WEIGHTS.values()) == 100
     assert MAX_RULE_SCORE == 100.0
+
+
+def test_rule_v6_weights_split_eighty_five_base_and_fifteen_rerank() -> None:
+    assert RULE_V6_BASE_WEIGHTS == {
+        "nutrition": 12,
+        "constitution": 14,
+        "solar_term": 16,
+        "weather": 4,
+        "preference": 15,
+        "feasibility": 14,
+        "mood": 5,
+        "activity": 3,
+        "zodiac": 2,
+    }
+    assert RULE_V6_RERANK_WEIGHTS == {"diversity": 7, "exploration": 8}
+    assert sum(RULE_V6_BASE_WEIGHTS.values()) == 85
+    assert sum(RULE_V6_RERANK_WEIGHTS.values()) == 15
+    assert MAX_BASE_SCORE == 85.0
+
+
+def test_score_breakdown_total_is_capped_at_eighty_five() -> None:
+    over = ScoreBreakdown(
+        nutrition=12, constitution=14, solar_term=16, weather=4,
+        preference=15, feasibility=14, mood=5, activity=3, zodiac=2,
+    )
+    assert over.total == 85.0
+    assert over.total == MAX_BASE_SCORE
 
 
 def test_meal_intent_soft_adjustment_is_bounded_and_explainable() -> None:
@@ -137,7 +174,8 @@ async def test_identity_reranker_returns_no_adjustments():
     assert await reranker.rerank([], None) == ()
 
 
-def test_today_seen_foods_are_excluded_when_three_unseen_exist():
+def test_today_seen_foods_get_minus_forty_five_penalty():
+    """rules_v6：当天曝光不再硬删除，而是 -45 惩罚压底，候选不足可回补。"""
     candidates = [_candidate(index, score=50 - index) for index in range(1, 7)]
     history = build_recommendation_history(
         [],
@@ -151,7 +189,12 @@ def test_today_seen_foods_are_excluded_when_three_unseen_exist():
         as_of=date(2026, 8, 11),
     )
     result = apply_novelty(candidates, history, top_n=3)
-    assert [candidate.food.id for candidate in result] == [4, 5, 6]
+    ids = [candidate.food.id for candidate in result]
+    assert {1, 2, 3}.issubset(ids)
+    for candidate in result:
+        if candidate.food.id in {1, 2, 3}:
+            assert candidate.novelty_penalty == -45.0
+            assert candidate.exposure_distance_days == 0
 
 
 def test_client_exclusions_extend_seen_without_mutating_other_history() -> None:
@@ -191,7 +234,8 @@ def test_chosen_penalty_wins_over_exposure_penalty():
         as_of=today,
     )
     result = apply_novelty([candidate], history, top_n=3)
-    assert result[0].novelty_penalty == -24.0
+    # chosen(1)=-32 强于 exposed(1)=-16，只取最强不叠加
+    assert result[0].novelty_penalty == -32.0
 
 
 def test_seen_foods_return_with_penalty_when_pool_is_too_small():
@@ -209,57 +253,62 @@ def test_seen_foods_return_with_penalty_when_pool_is_too_small():
     )
     result = apply_novelty([_candidate(1), _candidate(2)], history, top_n=3)
     assert len(result) == 2
-    assert all(candidate.novelty_penalty == -30.0 for candidate in result)
+    assert all(candidate.novelty_penalty == -45.0 for candidate in result)
 
 
-@pytest.mark.parametrize(
-    ("days_ago", "expected"),
-    list(enumerate([-30.0, -24.0, -18.0, -12.0, -8.0, -5.0, -3.0])),
-)
-def test_chosen_penalty_decays_across_seven_days(days_ago, expected):
+@pytest.mark.parametrize("days_ago", range(1, 14))
+def test_chosen_penalty_is_stronger_than_exposure_and_monotonic(days_ago: int) -> None:
+    """rules_v6：1..13 天 chosen 公式衰减且始终强于同日 exposed。"""
     today = date(2026, 8, 11)
-    history = build_recommendation_history(
-        [
-            DailyLog(
-                user_id=1,
-                log_date=today - timedelta(days=days_ago),
-                chosen_food_ids_json=[1],
-            )
-        ],
+    chosen_history = build_recommendation_history(
+        [DailyLog(user_id=1, log_date=today - timedelta(days=days_ago), chosen_food_ids_json=[1])],
         [],
         as_of=today,
     )
-    result = apply_novelty([_candidate(1)], history, top_n=3)
-    assert result[0].novelty_penalty == expected
+    exposed_history = build_recommendation_history(
+        [],
+        [RecommendationEvent(user_id=1, event_date=today - timedelta(days=days_ago), recommended_food_ids_json=[1])],
+        as_of=today,
+    )
+    chosen_pen = apply_novelty([_candidate(1)], chosen_history, top_n=3)[0].novelty_penalty
+    exposed_pen = apply_novelty([_candidate(1)], exposed_history, top_n=3)[0].novelty_penalty
+    assert chosen_pen == -round(32.0 * (14 - days_ago) / 13.0, 2)
+    assert exposed_pen == -round(16.0 * (14 - days_ago) / 13.0, 2)
+    assert chosen_pen <= exposed_pen
 
 
-@pytest.mark.parametrize(
-    ("days_ago", "expected"),
-    [
-        (0, -30.0),
-        (1, -10.0),
-        (2, -8.0),
-        (3, -6.0),
-        (4, -4.0),
-        (5, -3.0),
-        (6, -2.0),
-    ],
-)
-def test_exposure_penalty_decays_across_seven_days(days_ago, expected):
+def test_day_fourteen_has_no_novelty_penalty() -> None:
     today = date(2026, 8, 11)
     history = build_recommendation_history(
-        [],
+        [DailyLog(user_id=1, log_date=today - timedelta(days=14), chosen_food_ids_json=[1])],
+        [RecommendationEvent(user_id=1, event_date=today - timedelta(days=14), recommended_food_ids_json=[1])],
+        as_of=today,
+    )
+    result = apply_novelty([_candidate(1)], history, top_n=3)
+    assert result[0].novelty_penalty == 0.0
+
+
+def test_novelty_uses_strongest_signal_without_stacking() -> None:
+    """当天曝光(-45) + 第1天选择(-32) + 第1天曝光(-16)：只取最强 -45。"""
+    today = date(2026, 8, 11)
+    history = build_recommendation_history(
+        [DailyLog(user_id=1, log_date=today - timedelta(days=1), chosen_food_ids_json=[1])],
         [
-            RecommendationEvent(
-                user_id=1,
-                event_date=today - timedelta(days=days_ago),
-                recommended_food_ids_json=[1],
-            )
+            RecommendationEvent(user_id=1, event_date=today, recommended_food_ids_json=[1]),
+            RecommendationEvent(user_id=1, event_date=today - timedelta(days=1), recommended_food_ids_json=[1]),
         ],
         as_of=today,
     )
     result = apply_novelty([_candidate(1)], history, top_n=3)
-    assert result[0].novelty_penalty == expected
+    assert result[0].novelty_penalty == -45.0
+
+
+def test_unexposed_distance_is_thirty_day_sentinel() -> None:
+    today = date(2026, 8, 11)
+    history = build_recommendation_history([], [], as_of=today)
+    result = apply_novelty([_candidate(1), _candidate(2)], history, top_n=3)
+    assert all(candidate.exposure_distance_days == 30 for candidate in result)
+    assert all(candidate.novelty_penalty == 0.0 for candidate in result)
 
 
 def test_repeated_exposure_adds_a_bounded_freshness_penalty() -> None:
@@ -367,7 +416,9 @@ def test_preference_snapshot_boosts_similar_food_without_unbounded_repeat() -> N
     snapshot = build_preference_snapshot(
         [favorite, similar, unrelated],
         [],
-        favorite_food_ids=[1],
+        [Favorite(user_id=1, food_id=1, created_at=datetime.now(timezone.utc))],
+        [],
+        as_of=date.today(),
     )
 
     assert isinstance(snapshot, PreferenceSnapshot)
@@ -419,3 +470,131 @@ def test_bounded_exploration_varies_by_user_inside_same_quality_band() -> None:
     )
 
     assert [item.food.id for item in first] != [item.food.id for item in second]
+
+
+# ---- rules_v6 30 天偏好画像 ----
+
+_AS_OF = date(2026, 8, 29)
+
+
+def _pref_food(food_id: int, name: str = "菜", **kwargs) -> Food:
+    food = _make_food(name, **kwargs)
+    food.id = food_id
+    return food
+
+
+def test_empty_preference_snapshot_returns_neutral_seven_point_five() -> None:
+    snap = build_preference_snapshot([], [], [], [], as_of=_AS_OF)
+    assert preference_history_score(_pref_food(1), snap) == 7.5
+
+
+def test_preference_snapshot_contains_tag_category_nature_method_and_ingredient() -> None:
+    food = _pref_food(
+        1, "番茄炖牛", category="stew", cooking_method="stew", nature="warm",
+        tags=["soup", "nourish"], ingredients=["番茄", "牛肉"],
+    )
+    fav = Favorite(user_id=1, food_id=1, created_at=datetime.now(timezone.utc))
+    snap = build_preference_snapshot([food], [], [fav], [], as_of=_AS_OF)
+    assert snap.category_affinity
+    assert snap.method_affinity
+    assert snap.nature_affinity
+    assert snap.tag_affinity
+    assert snap.ingredient_affinity
+
+
+def test_favorite_signal_outweighs_chosen_signal() -> None:
+    food = _pref_food(1, category="soup")
+    fav = Favorite(user_id=1, food_id=1, created_at=datetime.now(timezone.utc))
+    log = DailyLog(user_id=1, log_date=_AS_OF, chosen_food_ids_json=[1])
+    snap_fav = build_preference_snapshot([food], [], [fav], [], as_of=_AS_OF)
+    snap_chosen = build_preference_snapshot([food], [log], [], [], as_of=_AS_OF)
+    assert snap_fav.category_affinity["soup"] > snap_chosen.category_affinity.get("soup", 0.0)
+
+
+def test_chosen_signal_decays_by_recency_bucket() -> None:
+    food = _pref_food(1, category="soup")
+    recent = DailyLog(user_id=1, log_date=_AS_OF, chosen_food_ids_json=[1])        # decay 1.0
+    older = DailyLog(user_id=1, log_date=date(2026, 8, 15), chosen_food_ids_json=[1])  # decay 0.6
+    snap_recent = build_preference_snapshot([food], [recent], [], [], as_of=_AS_OF)
+    snap_older = build_preference_snapshot([food], [older], [], [], as_of=_AS_OF)
+    assert snap_recent.category_affinity["soup"] > snap_older.category_affinity.get("soup", 0.0)
+
+
+def test_chosen_signal_is_damped_by_exposure_count() -> None:
+    food = _pref_food(1, category="soup")
+    log = DailyLog(user_id=1, log_date=_AS_OF, chosen_food_ids_json=[1])
+    once = build_preference_snapshot([food], [log], [], [], as_of=_AS_OF)
+    events = [
+        RecommendationEvent(user_id=1, event_date=date(2026, 8, 28), recommended_food_ids_json=[1])
+        for _ in range(4)
+    ]
+    many = build_preference_snapshot([food], [log], [], events, as_of=_AS_OF)
+    assert once.category_affinity["soup"] >= many.category_affinity.get("soup", 0.0)
+
+
+def test_exposed_but_not_chosen_is_not_negative_feedback() -> None:
+    food = _pref_food(1, category="soup")
+    events = [RecommendationEvent(user_id=1, event_date=date(2026, 8, 28), recommended_food_ids_json=[1])]
+    snap = build_preference_snapshot([food], [], [], events, as_of=_AS_OF)
+    assert preference_history_score(food, snap) == 7.5
+    assert not snap.negative_category
+
+
+def test_explicit_negative_signal_requires_explicit_input() -> None:
+    food = _pref_food(
+        1, category="soup", cooking_method="stew", nature="warm", tags=["t1"], ingredients=["番茄"],
+    )
+    neg = ExplicitPreferenceSignal(food_id=1, action="not_interested", occurred_on=date(2026, 8, 28))
+    snap_no_neg = build_preference_snapshot([food], [], [], [], as_of=_AS_OF)
+    snap_neg = build_preference_snapshot([food], [], [], [], as_of=_AS_OF, negative_signals=[neg])
+    assert preference_history_score(food, snap_neg) < preference_history_score(food, snap_no_neg)
+
+
+def test_preference_snapshot_uses_only_last_thirty_days() -> None:
+    food = _pref_food(1, category="soup")
+    old_fav = Favorite(user_id=1, food_id=1, created_at=datetime(2026, 7, 29, tzinfo=timezone.utc))
+    snap = build_preference_snapshot([food], [], [old_fav], [], as_of=_AS_OF)
+    assert preference_history_score(food, snap) == 7.5
+
+
+# ---- rules_v6 质量带探索 ----
+
+def test_unexposed_candidate_inside_quality_band_gets_eight() -> None:
+    high = replace(_candidate(1, score=100), exposure_distance_days=1)   # band峰且已曝光
+    unexposed = _candidate(2, score=96)                                  # band内未曝光
+    result = apply_bounded_exploration(
+        [high, unexposed], user_id=1, event_date=date(2026, 8, 11), request_id='r', meal_role='main',
+    )
+    by_id = {c.food.id: c for c in result}
+    assert by_id[2].exploration_bonus == 8.0
+    assert by_id[1].exploration_bonus == 0.0
+
+
+def test_unexposed_candidate_outside_quality_band_gets_no_exploration_bonus() -> None:
+    high = _candidate(1, score=100)
+    unexposed_far = _candidate(2, score=90)  # 100-90=10 > 5，band 外
+    result = apply_bounded_exploration(
+        [high, unexposed_far], user_id=1, event_date=date(2026, 8, 11), request_id='r', meal_role='main',
+    )
+    by_id = {c.food.id: c for c in result}
+    assert by_id[2].exploration_bonus == 0.0
+
+
+def test_request_seed_does_not_change_quality_band_membership() -> None:
+    candidates = [_candidate(1, score=100), _candidate(2, score=96)]
+    a = apply_bounded_exploration(
+        candidates, user_id=1, event_date=date(2026, 8, 11), request_id='r1', meal_role='main',
+    )
+    b = apply_bounded_exploration(
+        candidates, user_id=1, event_date=date(2026, 8, 11), request_id='r2', meal_role='main',
+    )
+    assert {c.exploration_bonus for c in a} == {c.exploration_bonus for c in b}
+
+
+def test_no_unexposed_in_band_does_not_expand_quality_band() -> None:
+    high = replace(_candidate(1, score=100), exposure_distance_days=1)
+    low = replace(_candidate(2, score=96), exposure_distance_days=1)  # 已曝光
+    result = apply_bounded_exploration(
+        [high, low], user_id=1, event_date=date(2026, 8, 11), request_id='r', meal_role='main',
+    )
+    assert all(c.exploration_bonus == 0.0 for c in result)

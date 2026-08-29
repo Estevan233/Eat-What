@@ -143,13 +143,27 @@ class RecommendContext(BaseModel):
 
 
 class RecommendationWeightProfile(BaseModel):
-    nutrition: int = 22
-    seasonal_wellness: int = 18
-    personal_family: int = 20
+    """rules_v6 权重画像：保留旧聚合键兼容旧客户端，新增明细键。
+
+    旧聚合键值更新为 v6 子项之和（nutrition=12, seasonal_wellness=solar16+weather4=20,
+    personal_family=constitution14+mood5+activity3+zodiac2=24, preference_history=15,
+    feasibility=14, diversity=7）。明细键直接暴露 v6 九个基础分项与两项重排分。
+    """
+
+    nutrition: int = 12
+    seasonal_wellness: int = 20
+    personal_family: int = 24
     preference_history: int = 15
-    feasibility: int = 15
-    diversity: int = 10
-    weather_modifier_limit: int = 3
+    feasibility: int = 14
+    diversity: int = 7
+    weather_modifier_limit: int = 4
+    solar_term: int = 16
+    weather: int = 4
+    constitution: int = 14
+    mood: int = 5
+    activity: int = 3
+    zodiac: int = 2
+    exploration: int = 8
 
 
 class RecommendResponse(BaseModel):

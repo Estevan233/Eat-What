@@ -5,6 +5,8 @@
 - list_favorites JOIN Food 返回完整菜信息（前端收藏页直接展示）
 - is_favorited 批量判断，FoodCard 渲染时用
 """
+from datetime import date, datetime, time, timedelta
+
 from sqlmodel import select
 
 from app.models.favorite import Favorite
@@ -76,6 +78,43 @@ def list_favorited_ids(session: DatabaseSession, user_id: int) -> list[int]:
     stmt = (
         select(Favorite.food_id)
         .where(Favorite.user_id == user_id)
+        .order_by(Favorite.created_at.desc())  # type: ignore[attr-defined]
+    )
+    return list(session.exec(stmt).all())
+
+
+def list_recent_favorites(
+    session: DatabaseSession,
+    user_id: int,
+    *,
+    days: int = 30,
+    as_of: date | None = None,
+) -> list[Favorite]:
+    """取包含 as_of 当天在内的近 N 天收藏行（闭区间），用于 rules_v6 偏好画像。
+
+    返回 Favorite 行（含 created_at）而非只有 id，使收藏可按时间衰减。
+    SQLite/SQLModel 与 CloudBase Repository 使用相同的闭区间语义：
+    [as_of - (days-1), as_of]，两端包含。
+    """
+    end = as_of or date.today()
+    start = end - timedelta(days=days - 1)
+    start_dt = datetime.combine(start, time.min)
+    end_dt = datetime.combine(end + timedelta(days=1), time.min)  # 闭区间上界用次日 0 点
+    if is_cloudbase_repository(session):
+        return session.list(
+            Favorite,
+            filters=(
+                RdbFilter('user_id', 'eq', user_id),
+                RdbFilter('created_at', 'gte', start_dt),
+                RdbFilter('created_at', 'lt', end_dt),
+            ),
+            order=(RdbOrder('created_at', 'desc'),),
+        )
+    stmt = (
+        select(Favorite)
+        .where(Favorite.user_id == user_id)
+        .where(Favorite.created_at >= start_dt)
+        .where(Favorite.created_at < end_dt)
         .order_by(Favorite.created_at.desc())  # type: ignore[attr-defined]
     )
     return list(session.exec(stmt).all())

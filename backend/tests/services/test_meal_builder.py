@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from app.models.recipe import Recipe
@@ -27,11 +29,14 @@ def _candidate(
         base_score=score,
         breakdown=ScoreBreakdown(
             nutrition=0,
-            seasonal_wellness=0,
-            personal_family=0,
-            preference_history=0,
+            constitution=0,
+            solar_term=0,
+            weather=0,
+            preference=0,
             feasibility=0,
-            diversity=0,
+            mood=0,
+            activity=0,
+            zodiac=0,
         ),
         reason_phrases={},
     )
@@ -125,26 +130,36 @@ def test_family_meal_supports_repeated_roles_with_distinct_foods() -> None:
     assert result.substitutions == []
 
 
-def test_selection_order_wins_inside_prequalified_candidate_pool() -> None:
-    high_score = _candidate(1, 'main', 300, 90)
-    explored_first = _candidate(2, 'main', 280, 87)
+def test_rules_v6_tie_break_prefers_distance_before_id() -> None:
+    """rules_v6 严格 tie-break：同 final 时先选更久未曝光者（distance 更大）。"""
+    near = _candidate(1, 'main', 300, 90)
+    far = _candidate(2, 'main', 300, 90)
+    near = MealCandidate(
+        ranked=replace(near.ranked, exposure_distance_days=2),
+        recipe=near.recipe,
+        reason=near.reason,
+    )
+    far = MealCandidate(
+        ranked=replace(far.ranked, exposure_distance_days=10),
+        recipe=far.recipe,
+        reason=far.reason,
+    )
     vegetable = _candidate(3, 'vegetable', 100, 85)
     staple = _candidate(4, 'staple', 250, 80)
-    high_score = MealCandidate(
-        ranked=high_score.ranked.__class__(
-            **{**high_score.ranked.__dict__, 'selection_order': 1}
-        ),
-        recipe=high_score.recipe,
-        reason=high_score.reason,
-    )
-    explored_first = MealCandidate(
-        ranked=explored_first.ranked.__class__(
-            **{**explored_first.ranked.__dict__, 'selection_order': 0}
-        ),
-        recipe=explored_first.recipe,
-        reason=explored_first.reason,
-    )
 
-    result = build_meal([high_score, explored_first, vegetable, staple])
+    result = build_meal([near, far, vegetable, staple])
 
     assert result.primary_meal.items[0].food_id == 2
+
+
+def test_rules_v6_first_slot_gives_equal_seven_diversity_points() -> None:
+    """rules_v6：首槽所有候选统一得 diversity_bonus=7，不改变首位相关性。"""
+    main_a = _candidate(1, 'main', 300, 90)
+    main_b = _candidate(2, 'main', 300, 85)
+    vegetable = _candidate(3, 'vegetable', 100, 85)
+    staple = _candidate(4, 'staple', 250, 80)
+
+    result = build_meal([main_a, main_b, vegetable, staple])
+
+    # 高分 main_a 应居首；diversity 不改变首位
+    assert result.primary_meal.items[0].food_id == 1
