@@ -35,6 +35,7 @@ import {
   readStoredString,
   removeStoredValue,
   saveLoginSession,
+  promoteToWechatSession,
   subscribeAuthClear,
   writeStoredJson,
   writeStoredString,
@@ -80,11 +81,13 @@ export const useUserStore = defineStore('user', () => {
 
   // 启动时从 storage 恢复
   token.value = getStoredToken()
+  guestId.value = readStoredString(AUTH_STORAGE_KEYS.guestId)
   const storedProfile = readStoredJson<UserRead>(AUTH_STORAGE_KEYS.profile)
-  profile.value = storedProfile ? normalizeUserRead(storedProfile) : null
+  profile.value = storedProfile
+    ? normalizeUserRead(storedProfile, guestId.value ? 'guest' : 'wechat')
+    : null
   userProfile.value = readStoredJson<ProfileRead>(AUTH_STORAGE_KEYS.userProfile)
   constitution.value = readStoredJson<ConstitutionResult>(AUTH_STORAGE_KEYS.constitution)
-  guestId.value = readStoredString(AUTH_STORAGE_KEYS.guestId)
 
   /**
    * 微信小程序登录走 CloudBase 私有链路，由云托管注入可信身份头。
@@ -100,8 +103,9 @@ export const useUserStore = defineStore('user', () => {
     token.value = data.token
     profile.value = user
     guestId.value = ''
-    removeStoredValue(AUTH_STORAGE_KEYS.guestId)
-    saveLoginSession(data.token, user)
+    userProfile.value = null
+    constitution.value = null
+    promoteToWechatSession(data.token, user)
     return user
   }
 
@@ -200,7 +204,7 @@ export const useUserStore = defineStore('user', () => {
   const isLoggedIn = computed(() => !!token.value)
   const hasProfile = computed(() => userProfile.value !== null)
   const hasConstitution = computed(() => constitution.value !== null)
-  const isGuest = computed(() => !!guestId.value && guestId.value.length > 0)
+  const isGuest = computed(() => profile.value?.accountKind === 'guest')
 
   return {
     token,

@@ -89,10 +89,13 @@ export interface UserWithProfile {
 }
 
 /** 后端返回的 user 字段（不含 openid/unionid）。 */
+export type AccountKind = 'guest' | 'wechat'
+
 export interface UserRead {
   id: number
   nickname: string
   avatarUrl?: string
+  accountKind: AccountKind
   profileComplete: boolean
 }
 
@@ -105,6 +108,7 @@ export interface AccountProfilePatch {
 export interface LoginResponse {
   token: string
   user: UserRead
+  mergeStatus: 'not_requested' | 'completed'
 }
 
 /**

@@ -25,12 +25,18 @@ describe('profile onboarding', () => {
       id: 7,
       nickname: '饭饭',
       avatarUrl: 'cloud://avatar.png',
+      accountKind: 'wechat',
       profileComplete: true,
     })
   })
 
   it('offers completion only to incomplete non-guest users that did not skip', () => {
-    const user = { id: 8, nickname: '微信用户', profileComplete: false }
+    const user = {
+      id: 8,
+      nickname: '微信用户',
+      accountKind: 'wechat' as const,
+      profileComplete: false,
+    }
 
     expect(shouldOfferProfileOnboarding(user, false)).toBe(true)
     expect(shouldOfferProfileOnboarding(user, true)).toBe(false)

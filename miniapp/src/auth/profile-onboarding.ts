@@ -1,4 +1,4 @@
-import type { UserRead } from '@/types/api'
+import type { AccountKind, UserRead } from '@/types/api'
 import { resolvePostLoginNavigation } from './navigation'
 
 type LegacyUserRead = {
@@ -6,13 +6,18 @@ type LegacyUserRead = {
   nickname: string
   avatarUrl?: string
   profileComplete?: boolean
+  accountKind?: AccountKind
   avatar_url?: string
   profile_complete?: boolean
+  account_kind?: AccountKind
 }
 
 const DISMISS_PREFIX = 'profile_onboarding_dismissed_v1:'
 
-export function normalizeUserRead(raw: LegacyUserRead): UserRead {
+export function normalizeUserRead(
+  raw: LegacyUserRead,
+  fallbackAccountKind: AccountKind = 'wechat',
+): UserRead {
   const avatarUrl = raw.avatarUrl ?? raw.avatar_url
   const profileComplete = raw.profileComplete
     ?? raw.profile_complete
@@ -25,6 +30,7 @@ export function normalizeUserRead(raw: LegacyUserRead): UserRead {
     id: raw.id,
     nickname: raw.nickname,
     ...(avatarUrl ? { avatarUrl } : {}),
+    accountKind: raw.accountKind ?? raw.account_kind ?? fallbackAccountKind,
     profileComplete,
   }
 }
