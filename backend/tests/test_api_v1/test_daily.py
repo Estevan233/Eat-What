@@ -225,13 +225,20 @@ def test_recommend_success_returns_three_foods(
     assert data["context"]["weather"]["weather_tag"] == "mild"
     assert data["context"]["today"]["zodiac_sign"] == "leo"
     assert data["weight_profile"] == {
-        "nutrition": 22,
-        "seasonal_wellness": 18,
-        "personal_family": 20,
+        "nutrition": 12,
+        "seasonal_wellness": 20,
+        "personal_family": 24,
         "preference_history": 15,
-        "feasibility": 15,
-        "diversity": 10,
-        "weather_modifier_limit": 3,
+        "feasibility": 14,
+        "diversity": 7,
+        "weather_modifier_limit": 4,
+        "solar_term": 16,
+        "weather": 4,
+        "constitution": 14,
+        "mood": 5,
+        "activity": 3,
+        "zodiac": 2,
+        "exploration": 8,
     }
     assert "医疗" in data["wellness_disclaimer"]
     server_timing = res.headers["server-timing"]

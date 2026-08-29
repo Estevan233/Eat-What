@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from app.models.recipe import Recipe
 from app.schemas.meal import (
@@ -88,35 +88,54 @@ def _choose_primary(
     )
     selected: list[MealCandidate] = []
     used_ids: set[int] = set()
+    used_categories: set[str] = set()
     used_methods: set[str] = set()
     for role in role_targets:
         matching = [candidate for candidate in ordered if candidate.ranked.food.meal_role == role]
         if not matching:
             raise ValueError(f'安全候选不足，缺少 {role} 槽位')
-        diverse = [
-            candidate for candidate in matching
-            if candidate.ranked.food.id not in used_ids
-            and candidate.ranked.food.cooking_method not in used_methods
-        ]
         available = [c for c in matching if c.ranked.food.id not in used_ids]
         if not available:
             raise ValueError(f'安全候选不足，缺少额外 {role} 槽位')
-        chosen = (diverse or available)[0]
+        # rules_v6 逐槽动态 diversity_bonus：新 category 3.5 + 新 cooking_method 3.5；
+        # 不再硬拒绝同做法候选，稀缺角色仍能完成。首槽统一 7。
+        scored: list[tuple[tuple[float, int, int, int], float, MealCandidate]] = []
+        for candidate in available:
+            cat_new = candidate.ranked.food.category not in used_categories
+            meth_new = candidate.ranked.food.cooking_method not in used_methods
+            diversity = (3.5 if cat_new else 0.0) + (3.5 if meth_new else 0.0)
+            final = candidate.ranked.final_raw_score + diversity
+            food_id = candidate.ranked.food.id or 0
+            scored.append(
+                (
+                    (-final, -candidate.ranked.exposure_distance_days, candidate.ranked.seed_rank, food_id),
+                    diversity,
+                    candidate,
+                )
+            )
+        scored.sort(key=lambda item: item[0])
+        diversity = scored[0][1]
+        chosen = scored[0][2]
+        chosen = replace(chosen, ranked=replace(chosen.ranked, diversity_bonus=diversity))
         selected.append(chosen)
         if chosen.ranked.food.id is not None:
             used_ids.add(chosen.ranked.food.id)
+        used_categories.add(chosen.ranked.food.category)
         used_methods.add(chosen.ranked.food.cooking_method)
     return selected
 
 
-def _selection_key(candidate: MealCandidate) -> tuple[int, int, float, int]:
-    """Use bounded-exploration order when present, otherwise preserve score order."""
-    selection_order = candidate.ranked.selection_order
+def _selection_key(candidate: MealCandidate) -> tuple[float, int, int, int]:
+    """rules_v6 严格 tie-break：-final, -exposure_distance, seed_rank, food_id。
+
+    主餐与替换项复用同一 key，不再把 selection_order 放在最终分之前。
+    """
+    food_id = candidate.ranked.food.id or 0
     return (
-        0 if selection_order is not None else 1,
-        selection_order or 0,
         -candidate.ranked.final_raw_score,
-        candidate.ranked.food.id or 0,
+        -candidate.ranked.exposure_distance_days,
+        candidate.ranked.seed_rank,
+        food_id,
     )
 
 

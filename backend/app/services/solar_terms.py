@@ -5,7 +5,8 @@
 - 星座用阳历，按月份固定分界表（不同年份可能差 1 天，可接受）
 - 缓存按 ISO 日期 key，避免同一天重复计算（用 dict + date key，进程内）
 """
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import date, datetime
 from functools import lru_cache
 from typing import Any
 
@@ -124,3 +125,62 @@ def get_today_context_cached(dt: datetime | None = None) -> TodayContext:
         dt = datetime.now()
     data = _get_today_context_cached(dt.date().isoformat())
     return TodayContext.model_validate(data)
+
+
+# ---- rules_v6 节气周期（仅供排序内部使用，不改 TodayContext 对外语义） ----
+
+
+@dataclass(frozen=True)
+class SolarTermCycle:
+    """当前节气周期：active 节气 → next 节气之间的三档周期。
+
+    phase_index 0/1/2 分别对应前/中/后段；节气当天归入新周期前段。
+    """
+
+    active_name: str
+    active_date: date
+    next_name: str
+    next_date: date
+    elapsed_days: int
+    cycle_days: int
+    phase_index: int  # 0=前 1=中 2=后
+
+
+def _solar_to_date(solar: Any) -> date:
+    return date(solar.getYear(), solar.getMonth(), solar.getDay())
+
+
+@lru_cache(maxsize=128)
+def get_solar_term_cycle(as_of: date) -> SolarTermCycle:
+    """计算 as_of 所在节气周期。
+
+    节气当天以当天为 active（getJieQi 命中），下一节气取 getNextJieQi；
+    非节气日以 getPrevJieQi 为 active，getNextJieQi 为 next。
+    phase_index = min(2, floor(3 * elapsed / cycle_days))，按比例而非固定天数。
+    """
+    solar = Solar.fromYmd(as_of.year, as_of.month, as_of.day)
+    lunar = solar.getLunar()
+    current_jq = lunar.getJieQi()  # 节气当天返中文名，否则空串
+    if current_jq:
+        active_name = current_jq
+        active_date = as_of
+        next_obj = lunar.getNextJieQi(whole_day=True)
+    else:
+        prev_obj = lunar.getPrevJieQi(whole_day=True)
+        active_name = prev_obj.getName()
+        active_date = _solar_to_date(prev_obj.getSolar())
+        next_obj = lunar.getNextJieQi(whole_day=True)
+    next_name = next_obj.getName()
+    next_date = _solar_to_date(next_obj.getSolar())
+    elapsed_days = (as_of - active_date).days
+    cycle_days = max(1, (next_date - active_date).days)
+    phase_index = min(2, 3 * elapsed_days // cycle_days)
+    return SolarTermCycle(
+        active_name=active_name,
+        active_date=active_date,
+        next_name=next_name,
+        next_date=next_date,
+        elapsed_days=elapsed_days,
+        cycle_days=cycle_days,
+        phase_index=phase_index,
+    )

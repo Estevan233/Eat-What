@@ -42,7 +42,8 @@ from app.schemas.daily import MealIntent, RecommendRequest
 from app.schemas.today_context import TodayContext
 from app.schemas.weather import WeatherData
 from app.services import recommender
-from app.services.recommendation_ranking import RULE_V4_WEIGHTS, RerankAdjustment
+from app.services.recommendation_ranking import RerankAdjustment
+from app.services.solar_terms import get_solar_term_cycle
 
 # ---- Fixtures ----
 
@@ -195,10 +196,11 @@ def _make_today(
     solar_term_next_name: str = "立秋",
     zodiac_sign: str = "leo",
     animal: str = "马",
+    today_date: date | None = None,
 ) -> TodayContext:
     """构造 TodayContext mock。"""
     return TodayContext(
-        date=date.today(),
+        date=today_date or date.today(),
         solar_term_current=solar_term_current,
         solar_term_next_name=solar_term_next_name,
         solar_term_next_date="2026-08-07",
@@ -304,13 +306,14 @@ def seeded_session(session):
 # ---- 测试 ----
 
 
-def test_score_food_uses_exact_v4_caps() -> None:
+def test_score_food_uses_exact_v6_caps() -> None:
     food = _make_food(
         'v3满分菜',
         cooking_method='steam',
         nature='warm',
         tags=['spicy'],
         suitable_constitutions=['qixu'],
+        ingredients=['鸡胸肉', '番茄'],
         nutrition={'protein_g': 20, 'fat_g': 2, 'carb_g': 8, 'fiber_g': 3},
         seasonal_solar_terms=['liqiu'],
     )
@@ -333,22 +336,32 @@ def test_score_food_uses_exact_v4_caps() -> None:
     ranked = recommender._score_food(
         food,
         _make_weather('cold', temp_c=5),
-        _make_today(solar_term_current='立秋', zodiac_sign='leo'),
+        _make_today(solar_term_current='立秋', zodiac_sign='leo', today_date=date(2026, 8, 7)),
         profile,
         history,
         [food, fatty],
         'tired',
         'high',
+        meal_intent=MealIntent(
+            available_ingredients=['鸡胸肉', '番茄'],
+            max_time_minutes=20,
+            goal='high_protein',
+            summary='满分菜：食材命中、省时、高蛋白',
+        ),
     )
 
-    assert ranked.breakdown.nutrition == RULE_V4_WEIGHTS['nutrition']
-    assert ranked.breakdown.seasonal_wellness == RULE_V4_WEIGHTS['seasonal_wellness']
-    assert ranked.breakdown.personal_family == RULE_V4_WEIGHTS['personal_family']
-    assert ranked.breakdown.preference_history == RULE_V4_WEIGHTS['preference_history']
-    assert ranked.breakdown.feasibility == RULE_V4_WEIGHTS['feasibility']
-    assert ranked.breakdown.diversity == RULE_V4_WEIGHTS['diversity']
-    assert ranked.breakdown.weather_modifier == 3.0
-    assert ranked.breakdown.total == 100
+    # rules_v6 九个基础分项上限精确为 12/14/16/4/15/14/5/3/2，合计不超过 85。
+    assert ranked.breakdown.nutrition == 12
+    assert ranked.breakdown.constitution == 14
+    assert ranked.breakdown.solar_term == 16
+    assert ranked.breakdown.weather == 4
+    assert ranked.breakdown.preference == 15
+    assert ranked.breakdown.feasibility == 14
+    assert ranked.breakdown.mood == 5
+    assert ranked.breakdown.activity == 3
+    assert ranked.breakdown.zodiac == 2
+    assert ranked.base_score <= 85
+    assert ranked.breakdown.total == 85
 
 
 def test_hard_filter_only_keeps_recipe_ready_safe_foods() -> None:
@@ -860,17 +873,72 @@ def test_score_food_uses_one_hundred_point_breakdown():
     candidate = recommender._score_food(
         food,
         _make_weather("cold"),
-        _make_today(solar_term_current="立秋", zodiac_sign="taurus"),
+        _make_today(solar_term_current="立秋", zodiac_sign="taurus", today_date=date(2026, 8, 7)),
         profile,
         [],
         [food],
         "tired",
         "high",
     )
-    assert 0.0 <= candidate.breakdown.weather_modifier <= 3.0
-    assert 0.0 <= candidate.breakdown.seasonal_wellness <= 18.0
-    assert 0.0 <= candidate.breakdown.personal_family <= 20.0
-    assert 0.0 <= candidate.base_score <= 100.0
+    assert 0.0 <= candidate.breakdown.weather <= 4.0
+    assert 0.0 <= candidate.breakdown.solar_term <= 16.0
+    assert 0.0 <= candidate.breakdown.constitution <= 14.0
+    assert 0.0 <= candidate.base_score <= 85.0
+
+
+def test_meal_intent_is_inside_feasibility_budget() -> None:
+    """rules_v6：meal_intent 的 ±6 已收进 14 分 feasibility，不再在 85 之外叠加。"""
+    food = _make_food(
+        "番茄鸡蛋",
+        ingredients=["番茄", "鸡蛋"],
+        nutrition={"protein_g": 18, "fat_g": 6, "carb_g": 8},
+    )
+    food.cooking_time_min = 18
+    intent = MealIntent(
+        available_ingredients=["番茄", "鸡蛋"],
+        max_time_minutes=20,
+        goal="high_protein",
+        summary="番茄鸡蛋，二十分钟，高蛋白",
+    )
+    ranked = recommender._score_food(
+        food,
+        _make_weather("mild"),
+        _make_today(),
+        None,
+        [],
+        [food],
+        "neutral",
+        "normal",
+        meal_intent=intent,
+    )
+    # meal_intent 不再产生 85 之外的额外分；final 仅由 base + novelty/exploration/diversity
+    assert ranked.base_score <= 85
+    assert ranked.final_raw_score == ranked.base_score
+
+
+def test_solar_term_score_active_term_uses_16_12_8_tiers() -> None:
+    """rules_v6：当前节气前/中/后段命中分别得 16/12/8。"""
+    food = _make_food("立秋菜", seasonal_solar_terms=["liqiu"])
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 7)))[0] == 16.0
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 13)))[0] == 12.0
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 18)))[0] == 8.0
+
+
+def test_solar_term_score_next_term_uses_0_4_8_tiers() -> None:
+    """rules_v6：下一节气前/中/后段命中分别得 0/4/8。"""
+    food = _make_food("处暑菜", seasonal_solar_terms=["chushu"])
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 7)))[0] == 0.0
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 13)))[0] == 4.0
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 18)))[0] == 8.0
+
+
+def test_solar_term_score_does_not_sum_active_and_next() -> None:
+    """rules_v6：同时命中 active 与 next 时取较高档，不累加。"""
+    food = _make_food("双节气菜", seasonal_solar_terms=["liqiu", "chushu"])
+    # 前段：active16 + next0 → max 16
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 7)))[0] == 16.0
+    # 后段：active8 + next8 → max 8（不得累加为 16）
+    assert recommender._score_solar_term_cycle(food, get_solar_term_cycle(date(2026, 8, 18)))[0] == 8.0
 
 
 def test_weather_modifier_is_bounded_inside_seasonal_wellness():
@@ -982,7 +1050,7 @@ async def test_invalid_reranker_output_falls_back_without_reintroducing_forbidde
         .order_by(RecommendationEvent.id.desc())  # type: ignore[attr-defined]
     ).first()
     assert event is not None
-    assert event.engine == "rules_v5"
+    assert event.engine == "rules_v6"
 
 
 @pytest.mark.asyncio
