@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 11
-- **Last Active**: 2026-07-31
+- **Total Sessions**: 12
+- **Last Active**: 2026-08-29
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~972 | Active |
+| `journal-1.md` | ~1008 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 12 | 2026-08-29 | 微信账户合并真实验收与小程序分享能力 | `21a6af7`, `d2518f0`, `2ae93c6` | `codex/recommendation-v6-auth` |
 | 11 | 2026-07-31 | MVP 父任务收尾 (E2E 验收 + 整体回顾) | `bcb8eb0` | `main` |
 | 10 | 2026-07-31 | T11 今日推荐 UI + 历史记录 + 收藏 | `10de8b5` | `main` |
 | 9 | 2026-07-31 | T10 推荐算法核心 | `0ad9f52` | `main` |
