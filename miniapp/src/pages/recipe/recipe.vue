@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import NutritionSummary from '@/components/NutritionSummary.vue'
@@ -117,6 +118,20 @@ function copySource(): void {
   if (!safeSourceUrl.value) return
   uni.setClipboardData({ data: safeSourceUrl.value })
 }
+
+onShareAppMessage(() => {
+  return {
+    title: recipe.value?.foodName ? `饭卜卜 · ${recipe.value.foodName}` : '饭卜卜 · 菜谱详情',
+    path: `/pages/recipe/recipe?foodId=${foodId.value}`,
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: recipe.value?.foodName ? `饭卜卜 · ${recipe.value.foodName}` : '饭卜卜 · 菜谱详情',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

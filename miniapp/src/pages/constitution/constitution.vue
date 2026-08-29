@@ -112,6 +112,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { getQuestions } from '@/api/constitution'
@@ -259,6 +260,20 @@ function goProfile() {
 function goToday() {
   uni.switchTab({ url: '/pages/today/today' })
 }
+
+onShareAppMessage(() => {
+  return {
+    title: '饭卜卜 · 体质测试',
+    path: '/pages/constitution/constitution',
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: '饭卜卜 · 体质测试',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

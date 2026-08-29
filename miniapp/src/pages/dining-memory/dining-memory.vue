@@ -87,6 +87,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useDiningStore } from '@/stores/dining'
@@ -203,6 +204,20 @@ onShow(async () => {
     loading.value = false
   }
 })
+
+onShareAppMessage(() => {
+  return {
+    title: '饭卜卜 · 外食记录',
+    path: '/pages/dining-memory/dining-memory',
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: '饭卜卜 · 外食记录',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

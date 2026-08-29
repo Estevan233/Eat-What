@@ -72,6 +72,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { CONSTITUTION_NAMES } from '@/constants/constitution'
@@ -125,6 +126,20 @@ function onLogout() {
     },
   })
 }
+
+onShareAppMessage(() => {
+  return {
+    title: '饭卜卜 · 我的餐盘',
+    path: '/pages/mine/mine',
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: '饭卜卜 · 我的餐盘',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

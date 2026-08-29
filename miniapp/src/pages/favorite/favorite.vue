@@ -35,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { getRecipe } from '@/api/recipe'
@@ -84,6 +85,20 @@ async function onUndo(foodId: number): Promise<void> {
     // request 层处理错误。
   }
 }
+
+onShareAppMessage(() => {
+  return {
+    title: '饭卜卜 · 我的收藏',
+    path: '/pages/favorite/favorite',
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: '饭卜卜 · 我的收藏',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>

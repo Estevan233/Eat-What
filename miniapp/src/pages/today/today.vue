@@ -215,6 +215,7 @@
 </template>
 
 <script setup lang="ts">
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import ExternalDiningCard from '@/components/ExternalDiningCard.vue'
@@ -393,6 +394,20 @@ onShow(() => {
   // 无推荐结果时自动展开选择器，有结果时收起
   selectorsExpanded.value = !dailyStore.currentMeal
 })
+
+onShareAppMessage(() => {
+  return {
+    title: '饭卜卜 · 今天吃啥嘞？',
+    path: '/pages/today/today',
+  }
+})
+
+onShareTimeline(() => {
+  return {
+    title: '饭卜卜 · 今天吃啥嘞？',
+  }
+})
+
 </script>
 
 <style lang="scss" scoped>
