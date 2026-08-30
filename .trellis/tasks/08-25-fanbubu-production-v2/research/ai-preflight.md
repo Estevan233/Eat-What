@@ -1,39 +1,82 @@
 # CloudBase AI 预检记录
 
-日期：2026-08-26（首次，被 CLI 未登录阻塞）/ 2026-08-29（经 MCP 完成真实查询）
 目标环境：`cloud1-d8gz4jm8vb964a1c9`
+最后更新：2026-08-30（结论修正）
 
-## 2026-08-29 预检结果（MCP callCloudApi 真实查询）
+## 结论修正说明
 
-### 1. 成长计划（ai_miniprogram_inspire_plan）
+2026-08-29 的预检曾判定"文本模型不可用"，依据是 `cloudbase` 与 `hunyuan-exp` 组的 `Models` 均为空。该结论**已作废**——它套用的是一期成长计划的模型清单（hunyuan-2.0 系列 / `hunyuan-exp` 组）。
 
-- `AttendAble: false`，Reason `OverLimited`（"活动已达到最大参与次数"）
-- `AttendRecords` 显示本环境（Uin 100051558681）已于 **2026-08-15 17:35:32** 参加过该活动，`Status=0`，`SubStatus="Deal:20260815681165857967801"`
-- 活动有效期至 2026-12-31；不能再重复参加
+本环境于 **2026-08-15** 报名，属于**二期**（2026-07-01 ~ 2026-12-31）。二期文本模型为 `hy3` 与 `hy3-preview`，对应 provider 为 `hunyuan-v3`。因此"标准组为空"不等于无模型可用。
 
-### 2. 模型可用性（DescribeAIModels）
+## 二期成长计划权益（来源：docs.cloudbase.net/ai/ai-inspire-plan）
 
-| Group | Status | 模型 | 结论 |
+| 项 | 二期（2026-07-01 ~ 2026-12-31） |
+|---|---|
+| Token 额度 | 10 亿 |
+| 图片生成额度 | 10 万张 |
+| 文本模型 | `hy3`、`hy3-preview` |
+| 生图模型 | `HY-Image-3.0-Plus-4090-Tob-v1.0`、`HY-Image-v3.0-I2I-ToB-v1.0.1` |
+| 有效期 | 自申请成功之日起 6 个月 |
+
+活动细则：一个小程序帐号只能参与一次；AI 资源包仅限小程序和云开发服务端使用。
+
+## provider 差异（来源：docs.cloudbase.net/ai/ai-inspire-plan-guide）
+
+| 对比项 | `cloudbase` | `hunyuan-v3` |
+|---|---|---|
+| 免费额度 | 来源允许时优先消耗 | 仅消耗免费额度 |
+| 免费额度耗尽 | 自动消耗套餐额度 | 报错 |
+| 套餐额度 | 支持 | 不支持 |
+| 适用套餐 | 仅限资源点套餐 | 资源点/非资源点均可 |
+| 模型开关 | **需控制台手动开启** `hy3`、`hy3-preview` | **无需开启，也不支持关闭** |
+
+**选定：`hunyuan-v3`** —— 无需控制台额外开启，直接可用。
+
+## 环境实测（DescribeAIModels，2026-08-30）
+
+| Group | Status | Models | 可用性 |
 |---|---|---|---|
-| `cloudbase` | 1 | **空** | 无可用文本模型 |
-| `hunyuan-exp` | 1 | **空** | 成长计划权益未体现为可用模型 |
-| `hunyuan-image` | 1 | 4 个图像模型（hunyuan-image 等） | 仅图像生成 |
-| `hunyuan-v3` | 1 | `hy3-preview` | 非标准文档组（小程序 SDK 文档组为 hunyuan-exp/cloudbase/custom-*） |
+| `cloudbase` | 1 | 空 | 未开启 `cloudbase` provider 模型开关 |
+| `hunyuan-exp` | 1 | 空 | 一期模型，二期不适用 |
+| `hunyuan-image` | 1 | 4 个 | 仅生图 |
+| **`hunyuan-v3`** | **1** | **`hy3-preview`** | ✅ **选定** |
 
-### 3. 结论
+成长计划：`AttendAble=false`（Reason `OverLimited`），本环境已于 2026-08-15 参加，不能重复报名。
 
-**预检不通过**：两个标准文本模型组（`cloudbase`、`hunyuan-exp`）的 `Models` 列表均为空，即当前环境没有可调用的文本大模型。按既定设计：
+## 小程序端调用方式（来源：docs.cloudbase.net/ai/sdk-reference/wxExtendAi）
 
-- 不在小程序代码中写入 `wx.cloud.extend.AI.createModel(...)` 真实调用；
-- `VITE_AI_MEAL_INTENT_ENABLED` 保持关闭；
-- 基础规则推荐与后端 `MealIntent` 契约不受影响（它们不依赖模型权益）。
+基础库 3.7.1+ 内置。初始化：
 
-### 4. 需要环境所有者在控制台确认的事项
+```js
+wx.cloud.init({ env: "cloud1-d8gz4jm8vb964a1c9" });
+```
 
-1. CloudBase 控制台 → AI+ → 大模型：确认文本模型（DeepSeek/混元/Kimi 等）的开启状态，检查 Token Credits 资源包余量（成长计划 8-15 已参加，但权益未见模型生效，可能需要手动开启或额度已耗尽）。
-2. 若控制台确认可开启某文本模型，重跑本预检（DescribeAIModels）确认组与模型出现后再实现适配器。
-3. `hunyuan-v3` 组的 `hy3-preview` 不在小程序 SDK 标准组列表中，如需使用须先在真机验证 `wx.cloud.extend.AI.createModel` 是否接受该 group。
+非流式：
 
-## 2026-08-26 首次记录（已解决）
+```js
+const model = wx.cloud.extend.AI.createModel("hunyuan-v3");
+const res = await model.generateText({
+  model: "hy3-preview",
+  messages: [{ role: "user", content: "..." }],
+});
+// res.choices[0].message.content
+```
 
-本机 CLI 未登录导致三项只读查询全部被拒（`tcb env list --json`、`DescribeActivityInfo`、`DescribeAIModels`）。该阻塞已于 2026-08-29 通过 MCP 已认证会话绕过，无需再执行 `tcb login`。
+流式：
+
+```js
+const model = wx.cloud.extend.AI.createModel("hunyuan-v3");
+const res = await model.streamText({
+  data: { model: "hy3-preview", messages: [{ role: "user", content: "..." }] },
+  onText: (t) => {}, onEvent: (e) => {}, onFinish: (t) => {},
+});
+for await (const str of res.textStream) { /* 增量文本 */ }
+```
+
+> 注：使用指南页出现的 `model.invoke({model, messages})` 是服务端 SDK 风格，小程序端应使用 `generateText` / `streamText`。
+
+## 待办
+
+- [ ] 在小程序模拟器/真机实调一次 `hunyuan-v3` + `hy3-preview`，确认扣费与响应正常
+- [ ] 若需使用 `hy3`（非 preview），需在控制台 `cloudbase` provider 下手动开启

@@ -18,6 +18,7 @@ import type {
   Audience,
   DiningMode,
   MealRecommendation,
+  MealIntent,
   MealSnapshot,
   MealSubstitution,
   Mood,
@@ -132,6 +133,8 @@ export const useDailyStore = defineStore('daily', () => {
   const offline = ref(false)
   const lastRequestId = ref<string | null>(null)
   const recentCookIds = ref<number[]>(parseStorage<number[]>(RECENT_COOK_IDS_KEY) || [])
+  // AI 用餐意图：由首页输入框解析得到；为空时不向后端提交该字段。
+  const mealIntent = ref<MealIntent | null>(null)
   let pendingRecommendRequestId: string | null = null
 
   // The old homepage reads recommendation.foods until the plate UI commit lands.
@@ -196,6 +199,7 @@ export const useDailyStore = defineStore('daily', () => {
         partySize: partySize.value,
         excludeFoodIds: [...recentCookIds.value],
         weatherSnapshot: freshWeatherSnapshot(weather.value),
+        mealIntent: mealIntent.value ?? undefined,
       }
       const data = await apiRecommend(body)
       pendingRecommendRequestId = null
@@ -337,6 +341,21 @@ export const useDailyStore = defineStore('daily', () => {
     uni.setStorageSync(CITY_KEY, city.value)
   }
 
+  /**
+   * 设置 AI 解析出的用餐意图。传入 null 表示清除。
+   * 变更会让当前推荐失效，下一次推荐请求带上新的意图约束。
+   */
+  function setMealIntent(intent: MealIntent | null): void {
+    mealIntent.value = intent
+    clearMealRecommendation()
+  }
+
+  function clearMealIntent(): void {
+    if (mealIntent.value === null) return
+    mealIntent.value = null
+    clearMealRecommendation()
+  }
+
   return {
     todayContext,
     weather,
@@ -372,6 +391,9 @@ export const useDailyStore = defineStore('daily', () => {
     setAudience,
     setPartySize,
     setCity,
+    mealIntent,
+    setMealIntent,
+    clearMealIntent,
     clearMealRecommendation,
   }
 })

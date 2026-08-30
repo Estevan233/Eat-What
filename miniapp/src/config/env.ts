@@ -39,3 +39,22 @@ export const CLOUDBASE_SERVICE =
 export function getCloudConfig(): CloudConfig {
   return resolveCloudConfig(CLOUDBASE_ENV_ID, CLOUDBASE_SERVICE)
 }
+
+/**
+ * AI 用餐意图开关。
+ *
+ * 默认关闭：只有真实模型预检通过后才在部署环境变量中打开。关闭时首页不呈现
+ * 任何 AI 入口，基础规则推荐不受影响。
+ */
+export const AI_MEAL_INTENT_ENABLED =
+  import.meta.env.VITE_AI_MEAL_INTENT_ENABLED === 'true'
+
+/**
+ * 二期小程序成长计划：provider 为 hunyuan-v3，模型为 hy3-preview。
+ * hunyuan-v3 无需在控制台手动开启模型开关，仅消耗成长计划免费额度。
+ * 详见 .trellis/tasks/08-25-fanbubu-production-v2/research/ai-preflight.md
+ */
+export const AI_MEAL_INTENT_PROVIDER =
+  import.meta.env.VITE_AI_MEAL_INTENT_PROVIDER?.trim() || 'hunyuan-v3'
+export const AI_MEAL_INTENT_MODEL =
+  import.meta.env.VITE_AI_MEAL_INTENT_MODEL?.trim() || 'hy3-preview'

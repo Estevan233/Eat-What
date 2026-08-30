@@ -35,6 +35,8 @@
       </view>
     </view>
 
+    <AiMealIntentInput />
+
     <view v-if="dailyStore.diningMode === 'cook' && chosenMealNames" class="chosen-banner">
       <text class="chosen-mark">✓</text>
       <view class="chosen-copy">
@@ -218,6 +220,7 @@
 import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import AiMealIntentInput from '@/components/AiMealIntentInput.vue'
 import ExternalDiningCard from '@/components/ExternalDiningCard.vue'
 import MealPlateCard from '@/components/MealPlateCard.vue'
 import MealSubstitution from '@/components/MealSubstitution.vue'
