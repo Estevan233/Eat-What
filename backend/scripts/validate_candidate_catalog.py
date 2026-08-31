@@ -15,6 +15,7 @@ if str(BACKEND_ROOT) not in sys.path:
 from app.services.candidate_catalog_validation import (  # noqa: E402
     load_taxonomy,
     normalize_candidate_name,
+    structural_fingerprint,
     validate_common_candidate,
     weak_variant_fingerprint,
 )
@@ -55,10 +56,12 @@ def _cross_catalog_report(
         )
     )
     weak_names: dict[str, str] = {}
+    structural_names: dict[str, str] = {}
+    structural_pairs: list[str] = []
     weak_pairs: list[str] = []
-    for row in [
-        *[row for row in food_rows if isinstance(row, dict)],
-        *external_candidates,
+    for kind, row in [
+        *[("home", row) for row in food_rows if isinstance(row, dict)],
+        *[("external", row) for row in external_candidates],
     ]:
         raw_name = row.get("name") or row.get("dish_name")
         if not isinstance(raw_name, str) or not raw_name.strip():
@@ -68,6 +71,12 @@ def _cross_catalog_report(
         if previous is not None and previous != raw_name:
             weak_pairs.append(f"{previous} / {raw_name}")
         weak_names[fingerprint] = raw_name
+        structural = structural_fingerprint(row, kind=kind)
+        if structural is not None:
+            previous_structural = structural_names.get(structural)
+            if previous_structural is not None and previous_structural != raw_name:
+                structural_pairs.append(f"{previous_structural} / {raw_name}")
+            structural_names[structural] = raw_name
 
     errors = [
         f"跨目录 approved 硬重名: {name}"
@@ -76,6 +85,7 @@ def _cross_catalog_report(
     return errors, {
         "exact_name_overlap": exact_overlap,
         "weak_variant_pairs": sorted(set(weak_pairs)),
+        "structural_duplicate_pairs": sorted(set(structural_pairs)),
     }
 
 
@@ -91,6 +101,8 @@ def _validate_external(  # noqa: C901
     keys: set[str] = set()
     names: set[str] = set()
     weak_names: dict[str, str] = {}
+    structural_names: dict[str, str] = {}
+    structural_pairs: list[str] = []
     approved: list[dict[str, object]] = []
     for index, raw in enumerate(rows):
         if not isinstance(raw, dict):
@@ -119,6 +131,12 @@ def _validate_external(  # noqa: C901
             if previous is not None and previous != name:
                 errors.append(f"{prefix} 弱变体待审: {previous} / {name}")
             weak_names[weak] = name
+        structural = structural_fingerprint(raw, kind="external")
+        if structural is not None:
+            previous_structural = structural_names.get(structural)
+            if previous_structural is not None and previous_structural != name:
+                structural_pairs.append(f"{previous_structural} / {name}")
+            structural_names[structural] = name
         energy_min = raw.get("energy_kcal_min_per_person")
         energy_max = raw.get("energy_kcal_max_per_person")
         if not isinstance(energy_min, int) or not isinstance(energy_max, int):
@@ -133,6 +151,7 @@ def _validate_external(  # noqa: C901
         "draft": sum(1 for row in rows if isinstance(row, dict) and row.get("review_status") == "draft"),
         "serving_style": dict(Counter(str(row.get("serving_style")) for row in approved)),
         "meal_family": dict(Counter(str(row.get("meal_family")) for row in approved)),
+        "structural_duplicate_pairs": sorted(set(structural_pairs)),
     }
     if not allow_draft:
         if not 300 <= len(approved) <= 320:
@@ -150,6 +169,8 @@ def _validate_external(  # noqa: C901
             errors.append("单一 meal_family 超过 20%")
         if approved and (delivery_counts["high"] + delivery_counts["medium"]) / len(approved) < 0.7:
             errors.append("delivery_fit high|medium 低于 70%")
+        if summary["structural_duplicate_pairs"]:
+            errors.append("approved 外食候选存在结构重复，必须人工确认 variant")
     return errors, summary
 
 
@@ -192,6 +213,8 @@ def validate_catalog(
     errors = food_errors + external_errors
     if not allow_draft:
         errors.extend(cross_errors)
+        if cross_summary["structural_duplicate_pairs"]:
+            errors.append("跨目录存在结构重复，必须人工确认 variant")
         if catalog_total < 500:
             errors.append(f"approved 候选目录总数必须至少 500，实际 {catalog_total}")
     return errors, {

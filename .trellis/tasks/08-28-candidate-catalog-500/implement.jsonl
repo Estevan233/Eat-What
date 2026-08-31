@@ -6,3 +6,6 @@
 {"file": "backend/data/candidate_review_manifest.csv", "reason": "Expose per-row anchor and continuity audit columns."}
 {"file": "backend/alembic/versions/20260831_09_candidate_audit.py", "reason": "Add nullable audit columns without destructive changes."}
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch1.md", "reason": "Record browser-verified source page and usage boundaries."}
+{"file": "backend/app/services/candidate_catalog_validation.py", "reason": "Normalize Unicode names and add conservative structural fingerprints for duplicate review."}
+{"file": "backend/scripts/validate_candidate_catalog.py", "reason": "Report structural duplicate pairs and block them for approved release candidates."}
+{"file": "backend/tests/services/test_candidate_catalog_validation.py", "reason": "Cover serving-modifier normalization while retaining protein differences."}

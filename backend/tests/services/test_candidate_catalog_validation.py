@@ -6,6 +6,8 @@ from pathlib import Path
 from app.services.candidate_catalog_validation import (
     load_taxonomy,
     normalize_candidate_name,
+    structural_base_name,
+    structural_fingerprint,
     validate_common_candidate,
     weak_variant_fingerprint,
 )
@@ -105,6 +107,17 @@ def test_name_normalization_exposes_weak_variants() -> None:
     assert weak_variant_fingerprint("招牌 番茄牛腩饭 配青菜") == "番茄牛腩饭"
 
 
+def test_structural_fingerprint_strips_serving_modifiers_but_keeps_protein() -> None:
+    first = _valid_external()
+    first["dish_name"] = "番茄牛肉饭配青菜"
+    second = deepcopy(first)
+    second["dish_name"] = "番茄牛肉饭套餐"
+    assert structural_base_name(first["dish_name"]) == "番茄牛肉饭"
+    assert structural_fingerprint(first, kind="external") == structural_fingerprint(second, kind="external")
+    second["protein_types"] = ["poultry"]
+    assert structural_fingerprint(first, kind="external") != structural_fingerprint(second, kind="external")
+
+
 def test_cross_catalog_report_rejects_approved_exact_overlap() -> None:
     errors, summary = _cross_catalog_report(
         [{"name": "番茄鸡蛋饭"}],
@@ -119,3 +132,26 @@ def test_cross_catalog_report_rejects_approved_exact_overlap() -> None:
 
     assert errors == ["跨目录 approved 硬重名: 番茄鸡蛋饭"]
     assert summary["exact_name_overlap"] == ["番茄鸡蛋饭"]
+
+
+def test_cross_catalog_report_lists_structural_duplicates() -> None:
+    home = {
+        "name": "番茄牛肉饭",
+        "meal_family": "rice_meal",
+        "sub_family": "rice_bowl",
+        "staple_type": "rice",
+        "protein_types": ["beef"],
+        "serving_style": "individual",
+    }
+    external = {
+        "dish_name": "番茄牛肉饭套餐",
+        "meal_family": "rice_meal",
+        "sub_family": "rice_bowl",
+        "staple_type": "rice",
+        "protein_types": ["beef"],
+        "serving_style": "individual",
+        "review_status": "approved",
+        "is_active": True,
+    }
+    _, summary = _cross_catalog_report([home], [external])
+    assert summary["structural_duplicate_pairs"] == ["番茄牛肉饭 / 番茄牛肉饭套餐"]

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
@@ -23,6 +24,9 @@ SOLAR_TERMS = frozenset(
 )
 _PUNCTUATION = re.compile(r"[\s·•・,，。.!！?？、+＋/／()（）\[\]【】_-]+")
 _WEAK_VARIANT_WORDS = re.compile(r"(?:少油版|低脂版|健康版|招牌|配青菜|加青菜)")
+_STRUCTURAL_MODIFIERS = re.compile(
+    r"(?:配(?:白饭|米饭|杂粮饭|时蔬|青菜)|套餐|小份|家庭餐|分享餐|团圆餐|合餐|拼盘餐?)"
+)
 
 
 @dataclass(frozen=True)
@@ -84,11 +88,41 @@ def load_taxonomy(path: Path) -> CatalogTaxonomy:
 
 
 def normalize_candidate_name(value: str) -> str:
-    return _PUNCTUATION.sub("", value).casefold()
+    normalized = unicodedata.normalize("NFKC", value).strip()
+    return _PUNCTUATION.sub("", normalized).casefold()
 
 
 def weak_variant_fingerprint(value: str) -> str:
     return normalize_candidate_name(_WEAK_VARIANT_WORDS.sub("", value))
+
+
+def structural_base_name(value: str) -> str:
+    """Remove serving-only modifiers while retaining the dish's core name."""
+    return normalize_candidate_name(_STRUCTURAL_MODIFIERS.sub("", value))
+
+
+def structural_fingerprint(item: Mapping[str, object], *, kind: CandidateKind) -> str | None:
+    """Return a conservative identity for structural duplicate review."""
+    raw_name = item.get("name") if kind == "home" else item.get("dish_name")
+    family = item.get("meal_family")
+    sub_family = item.get("sub_family")
+    staple = item.get("staple_type")
+    serving = item.get("serving_style")
+    proteins = item.get("protein_types")
+    if (
+        not isinstance(raw_name, str)
+        or not isinstance(family, str)
+        or not isinstance(sub_family, str)
+        or not isinstance(staple, str)
+        or not isinstance(serving, str)
+        or not isinstance(proteins, list)
+        or any(not isinstance(value, str) for value in proteins)
+    ):
+        return None
+    protein_key = ",".join(sorted(set(proteins)))
+    return "|".join(
+        (family, sub_family, staple, protein_key, serving, structural_base_name(raw_name))
+    )
 
 
 def _string_list(value: object) -> list[str] | None:
