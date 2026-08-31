@@ -36,3 +36,7 @@
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-scope-approved.md", "reason": "Include Meishichina and Xiangha in the explicit discovery-only UGC source boundary."}
 {"file": "backend/app/services/food_seed.py", "reason": "Recover committed CloudBase REST food inserts/updates when the gateway returns an empty representation; re-read by name/id and fail closed if the row is absent."}
 {"file": "backend/tests/services/test_seed_import_cloudbase_rest.py", "reason": "Add a regression double for empty food insert/update responses and verify idempotent recovery."}
+{"file": "backend/scripts/build_external_catalog_batch6.py", "reason": "Batch 52 ordinary recipe candidates from Meishichina pages 21-30, balanced across rice/noodles/dumplings/soups/stews and kept as drafts."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 289 external candidates after batch 6; Meishichina-backed rows remain draft and excluded from production recommendation."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the 52 sixth-batch candidates with direct source URL, anchor, continuity score and review state."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch6.md", "reason": "Record parallel page-level verification for Meishichina pages 21-30 and the discovery-only approval boundary."}
