@@ -8,7 +8,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Column, Text
+from sqlalchemy import Column, Index, String, Text
 from sqlalchemy.types import JSON
 from sqlmodel import Field, SQLModel
 
@@ -17,30 +17,71 @@ class Food(SQLModel, table=True):
     """一道家常菜的结构化记录。"""
 
     __tablename__ = "foods"
+    __table_args__ = (
+        Index("ix_foods_openid", "_openid"),
+        Index("ix_foods_review_active", "review_status", "is_active"),
+        Index("ix_foods_catalog_family", "meal_family", "sub_family"),
+    )
 
     id: int | None = Field(default=None, primary_key=True)
+    # CloudBase SQL 表统一保留 `_openid`；目录由服务端维护，因此不进入 REST 写入载荷。
+    openid_scope: str = Field(
+        default="",
+        max_length=64,
+        exclude=True,
+        sa_column=Column(
+            "_openid",
+            String(length=64),
+            nullable=False,
+            default="",
+            index=False,
+        ),
+    )
     # name 唯一 + 索引：seed-food upsert 按 name，搜索也按 name
     name: str = Field(unique=True, index=True, max_length=64)
+    catalog_key: str | None = Field(default=None, unique=True, index=True, max_length=96)
+    aliases_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     category: str = Field(max_length=32, index=True)
-    ingredients_json: list[str] = Field(default=[], sa_column=Column(JSON))
+    ingredients_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     # 可空：少数菜没有可靠营养数据，宁可少标不杜撰
     calories_kcal_per_100g: float | None = Field(default=None)
-    nutrition_json: dict[str, Any] = Field(default={}, sa_column=Column(JSON))
+    nutrition_json: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
     # nature: cold | cool | neutral | warm | hot
     nature: str = Field(max_length=16, index=True)
     # flavor: subset of [sour, bitter, sweet, spicy, salty, bland]
-    flavor_json: list[str] = Field(default=[], sa_column=Column(JSON))
-    organ_meridians_json: list[str] = Field(default=[], sa_column=Column(JSON))
-    suitable_constitutions_json: list[str] = Field(default=[], sa_column=Column(JSON))
-    suitable_weathers_json: list[str] = Field(default=[], sa_column=Column(JSON))
-    forbidden_for_json: list[str] = Field(default=[], sa_column=Column(JSON))
-    tags_json: list[str] = Field(default=[], sa_column=Column(JSON))
+    flavor_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    organ_meridians_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    suitable_constitutions_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    suitable_weathers_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    forbidden_for_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     # cooking_method: steam | boil | stir_fry | deep_fry | cold | soup | congee | other
     cooking_method: str = Field(max_length=32, index=True)
     cooking_time_min: int | None = Field(default=None)
     image_url: str | None = Field(default=None, max_length=512)
-    seasonal_solar_terms_json: list[str] = Field(default=[], sa_column=Column(JSON))
+    seasonal_solar_terms_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     description: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    meal_family: str | None = Field(default=None, max_length=32)
+    sub_family: str | None = Field(default=None, max_length=48)
+    cuisine_region: str | None = Field(default=None, max_length=48, index=True)
+    staple_type: str | None = Field(default=None, max_length=32)
+    protein_types_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    serving_style: str | None = Field(default=None, max_length=16, index=True)
+    meal_periods_json: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    delivery_fit: str | None = Field(default=None, max_length=24)
+    price_band: str | None = Field(default=None, max_length=16)
+    source_url: str | None = Field(default=None, max_length=512)
+    source_type: str | None = Field(default=None, max_length=32)
+    source_checked_at: datetime | None = Field(default=None)
+    review_status: str = Field(default="draft", max_length=24)
+    reviewed_by: str | None = Field(default=None, max_length=64)
+    reviewed_at: datetime | None = Field(default=None)
+    review_notes: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    is_active: bool = Field(default=True)
+    catalog_version: int = Field(default=1, ge=1)
+    taxonomy_version: int = Field(default=1, ge=1)
+    nutrition_source_url: str | None = Field(default=None, max_length=512)
+    nutrition_basis: str | None = Field(default=None, max_length=512)
     meal_role: str | None = Field(default=None, max_length=16, index=True)
     recipe_ready: bool = Field(default=False, index=True)
     visual_key: str | None = Field(default=None, max_length=64)

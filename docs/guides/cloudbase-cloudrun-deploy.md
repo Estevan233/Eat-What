@@ -188,14 +188,14 @@ wx.cloud.callContainer({
 uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080}
 ```
 
-本次数据库已由上一 SQLAlchemy 版本执行 Alembic 和幂等 seed，不要在 `DATABASE_BACKEND=cloudbase_rest` 的新实例里再次执行 `/app/scripts/release.sh`；它是 DDL 发布工具，需要原生数据库连接，不是应用启动步骤。
+候选目录等结构迁移应在发布窗口执行 `/app/scripts/release.sh`。脚本会先运行 Alembic，再按 `DATABASE_BACKEND` 选择 SQLAlchemy 或 CloudBase HTTPS Repository 执行幂等 seed；不能让多个扩容实例争着改表。普通无结构变更版本不应重复运行 release。
 
 上线顺序：
 
-1. 保留上一稳定 SQLAlchemy 版本，记录当前 Alembic revision 和数据表行数。
-2. 发布 REST 新版本，但先只给测试流量。
+1. 保留上一稳定版本，记录当前 Alembic revision 和数据表行数。
+2. 结构迁移发布窗口先执行 release，确认 `20260831_08` 和目录表存在；再发布 REST 新版本，先只给测试流量。
 3. 在 Webshell 确认 `CLOUDBASE_APIKEY=SET`，依次运行只读验证和 `python /app/scripts/verify_cloudbase_rdb.py --write`。
-4. 验证 `/health`、登录、档案、推荐、收藏、外食记录、确认套餐和历史。
+4. 验证 `/health`、登录、档案、推荐、收藏、外食记录、确认套餐和历史；候选目录开关先保持 false，只有 approved 批次验收后再灰度打开。
 5. 切换全部流量并观察一个业务周期；稳定后关闭 MySQL 公网地址。
 
 未来确有结构迁移时，先在旧 SQLAlchemy 版本或受控发布任务执行 `/app/scripts/release.sh`，再部署 REST 应用版本；不要让多个实例同时跑迁移。

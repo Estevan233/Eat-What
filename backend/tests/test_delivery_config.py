@@ -20,3 +20,13 @@ def test_release_script_owns_migration_and_seed() -> None:
     assert "alembic upgrade head" in script
     assert "eat-what seed-all" in script
     assert "uvicorn" not in script
+
+
+def test_rest_release_skips_ddl_and_runs_gateway_contract_after_seed() -> None:
+    script = (BACKEND_ROOT / "scripts" / "release.sh").read_text(encoding="utf-8")
+
+    assert 'database_backend="${DATABASE_BACKEND:-sqlalchemy}"' in script
+    assert 'if [ "$database_backend" = "cloudbase_rest" ]; then' in script
+    assert "CloudBase REST backend detected; skipping Alembic DDL." in script
+    assert "python /app/scripts/verify_cloudbase_rdb.py" in script
+    assert script.index("eat-what seed-all") < script.index("verify_cloudbase_rdb.py")

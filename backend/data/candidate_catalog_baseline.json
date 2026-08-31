@@ -1,0 +1,990 @@
+{
+  "schema_version": 1,
+  "food_seed_sha256": "73c07761a170598b426e3662a1987b8dcc7f677a875909394929f2c24f0f5da0",
+  "recipe_seed_sha256": "fad33a5eb75b2e0698abb16e9d6b3147be9977720f5fa848bef6f1fa88007df8",
+  "food_count": 205,
+  "food_names": [
+    "白米饭",
+    "小米粥",
+    "阳春面",
+    "杂粮馒头",
+    "鲜肉小馄饨",
+    "红豆包子",
+    "番茄炒蛋",
+    "宫保鸡丁",
+    "清蒸鲈鱼",
+    "红烧肉",
+    "番茄炖牛腩",
+    "麻婆豆腐",
+    "家常豆腐",
+    "白切鸡",
+    "虾仁滑蛋",
+    "鸡蛋羹",
+    "蒜蓉西兰花",
+    "醋溜白菜",
+    "干煸四季豆",
+    "地三鲜",
+    "香菇青菜",
+    "凉拌黄瓜",
+    "蒜泥白肉",
+    "凉拌木耳",
+    "冬瓜排骨汤",
+    "银耳莲子羹",
+    "酸萝卜老鸭汤",
+    "山药鸡汤",
+    "紫菜蛋花汤",
+    "凉拌西红柿",
+    "皮蛋瘦肉粥",
+    "八宝粥",
+    "绿豆粥",
+    "南瓜粥",
+    "牛肉面",
+    "炸酱面",
+    "炒河粉",
+    "扬州炒饭",
+    "小笼包",
+    "葱花饼",
+    "韭菜盒子",
+    "煎饺",
+    "杂粮饭",
+    "糯米鸡",
+    "豆沙包",
+    "葱花鸡蛋饼",
+    "锅巴肉片",
+    "韭菜炒鸡蛋",
+    "燕麦粥",
+    "发糕",
+    "白斩鸡",
+    "黄焖鸡米饭",
+    "口水鸡",
+    "叫花鸡",
+    "啤酒鸭",
+    "盐水鸭",
+    "烧鹅",
+    "板栗烧鸡",
+    "辣子鸡",
+    "可乐鸡翅",
+    "手撕鸡",
+    "香菇炖鸡",
+    "栗子鸡",
+    "红烧带鱼",
+    "糖醋鲤鱼",
+    "水煮鱼",
+    "酸菜鱼",
+    "清蒸虾",
+    "油焖大虾",
+    "葱姜炒蟹",
+    "蒜蓉粉丝蒸扇贝",
+    "红烧鱼块",
+    "剁椒鱼头",
+    "干煎带鱼",
+    "清炒虾仁",
+    "清蒸鳗鱼",
+    "回锅肉",
+    "鱼香肉丝",
+    "糖醋排骨",
+    "红烧排骨",
+    "京酱肉丝",
+    "青椒炒肉",
+    "鱼香茄子煲",
+    "梅菜扣肉",
+    "蒜苔炒肉",
+    "猪肝炒菜椒",
+    "莲藕炖排骨",
+    "土豆烧排骨",
+    "红油耳丝",
+    "猪血豆腐汤",
+    "马蹄蒸肉饼",
+    "葱爆羊肉",
+    "牛肉炖萝卜",
+    "红烧牛肉",
+    "水煮牛肉",
+    "凉拌牛肉",
+    "土豆烧牛肉",
+    "羊肉汤",
+    "咖喱牛肉",
+    "孜然羊肉",
+    "牛腩煲",
+    "香煎豆腐",
+    "西施豆腐",
+    "干锅千叶豆腐",
+    "铁板豆腐",
+    "豆腐鱼汤",
+    "红烧素鸡",
+    "豆腐皮卷",
+    "麻酱拌豆腐",
+    "豆泡烧肉",
+    "凉拌豆腐丝",
+    "油焖春笋",
+    "糖藕",
+    "酸辣土豆丝",
+    "炝炒圆白菜",
+    "清炒豆苗",
+    "素炒合子",
+    "蒜蓉生菜",
+    "清蒸茄子",
+    "干煸花菜",
+    "酸辣大白菜",
+    "素炒芥兰",
+    "糖醋藕丁",
+    "清炒菠菜",
+    "虾皮炒丝瓜",
+    "苦瓜炒蛋",
+    "双菇炒青菜",
+    "鱼香烘蛋",
+    "荷塘小炒",
+    "蒜苗回锅肉",
+    "素炒豌豆苗",
+    "葱花土豆泥",
+    "清炒空心菜",
+    "蒜蓉秋葵",
+    "萝卜炖排骨",
+    "木耳炒山药",
+    "素炒三丝",
+    "番茄蛋花汤",
+    "豆腐青菜汤",
+    "玉米排骨汤",
+    "西红柿牛肉汤",
+    "西湖牛肉羹",
+    "山药排骨汤",
+    "海带排骨汤",
+    "疙瘩汤",
+    "鲫鱼豆腐汤",
+    "菌菇汤",
+    "麻辣香锅",
+    "毛血旺",
+    "酸辣粉",
+    "麻辣烫",
+    "鸡蛋炒米粉",
+    "菠萝饭",
+    "鸡丝凉面",
+    "蛋炒饭",
+    "韭菜猪肉水饺",
+    "叉烧肉",
+    "松仁玉米",
+    "虎皮青椒",
+    "红烧蹄髈",
+    "土豆牛腩",
+    "莲藕排骨汤",
+    "凉拌粉皮",
+    "陈皮红豆沙",
+    "冰糖雪梨",
+    "烤红薯",
+    "拔丝红薯",
+    "白灼秋葵",
+    "蒜蓉炒花甲",
+    "清炒茼蒿",
+    "蒜蓉西蓝花",
+    "腊肉炒荷兰豆",
+    "韭菜炒河虾",
+    "椒盐排骨",
+    "蒜蓉蒸茄子",
+    "腰果虾仁",
+    "火腿炒蛋",
+    "菠菜炒猪肝",
+    "豆角焖面",
+    "五香卤牛肉",
+    "素烧鹅",
+    "紫薯粥",
+    "芹菜炒鱿鱼",
+    "肉末蒸蛋",
+    "酸汤肥牛",
+    "香煎鲳鱼",
+    "鸡蛋灌饼",
+    "冬瓜薏米汤",
+    "蒜蓉豆角丝",
+    "素炒平菇",
+    "炒南瓜",
+    "蒸腊肉",
+    "鱼头豆腐汤",
+    "凉拌海带丝",
+    "砂锅豆腐",
+    "糖醋里脊",
+    "酸豆角炒肉末",
+    "清炒山药木耳",
+    "水煮毛豆",
+    "冰糖葫芦",
+    "蟹黄豆腐",
+    "山药枸杞粥",
+    "肉末粉丝",
+    "素炒南瓜尖",
+    "冬瓜香菜汤"
+  ],
+  "recipe_count": 120,
+  "recipe_names": [
+    "白米饭",
+    "小米粥",
+    "阳春面",
+    "杂粮馒头",
+    "鲜肉小馄饨",
+    "红豆包子",
+    "皮蛋瘦肉粥",
+    "八宝粥",
+    "绿豆粥",
+    "南瓜粥",
+    "番茄炒蛋",
+    "宫保鸡丁",
+    "清蒸鲈鱼",
+    "红烧肉",
+    "番茄炖牛腩",
+    "麻婆豆腐",
+    "家常豆腐",
+    "白切鸡",
+    "虾仁滑蛋",
+    "鸡蛋羹",
+    "冬瓜排骨汤",
+    "酸萝卜老鸭汤",
+    "山药鸡汤",
+    "红烧带鱼",
+    "糖醋鲤鱼",
+    "清蒸虾",
+    "油焖大虾",
+    "回锅肉",
+    "鱼香肉丝",
+    "糖醋排骨",
+    "红烧排骨",
+    "京酱肉丝",
+    "青椒炒肉",
+    "牛肉炖萝卜",
+    "咖喱牛肉",
+    "蒜蓉西兰花",
+    "醋溜白菜",
+    "干煸四季豆",
+    "地三鲜",
+    "香菇青菜",
+    "凉拌黄瓜",
+    "凉拌木耳",
+    "凉拌西红柿",
+    "油焖春笋",
+    "酸辣土豆丝",
+    "炝炒圆白菜",
+    "清炒豆苗",
+    "蒜蓉生菜",
+    "清蒸茄子",
+    "干煸花菜",
+    "酸辣大白菜",
+    "素炒芥兰",
+    "糖醋藕丁",
+    "清炒菠菜",
+    "虾皮炒丝瓜",
+    "苦瓜炒蛋",
+    "荷塘小炒",
+    "木耳炒山药",
+    "蒜蓉秋葵",
+    "冬瓜香菜汤",
+    "韭菜炒鸡蛋",
+    "蒜泥白肉",
+    "口水鸡",
+    "盐水鸭",
+    "凉拌牛肉",
+    "五香卤牛肉",
+    "蒜蓉粉丝蒸扇贝",
+    "剁椒鱼头",
+    "马蹄蒸肉饼",
+    "肉末蒸蛋",
+    "啤酒鸭",
+    "板栗烧鸡",
+    "可乐鸡翅",
+    "香菇炖鸡",
+    "红烧鱼块",
+    "土豆烧排骨",
+    "红烧牛肉",
+    "砂锅豆腐",
+    "辣子鸡",
+    "葱姜炒蟹",
+    "清炒虾仁",
+    "葱爆羊肉",
+    "孜然羊肉",
+    "腰果虾仁",
+    "菠菜炒猪肝",
+    "凉拌海带丝",
+    "水煮毛豆",
+    "麻酱拌豆腐",
+    "凉拌豆腐丝",
+    "白灼秋葵",
+    "紫菜蛋花汤",
+    "番茄蛋花汤",
+    "豆腐青菜汤",
+    "菌菇汤",
+    "冬瓜薏米汤",
+    "蒜蓉蒸茄子",
+    "鱼香茄子煲",
+    "香煎豆腐",
+    "干锅千叶豆腐",
+    "铁板豆腐",
+    "双菇炒青菜",
+    "素炒豌豆苗",
+    "清炒空心菜",
+    "素炒三丝",
+    "松仁玉米",
+    "虎皮青椒",
+    "清炒茼蒿",
+    "蒜蓉豆角丝",
+    "糖藕",
+    "葱花土豆泥",
+    "牛肉面",
+    "炸酱面",
+    "扬州炒饭",
+    "小笼包",
+    "葱花饼",
+    "韭菜盒子",
+    "煎饺",
+    "杂粮饭",
+    "葱花鸡蛋饼",
+    "韭菜猪肉水饺"
+  ],
+  "recipe_role_counts": {
+    "main": 50,
+    "staple": 20,
+    "vegetable": 50
+  },
+  "external_rule_count": 57,
+  "external_rules": [
+    {
+      "legacy_key": "rule-5ae16fd87b",
+      "dish_name": "番茄鸡蛋盖饭",
+      "category": "家常盖饭",
+      "meal_format": "rice_bowl",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-9c65bea6d3",
+      "dish_name": "菌菇豆腐煲配米饭",
+      "category": "砂锅简餐",
+      "meal_format": "claypot_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-6029661dce",
+      "dish_name": "鸡肉时蔬饭",
+      "category": "均衡套餐",
+      "meal_format": "balanced_plate",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-1a19aedaab",
+      "dish_name": "南瓜小米粥配蒸蛋",
+      "category": "粥品套餐",
+      "meal_format": "congee_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-27dbe18134",
+      "dish_name": "清汤牛肉面",
+      "category": "汤面",
+      "meal_format": "noodle_soup",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-e1edd76e6f",
+      "dish_name": "清蒸鱼时蔬套餐",
+      "category": "蒸菜套餐",
+      "meal_format": "steamed_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-559e9ec500",
+      "dish_name": "凉拌鸡丝荞麦面",
+      "category": "轻食拌面",
+      "meal_format": "cold_noodle",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-06cb3ab931",
+      "dish_name": "鱼香肉丝饭",
+      "category": "川味盖饭",
+      "meal_format": "spicy_rice_bowl",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-da6422131f",
+      "dish_name": "鲜虾蔬菜馄饨",
+      "category": "汤馄饨",
+      "meal_format": "wonton_soup",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-d0cc90314a",
+      "dish_name": "香菇鸡肉焖饭",
+      "category": "焖饭",
+      "meal_format": "braised_rice",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-c303593271",
+      "dish_name": "鸡蛋蔬菜卷配玉米",
+      "category": "轻简套餐",
+      "meal_format": "wrap_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-a6ca1a2052",
+      "dish_name": "番茄牛腩粉",
+      "category": "汤粉",
+      "meal_format": "rice_noodle_soup",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-9121a57f50",
+      "dish_name": "鸡腿肉蔬菜糙米饭",
+      "category": "谷物套餐",
+      "meal_format": "grain_bowl",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-7fc3415d50",
+      "dish_name": "海南鸡饭配青菜",
+      "category": "东南亚简餐",
+      "meal_format": "hainanese_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-e38d4f29a8",
+      "dish_name": "虾仁滑蛋饭配时蔬",
+      "category": "滑蛋饭",
+      "meal_format": "egg_rice_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-3282c07998",
+      "dish_name": "烤鲭鱼定食",
+      "category": "烤鱼定食",
+      "meal_format": "grilled_fish_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-65a1fa102e",
+      "dish_name": "香煎豆腐杂蔬饭",
+      "category": "豆腐简餐",
+      "meal_format": "tofu_bowl",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-42f88b2248",
+      "dish_name": "番茄鸡蛋面配青菜",
+      "category": "家常汤面",
+      "meal_format": "homestyle_noodle",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-30e637ee79",
+      "dish_name": "三鲜米线配青菜",
+      "category": "米线",
+      "meal_format": "rice_noodle_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-2a4cc96746",
+      "dish_name": "鸡肉蔬菜河粉",
+      "category": "清汤河粉",
+      "meal_format": "pho_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-48e218cc3a",
+      "dish_name": "牛肉蔬菜卷饼",
+      "category": "卷饼套餐",
+      "meal_format": "beef_wrap",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-d97c3755b8",
+      "dish_name": "鹰嘴豆蔬菜卷配玉米",
+      "category": "素食卷饼",
+      "meal_format": "legume_wrap",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-3171cb2517",
+      "dish_name": "莲藕排骨汤配时蔬饭",
+      "category": "汤菜套餐",
+      "meal_format": "pork_soup_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-15f271c922",
+      "dish_name": "冬瓜虾仁汤配杂粮饭",
+      "category": "清汤套餐",
+      "meal_format": "light_soup_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-55d751a640",
+      "dish_name": "麻婆豆腐饭配青菜",
+      "category": "川味豆腐饭",
+      "meal_format": "spicy_tofu_rice",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-51265ea569",
+      "dish_name": "咖喱鸡肉饭配蔬菜",
+      "category": "咖喱饭",
+      "meal_format": "curry_rice",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-0e1df5fe1a",
+      "dish_name": "黑椒牛柳饭配彩椒",
+      "category": "铁板牛肉饭",
+      "meal_format": "beef_rice_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-d567ca91bb",
+      "dish_name": "红烧豆腐杂粮饭",
+      "category": "家常素套餐",
+      "meal_format": "vegetarian_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-331bddef7c",
+      "dish_name": "云吞面配白灼菜",
+      "category": "粤式面食",
+      "meal_format": "wonton_noodle",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-138ae95d95",
+      "dish_name": "鸡肉蔬菜沙拉配玉米",
+      "category": "轻食套餐",
+      "meal_format": "salad_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-49b4720529",
+      "dish_name": "烤鸡腿土豆时蔬套餐",
+      "category": "烤物套餐",
+      "meal_format": "roast_set",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-7a9f910364",
+      "dish_name": "韩式杂蔬拌饭",
+      "category": "拌饭",
+      "meal_format": "bibimbap",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-099ef239e3",
+      "dish_name": "腊味煲仔饭配青菜",
+      "category": "煲仔饭",
+      "meal_format": "claypot_rice",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-3d71a2e1d3",
+      "dish_name": "酸汤鱼片粉",
+      "category": "酸汤粉",
+      "meal_format": "sour_fish_noodle",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-462d477369",
+      "dish_name": "肉末茄子饭配青菜",
+      "category": "家常盖浇饭",
+      "meal_format": "minced_pork_rice",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-aaaeb440fe",
+      "dish_name": "香菇鸡肉蒸饭",
+      "category": "蒸饭",
+      "meal_format": "steamed_rice",
+      "serving_style": "individual"
+    },
+    {
+      "legacy_key": "rule-dd71c9f71a",
+      "dish_name": "番茄炒蛋＋菌菇豆腐＋时蔬＋杂粮饭",
+      "category": "家常合菜",
+      "meal_format": "shared_dishes",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-b1c0127209",
+      "dish_name": "菌汤火锅＋豆腐蔬菜拼盘＋主食",
+      "category": "清汤火锅",
+      "meal_format": "hotpot",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-91f323eab9",
+      "dish_name": "蒸点拼盘＋粥＋青菜",
+      "category": "广式茶点",
+      "meal_format": "dim_sum",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-51468cfef4",
+      "dish_name": "清蒸鱼＋时蔬＋杂粮饭",
+      "category": "清蒸合菜",
+      "meal_format": "steamed_set",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-b733c2a2da",
+      "dish_name": "砂锅鸡煲＋双份青菜＋米饭",
+      "category": "砂锅合餐",
+      "meal_format": "claypot",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-53f5ef91fd",
+      "dish_name": "番茄牛腩锅＋凉热双蔬＋主食",
+      "category": "炖锅合餐",
+      "meal_format": "stew_pot",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-74b3e8ad97",
+      "dish_name": "铁板鸡肉＋彩椒洋葱＋米饭",
+      "category": "铁板合餐",
+      "meal_format": "sizzling_plate",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-af09f66ffa",
+      "dish_name": "云南菌菇汽锅＋豆腐＋时蔬＋杂粮饭",
+      "category": "云南汽锅",
+      "meal_format": "steam_pot",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-0842437553",
+      "dish_name": "什锦素烩菜＋蒸蛋＋杂粮饭",
+      "category": "北方烩菜",
+      "meal_format": "homestyle_stew",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-d23fb8549c",
+      "dish_name": "白切鸡＋白灼时蔬＋例汤＋米饭",
+      "category": "粤式合菜",
+      "meal_format": "cantonese_set",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-71668ac38e",
+      "dish_name": "客家酿豆腐＋时蔬小炒＋杂粮饭",
+      "category": "客家合菜",
+      "meal_format": "hakka_set",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-596ad97267",
+      "dish_name": "小鸡炖蘑菇＋凉拌菜＋杂粮饭",
+      "category": "东北炖菜",
+      "meal_format": "northeast_stew",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-419afe6f3a",
+      "dish_name": "清炖狮子头＋双份时蔬＋米饭",
+      "category": "江浙合菜",
+      "meal_format": "jiangnan_set",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-c8d07bd0bd",
+      "dish_name": "湘味小炒肉＋蒸蛋＋时蔬＋米饭",
+      "category": "湘菜合餐",
+      "meal_format": "hunan_set",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-d2e5fdc3b9",
+      "dish_name": "烧味双拼＋白灼菜＋例汤＋米饭",
+      "category": "烧味合餐",
+      "meal_format": "roast_meat_set",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-7ef33cd6b3",
+      "dish_name": "清汤牛肉锅＋菌菇蔬菜拼盘＋主食",
+      "category": "牛肉锅",
+      "meal_format": "beef_hotpot",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-951256a783",
+      "dish_name": "酸菜鱼小份＋时蔬＋豆腐＋米饭",
+      "category": "酸菜鱼合餐",
+      "meal_format": "pickled_fish_set",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-0cb692b739",
+      "dish_name": "烤鱼小份＋双拼蔬菜＋主食",
+      "category": "烤鱼合餐",
+      "meal_format": "grilled_fish_share",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-f2b90fb2f8",
+      "dish_name": "家常豆腐＋地三鲜少油版＋蒸蛋＋杂粮饭",
+      "category": "素菜合餐",
+      "meal_format": "vegetarian_share",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-78a291b574",
+      "dish_name": "大盘鸡小份＋拌青菜＋面或米饭",
+      "category": "西北合餐",
+      "meal_format": "northwest_share",
+      "serving_style": "shared"
+    },
+    {
+      "legacy_key": "rule-958cd74092",
+      "dish_name": "铁板豆腐＋清炒虾仁＋双份时蔬＋米饭",
+      "category": "海陆合菜",
+      "meal_format": "seafood_share",
+      "serving_style": "shared"
+    }
+  ],
+  "claim_review_count": 38,
+  "claim_review_items": [
+    {
+      "name": "小米粥",
+      "terms": [
+        "养胃",
+        "安神"
+      ]
+    },
+    {
+      "name": "红烧肉",
+      "terms": [
+        "滋阴"
+      ]
+    },
+    {
+      "name": "番茄炖牛腩",
+      "terms": [
+        "补气",
+        "温补"
+      ]
+    },
+    {
+      "name": "家常豆腐",
+      "terms": [
+        "清热"
+      ]
+    },
+    {
+      "name": "鸡蛋羹",
+      "terms": [
+        "安神"
+      ]
+    },
+    {
+      "name": "醋溜白菜",
+      "terms": [
+        "清热"
+      ]
+    },
+    {
+      "name": "地三鲜",
+      "terms": [
+        "清热",
+        "健脾"
+      ]
+    },
+    {
+      "name": "凉拌黄瓜",
+      "terms": [
+        "清热",
+        "利尿"
+      ]
+    },
+    {
+      "name": "凉拌木耳",
+      "terms": [
+        "活血"
+      ]
+    },
+    {
+      "name": "冬瓜排骨汤",
+      "terms": [
+        "祛湿"
+      ]
+    },
+    {
+      "name": "银耳莲子羹",
+      "terms": [
+        "润肺",
+        "安神"
+      ]
+    },
+    {
+      "name": "酸萝卜老鸭汤",
+      "terms": [
+        "清热",
+        "滋阴"
+      ]
+    },
+    {
+      "name": "山药鸡汤",
+      "terms": [
+        "健脾",
+        "温补"
+      ]
+    },
+    {
+      "name": "皮蛋瘦肉粥",
+      "terms": [
+        "清热",
+        "滋阴"
+      ]
+    },
+    {
+      "name": "八宝粥",
+      "terms": [
+        "补气"
+      ]
+    },
+    {
+      "name": "绿豆粥",
+      "terms": [
+        "清热",
+        "解毒"
+      ]
+    },
+    {
+      "name": "牛肉面",
+      "terms": [
+        "补气",
+        "温补"
+      ]
+    },
+    {
+      "name": "韭菜盒子",
+      "terms": [
+        "温补"
+      ]
+    },
+    {
+      "name": "韭菜炒鸡蛋",
+      "terms": [
+        "滋阴",
+        "温补"
+      ]
+    },
+    {
+      "name": "发糕",
+      "terms": [
+        "补气"
+      ]
+    },
+    {
+      "name": "白斩鸡",
+      "terms": [
+        "温补"
+      ]
+    },
+    {
+      "name": "啤酒鸭",
+      "terms": [
+        "清热",
+        "滋阴"
+      ]
+    },
+    {
+      "name": "板栗烧鸡",
+      "terms": [
+        "健脾"
+      ]
+    },
+    {
+      "name": "栗子鸡",
+      "terms": [
+        "温补"
+      ]
+    },
+    {
+      "name": "猪肝炒菜椒",
+      "terms": [
+        "补血"
+      ]
+    },
+    {
+      "name": "莲藕炖排骨",
+      "terms": [
+        "清热",
+        "润肺"
+      ]
+    },
+    {
+      "name": "猪血豆腐汤",
+      "terms": [
+        "清热",
+        "解毒"
+      ]
+    },
+    {
+      "name": "葱爆羊肉",
+      "terms": [
+        "温补"
+      ]
+    },
+    {
+      "name": "牛肉炖萝卜",
+      "terms": [
+        "温补"
+      ]
+    },
+    {
+      "name": "羊肉汤",
+      "terms": [
+        "驱寒"
+      ]
+    },
+    {
+      "name": "虾皮炒丝瓜",
+      "terms": [
+        "解毒"
+      ]
+    },
+    {
+      "name": "苦瓜炒蛋",
+      "terms": [
+        "清热"
+      ]
+    },
+    {
+      "name": "木耳炒山药",
+      "terms": [
+        "健脾"
+      ]
+    },
+    {
+      "name": "冰糖雪梨",
+      "terms": [
+        "润肺",
+        "降火"
+      ]
+    },
+    {
+      "name": "菠菜炒猪肝",
+      "terms": [
+        "补血"
+      ]
+    },
+    {
+      "name": "冬瓜薏米汤",
+      "terms": [
+        "祛湿"
+      ]
+    },
+    {
+      "name": "清炒山药木耳",
+      "terms": [
+        "健脾"
+      ]
+    },
+    {
+      "name": "山药枸杞粥",
+      "terms": [
+        "润肺",
+        "健脾"
+      ]
+    }
+  ]
+}

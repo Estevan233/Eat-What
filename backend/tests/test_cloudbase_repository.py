@@ -6,6 +6,7 @@ from types import MappingProxyType
 
 import pytest
 
+from app.models.food import Food
 from app.models.user import User
 from app.models.user_profile import UserProfile
 from app.repositories.cloudbase_rdb import RdbFilter, RdbResult
@@ -220,3 +221,18 @@ def test_update_fields_rejects_unknown_and_primary_key_columns(
             values=values,
             filters=(RdbFilter("id", "eq", 9),),
         )
+
+
+def test_internal_openid_scope_is_not_serialized_to_rest_payload() -> None:
+    food = Food(
+        name="REST 内部字段测试",
+        category="staple",
+        nature="unknown",
+        cooking_method="boil",
+        openid_scope="server-only",
+    )
+
+    payload = CloudBaseRepository._values(food)
+
+    assert "openid_scope" not in payload
+    assert "_openid" not in payload

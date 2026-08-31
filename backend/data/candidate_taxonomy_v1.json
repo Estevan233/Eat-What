@@ -1,0 +1,52 @@
+{
+  "taxonomy_version": 1,
+  "meal_families": {
+    "single_dish": ["stir_fry", "steamed_dish", "stewed_dish", "cold_dish"],
+    "rice_meal": ["rice_bowl", "fried_rice", "braised_rice", "curry_rice", "claypot_rice"],
+    "noodle_meal": ["noodle_soup", "dry_noodle", "rice_noodle_soup", "stir_fried_noodle"],
+    "grain_congee": ["congee", "grain_bowl"],
+    "soup_meal": ["light_soup_set", "stew_soup_set", "soup_rice"],
+    "dumpling_bun": ["dumpling", "wonton", "steamed_bun", "dim_sum"],
+    "wrap_light_meal": ["wrap", "salad_set", "sandwich"],
+    "set_meal": ["balanced_plate", "steamed_set", "roast_set"],
+    "shared_dishes": ["homestyle_share", "regional_share"],
+    "hotpot_grill": ["hotpot", "grilled_share"],
+    "snack_dessert": ["snack", "dessert"],
+    "other": ["other"]
+  },
+  "cuisine_regions": ["cn_national", "cn_northeast", "cn_beijing_tianjin", "cn_shandong", "cn_jiangzhe", "cn_fujian", "cn_cantonese", "cn_hakka", "cn_sichuan", "cn_hunan", "cn_yunnan_guizhou", "cn_northwest", "cn_hainan", "east_asia", "southeast_asia", "fusion", "other", "unknown"],
+  "staple_types": ["rice", "wheat_noodle", "rice_noodle", "wheat_bread", "dumpling_wrapper", "whole_grain", "congee", "tuber", "corn", "mixed", "none", "other", "unknown"],
+  "protein_types": ["egg", "poultry", "pork", "beef", "lamb", "fish", "crustacean", "mollusk", "dairy", "soy", "legume", "nut_seed", "none", "other", "unknown"],
+  "serving_styles": ["individual", "shared", "either"],
+  "meal_periods": ["breakfast", "lunch", "dinner", "late_night", "snack", "any"],
+  "delivery_fits": ["high", "medium", "low", "not_applicable", "unknown"],
+  "price_bands": ["budget", "standard", "premium", "unknown"],
+  "natures": ["cold", "cool", "neutral", "warm", "hot", "unknown"],
+  "review_statuses": ["draft", "source_verified", "content_reviewed", "approved", "rejected", "retired"],
+  "source_types": ["government_data", "original_publisher", "restaurant_menu", "professional_recipe", "other_reviewed"],
+  "external_targets": {
+    "total": 315,
+    "individual": 195,
+    "shared": 105,
+    "either": 15,
+    "meal_family_counts": {
+      "rice_meal": 48,
+      "noodle_meal": 48,
+      "dumpling_bun": 36,
+      "set_meal": 42,
+      "grain_congee": 28,
+      "soup_meal": 25,
+      "wrap_light_meal": 20,
+      "shared_dishes": 32,
+      "hotpot_grill": 26,
+      "snack_dessert": 10
+    }
+  },
+  "continuity_weights": {
+    "ingredient_protein_staple": 40,
+    "meal_family": 25,
+    "cooking_method": 15,
+    "flavor": 10,
+    "context": 10
+  }
+}

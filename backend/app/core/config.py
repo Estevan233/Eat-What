@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     qweather_api_key: SecretStr | None = None
     qweather_timeout_seconds: float = 2.5
 
+    # 外食候选目录默认关闭；完成来源审核并在 CloudBase 灰度验证后才打开。
+    external_catalog_enabled: bool = False
+
     @field_validator("database_url", mode="before")
     @classmethod
     def use_installed_mysql_driver(cls, value: object) -> object:

@@ -1,0 +1,48 @@
+{"file": "backend/app/models/external_dining_candidate.py", "reason": "Add auditable anchor_food and continuity_score fields for source-reviewed candidates."}
+{"file": "backend/app/services/candidate_catalog_validation.py", "reason": "Require anchor and 0-100 continuity score from source_verified onward."}
+{"file": "backend/app/services/external_dining_seed.py", "reason": "Persist audit fields during idempotent seed import."}
+{"file": "backend/scripts/build_external_catalog_batch1.py", "reason": "Deterministically append first 52 source-backed draft candidates."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 109 total external candidates while keeping all unapproved."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Expose per-row anchor and continuity audit columns."}
+{"file": "backend/alembic/versions/20260831_09_candidate_audit.py", "reason": "Add nullable audit columns without destructive changes."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch1.md", "reason": "Record browser-verified source page and usage boundaries."}
+{"file": "backend/app/services/candidate_catalog_validation.py", "reason": "Normalize Unicode names and add conservative structural fingerprints for duplicate review."}
+{"file": "backend/scripts/validate_candidate_catalog.py", "reason": "Report structural duplicate pairs and block them for approved release candidates."}
+{"file": "backend/tests/services/test_candidate_catalog_validation.py", "reason": "Cover serving-modifier normalization while retaining protein differences."}
+{"file": "backend/scripts/validate_external_dining_seed.py", "reason": "Add explicit opt-in source URL reachability checks with bounded HEAD/Range GET fallback."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch1.md", "reason": "Record actual WSL source-check result and browser/network boundary."}
+{"file": "backend/scripts/validate_candidate_catalog.py", "reason": "Accept an explicit --offline switch used by the documented release validation command."}
+{"file": "backend/scripts/build_external_catalog_batch2.py", "reason": "Idempotently append 14 browser-verified ICH project-name drafts with conservative unknown fields."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 123 total external candidates; second batch remains draft pending menu and nutrition evidence."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the second candidate batch."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch2.md", "reason": "Record page-level source evidence and explicit usage boundaries for batch 2."}
+{"file": "backend/scripts/build_external_catalog_batch3.py", "reason": "Idempotently append 10 names explicitly listed by the browser-verified official ICH tofu page; keep all rows draft."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 133 total external candidates; third batch is source-backed but remains draft pending menu and nutrition evidence."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the third candidate batch."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch3.md", "reason": "Record page-level official source evidence and explicit non-inference boundaries for batch 3."}
+{"file": "backend/scripts/release.sh", "reason": "Route CloudBase REST releases through the HTTP gateway read-contract check and skip Alembic DDL; retain Alembic only for SQLAlchemy deployments."}
+{"file": "backend/README.md", "reason": "Document the REST release preflight and the explicit schema-migration boundary."}
+{"file": "backend/app/services/recipe_seed.py", "reason": "Recover recipe seed inserts/updates when the CloudBase REST gateway returns an empty representation after a successful write; re-read by food_id/id and fail closed if the row is absent."}
+{"file": "backend/tests/services/test_seed_import_cloudbase_rest.py", "reason": "Add a REST-shaped regression double that returns an empty recipe insert body while persisting the row."}
+{"file": "backend/scripts/build_external_catalog_batch4.py", "reason": "Batch 52 real-world recipe-index candidates across rice meals, noodles, dumplings, soups, wraps, hotpot and grilled dishes; keep all rows draft pending menu review."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 185 external candidates after batch 4; new public-recipe-index rows remain draft and excluded from production recommendation."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the 52 fourth-batch candidates with source URL, anchor, continuity score and review state."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch4.md", "reason": "Document the public recipe-index source choice, browser verification, rate-limit boundary and approval requirements for batch 4."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-scope-approved.md", "reason": "Clarify that Xiachufang/UGC links are discovery-only and require menu or A/B-grade evidence before approval."}
+{"file": "backend/scripts/build_external_catalog_batch5.py", "reason": "Batch 52 mainstream recipe candidates from reachable Meishichina pages; keep all rows draft and preserve anchor/continuity metadata."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 237 external candidates after batch 5; Meishichina-backed rows remain draft and excluded from production recommendation."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the 52 fifth-batch candidates with direct source URL, anchor, continuity score and review state."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch5.md", "reason": "Record parallel page-level verification on Meishichina, source replacement after Xiachufang rate limits, and approval boundaries."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-scope-approved.md", "reason": "Include Meishichina and Xiangha in the explicit discovery-only UGC source boundary."}
+{"file": "backend/app/services/food_seed.py", "reason": "Recover committed CloudBase REST food inserts/updates when the gateway returns an empty representation; re-read by name/id and fail closed if the row is absent."}
+{"file": "backend/tests/services/test_seed_import_cloudbase_rest.py", "reason": "Add a regression double for empty food insert/update responses and verify idempotent recovery."}
+{"file": "backend/scripts/build_external_catalog_batch6.py", "reason": "Batch 52 ordinary recipe candidates from Meishichina pages 21-30, balanced across rice/noodles/dumplings/soups/stews and kept as drafts."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 289 external candidates after batch 6; Meishichina-backed rows remain draft and excluded from production recommendation."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the 52 sixth-batch candidates with direct source URL, anchor, continuity score and review state."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch6.md", "reason": "Record parallel page-level verification for Meishichina pages 21-30 and the discovery-only approval boundary."}
+{"file": "backend/scripts/build_external_catalog_batch7.py", "reason": "Complete the 315-row external discovery target with 26 ordinary shared/individual candidates from verified Meishichina pages."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 315 external candidates after batch 7; all remain draft pending merchant/menu review."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the final 26 candidates with direct source URL, anchor, continuity score and review state."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch7.md", "reason": "Record parallel page-level verification for the final 26 Meishichina sources and approval boundaries."}
+{"file": "backend/app/services/external_dining_seed.py", "reason": "Recover committed CloudBase REST candidate inserts/updates when the gateway omits a representation; re-read by catalog_key/id and fail closed if absent."}
+{"file": "backend/tests/services/test_seed_import_cloudbase_rest.py", "reason": "Add a regression double for empty external-candidate REST write responses and verify idempotent recovery."}

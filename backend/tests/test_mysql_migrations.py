@@ -66,6 +66,15 @@ def test_all_alembic_revisions_compile_for_mysql() -> None:
     assert "ix_users_account_kind_status" in result.stdout
     assert "ix_users_merged_into_user_id" in result.stdout
     assert "fk_users_merged_into_user_id_users" in result.stdout
+    assert "CREATE TABLE external_dining_candidates" in result.stdout
+    assert "_openid VARCHAR(64) NOT NULL" in result.stdout
+    assert "ix_external_dining_candidates_openid" in result.stdout
+    assert "catalog_key VARCHAR(96)" in result.stdout
+    assert "review_status VARCHAR(24)" in result.stdout
+    assert "ix_external_dining_candidates_review_active" in result.stdout
+    assert "ix_external_dining_candidates_family" in result.stdout
+    assert "ix_foods_review_active" in result.stdout
+    assert "ix_foods_catalog_family" in result.stdout
 
 
 def test_account_merge_revision_compiles_for_sqlite() -> None:

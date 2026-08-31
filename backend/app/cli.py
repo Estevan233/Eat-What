@@ -7,6 +7,30 @@
 """
 import sys
 
+from sqlmodel import Session
+
+from app.repositories.cloudbase_repository import DatabaseSession
+
+
+def _open_database() -> DatabaseSession:
+    """Open the configured app database; CloudBase REST never falls back to SQLite."""
+    from app.core.config import get_settings
+
+    if get_settings().database_backend == "cloudbase_rest":
+        from app.core.deps import get_cloudbase_repository
+
+        return get_cloudbase_repository()
+
+    from app.db import SessionLocal, init_db
+
+    init_db()
+    return SessionLocal()
+
+
+def _close_database(session: DatabaseSession) -> None:
+    if isinstance(session, Session):
+        session.close()
+
 
 def main() -> int:
     if len(sys.argv) < 2:
@@ -14,6 +38,7 @@ def main() -> int:
         print("Commands:")
         print("  seed-food     幂等导入食物库冷启动数据")
         print("  seed-recipes  幂等导入结构化菜谱")
+        print("  seed-catalog  幂等导入已审核的外食候选目录")
         print("  seed-all      先导入食物，再导入结构化菜谱")
         return 1
 
@@ -22,12 +47,17 @@ def main() -> int:
         return _run_seed_food()
     if cmd == "seed-recipes":
         return _run_seed_recipes()
+    if cmd == "seed-catalog":
+        return _run_seed_catalog(include_drafts="--include-drafts" in sys.argv[2:])
     if cmd == "seed-all":
         food_result = _run_seed_food()
-        return food_result if food_result else _run_seed_recipes()
+        if food_result:
+            return food_result
+        recipe_result = _run_seed_recipes()
+        return recipe_result if recipe_result else _run_seed_catalog(include_drafts=False)
     else:
         print(f"Unknown command: {cmd}")
-        print("Available: seed-food, seed-recipes, seed-all")
+        print("Available: seed-food, seed-recipes, seed-catalog, seed-all")
         return 1
 
 
@@ -37,13 +67,9 @@ def _run_seed_food() -> int:
     环境要求：JWT_SECRET / WX_APPID / CLOUDBASE_ENV_ID 已在 .env 或环境变量里。
     正式 CloudBase 登录不需要 WX_SECRET；仅显式开启旧 code2session 时才需要。
     """
-    from app.db import SessionLocal, init_db
     from app.services.food_seed import DEFAULT_SEED_PATH, import_seed
 
-    # 确保表存在（首次跑或 dev.db 删过时需要）
-    init_db()
-
-    session = SessionLocal()
+    session = _open_database()
     try:
         count = import_seed(session, DEFAULT_SEED_PATH)
         print(f"[OK] 导入食物库完成：{count} 条")
@@ -57,16 +83,14 @@ def _run_seed_food() -> int:
         print(f"[ERR] 导入失败: {e}")
         return 3
     finally:
-        session.close()
+        _close_database(session)
 
 
 def _run_seed_recipes() -> int:
     """幂等 upsert 结构化菜谱；必须在食物种子之后执行。"""
-    from app.db import SessionLocal, init_db
     from app.services.recipe_seed import DEFAULT_RECIPE_SEED_PATH, import_recipe_seed
 
-    init_db()
-    session = SessionLocal()
+    session = _open_database()
     try:
         count = import_recipe_seed(session, DEFAULT_RECIPE_SEED_PATH)
         print(f"[OK] 导入结构化菜谱完成：{count} 条")
@@ -79,7 +103,24 @@ def _run_seed_recipes() -> int:
         print(f"[ERR] 菜谱导入失败: {error}")
         return 3
     finally:
-        session.close()
+        _close_database(session)
+
+
+def _run_seed_catalog(*, include_drafts: bool) -> int:
+    """Import the audited external catalog; drafts require an explicit flag."""
+    from app.services.external_dining_seed import DEFAULT_SEED_PATH, import_seed
+
+    session = _open_database()
+    try:
+        count = import_seed(session, DEFAULT_SEED_PATH, include_drafts=include_drafts)
+        print(f"[OK] 导入外食候选目录完成：{count} 条")
+        print(f"     数据源: {DEFAULT_SEED_PATH}")
+        return 0
+    except (FileNotFoundError, ValueError) as error:
+        print(f"[ERR] 外食候选导入失败: {error}")
+        return 2
+    finally:
+        _close_database(session)
 
 
 if __name__ == "__main__":

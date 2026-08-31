@@ -1,6 +1,6 @@
 # 500+ 结构化候选库实施计划
 
-> 当前状态：仅规划，未启动。所有条目保持未勾选，待 `prd.md`、`design.md` 和审计报告评审通过后，才能运行 Trellis start 并进入实现。
+> 当前状态：已于 2026-08-31 确认范围并启动实施。目标为 205 个家庭候选 + 315 个外食方向，语义去重后不少于 500 个；120 个既有 Recipe 保持独立质量门。
 
 ## 实施原则
 
@@ -12,20 +12,21 @@
 
 ## 0. 评审与基线冻结
 
-- [ ] 0.1 评审需求口径与质量门
+- [x] 0.1 评审需求口径与质量门
   - 确认家庭候选 205–250、外食 300–320、去重后总计 >=500。
   - 确认 120 Recipe 保留，未来按 <=30/批渐进到 180–240。
   - 确认 `nature=unknown`、`seasonal_solar_terms=[all_season]` 为合法完整值。
   - 确认体质/性味不承担无证据的医疗硬过滤。
   - _Requirements: R1, R3, R6, R8_
+  - 已确认：外食平台菜单仅作现实存在性验证，不作为唯一主来源；新增候选按 75% 邻近扩展、20% 中国常见缺口、最多 5% 探索控制。
 
-- [ ] 0.2 生成不可变基线清单
+- [x] 0.2 生成不可变基线清单
   - 固化 205 个家庭名称、120 个 Recipe 名称及 50/50/20 角色摘要、57 个外食旧 key。
   - 记录 seed SHA256、当前 validator 输出与测试结果。
   - 记录现有 38 条功效性描述作为待清理清单，不能在迁移时静默改写。
   - _Requirements: R6, R7, R8_
 
-- [ ] 0.3 建立版本化词表
+- [x] 0.3 建立版本化词表
   - 定义 `meal_family/sub_family/cuisine_region` registry v1。
   - 定义 `staple_type/protein_types/serving_style/meal_periods/delivery_fit/price_band/nature/review_status` 枚举。
   - 为所有词表增加 schema fixture 和非法值测试。
@@ -41,7 +42,7 @@
   - 覆盖描述/说明中的无依据治疗与保证性承诺扫描。
   - _Requirements: R1, R2, R3, R4, R8_
 
-- [ ] 1.2 新建外食目录 validator 测试
+- [x] 1.2 新建外食目录 validator 测试
   - 覆盖 300–320 总量、个人 >=180、共享 >=90。
   - 覆盖至少 10 个 family、单 family <=20%、`delivery_fit high|medium >=70%`。
   - 覆盖能量上下界、受控词表、来源状态、硬重复和近重复报告。
@@ -69,26 +70,27 @@ pytest tests/services/test_food_seed.py tests/services/test_recipe_seed.py tests
 
 ## 2. 数据库与模型的兼容迁移
 
-- [ ] 2.1 为 `foods` 增加目录字段
+- [x] 2.1 为 `foods` 增加目录字段
   - 先新增 nullable/有安全默认值的字段与索引。
   - JSON 数组使用独立 default factory；避免共享可变默认值。
   - `catalog_key` 在回填完成前不立刻强制非空，避免老库升级失败。
   - _Requirements: R2, R3, R4, R7_
 
-- [ ] 2.2 新建 `external_dining_candidates` 模型与迁移
+- [x] 2.2 新建 `external_dining_candidates` 模型与迁移
   - 包含公共字段、外食能量范围、忌口、营养说明和下单提示。
   - 为 `catalog_key` 建唯一索引，为 `(review_status,is_active)` 及主要分类建查询索引。
   - _Requirements: R1, R2, R4, R7_
 
-- [ ] 2.3 增加 legacy key alias 结构
+- [x] 2.3 增加 legacy key alias 结构
   - 生成现有 57 条 `rule-<sha1>` 到新 `catalog_key` 的映射。
   - replay/历史读取在过渡期同时识别新旧 key。
   - _Requirements: R7_
 
-- [ ] 2.4 验证 SQLite 与 CloudBase MySQL DDL
+- [x] 2.4 验证 SQLite 与 CloudBase MySQL DDL
   - SQLite 运行完整 upgrade/downgrade 测试。
   - 审阅 MySQL JSON、索引长度、布尔默认值和时间字段。
   - 升级后验证旧 205 Food、120 Recipe 可读且接口未变。
+  - 2026-08-31 已在 `cloud1-d8gz4jm8vb964a1c9` 实测追加 DDL，`alembic_version=20260831_08`、`foods=205`、`external_dining_candidates=0`；备份创建因环境另一个 paused serverless 实例被平台拒绝，未强行唤醒。
   - _Requirements: R6, R7_
 
 **建议验证命令**：
@@ -105,7 +107,7 @@ alembic upgrade head
 
 ## 3. 校验脚本与质量报告
 
-- [ ] 3.1 实现公共 schema/registry 校验模块
+- [x] 3.1 实现公共 schema/registry 校验模块
   - 统一字段类型、枚举、互斥数组、URL、审核状态和版本约束。
   - 错误必须包含文件、记录索引、`catalog_key`、字段和实际值。
   - _Requirements: R2, R3, R4_
@@ -116,7 +118,7 @@ alembic upgrade head
   - 旧 50% 节气 warning 删除，改成新发布集的 100% 阻断门。
   - _Requirements: R1, R2, R3, R4, R8_
 
-- [ ] 3.3 新增 `validate_external_dining_seed.py`
+- [x] 3.3 新增 `validate_external_dining_seed.py`
   - 输出结构错误、硬重复、近重复候选和分类矩阵。
   - 支持稳定的 `--offline` 与发布前 `--check-sources` 模式。
   - _Requirements: R1, R4, R5, R8_
@@ -127,7 +129,7 @@ alembic upgrade head
   - 禁止承诺扫描扩展到所有公开文本字段。
   - _Requirements: R4, R6, R8_
 
-- [ ] 3.5 新增全目录质量报告
+- [x] 3.5 新增全目录质量报告
   - 生成 JSON 与 Markdown：计数、分布、unknown/all_season、来源状态、重复、声明扫描和 Recipe 连续性。
   - 报告中区分 schema completeness 与 evidence completeness。
   - _Requirements: R1, R4, R5, R6, R8_
@@ -143,19 +145,19 @@ python backend/scripts/validate_candidate_catalog.py --offline
 
 ## 4. 导入服务：稳定键、dry-run、幂等与软停用
 
-- [ ] 4.1 改造家庭 seed importer
+- [x] 4.1 改造家庭 seed importer
   - 从按 `name` upsert 迁移到按 `catalog_key` upsert。
   - 首次迁移可通过经审计的 name→key 映射绑定旧行，冲突必须失败。
   - 保持“不删除生产自建 Food”的现有保证。
   - _Requirements: R7_
 
-- [ ] 4.2 新增外食 seed importer
+- [x] 4.2 新增外食 seed importer
   - 仅导入 `approved`；默认非 destructive。
   - 支持 create/update/unchanged/conflict/retire 的 dry-run 汇总。
   - 每批单事务，任一冲突整批回滚。
   - _Requirements: R4, R7_
 
-- [ ] 4.3 增加导入幂等与冲突测试
+- [x] 4.3 增加导入幂等与冲突测试
   - 连续导入两次行数不变。
   - 展示名变化更新原记录，stable key 不变。
   - stable key/name 交叉冲突、重复 key、非法 retire 阻断。
@@ -171,7 +173,7 @@ python backend/scripts/validate_candidate_catalog.py --offline
   - 不在此步骤改展示名、营养或描述。
   - _Requirements: R1, R6, R7_
 
-- [ ] 5.2 为现有 57 外食方向分配稳定键和公共分类
+- [x] 5.2 为现有 57 外食方向分配稳定键和公共分类
   - 记录 36 individual / 21 shared 基线。
   - 将 56 个唯一 `meal_format` 映射为 registry 中的 sub-family，解决 `steamed_set` 跨 style 冲突的统计语义，不破坏 API。
   - _Requirements: R2, R5, R7_
@@ -250,12 +252,12 @@ python backend/scripts/validate_candidate_catalog.py --offline
 
 ## 9. 外食服务切换与兼容
 
-- [ ] 9.1 实现 DB→现有响应的适配器
+- [x] 9.1 实现 DB→现有响应的适配器
   - `sub_family` 映射到 `meal_format`，`catalog_key` 映射到 suggestion key。
   - 仅读取 approved+active；`either` 可服务个人与家庭。
   - _Requirements: R2, R4, R7_
 
-- [ ] 9.2 保留规则 fallback
+- [x] 9.2 保留规则 fallback
   - 开关关闭、表为空、读取失败时回到 57 条现有规则。
   - fallback 必须记录结构化指标，不泄漏城市/搜索关键词等隐私。
   - _Requirements: R7_
@@ -296,7 +298,7 @@ python backend/scripts/validate_candidate_catalog.py --offline
   - 外食个人/共享、family、delivery 分布全部达标。
   - _Requirements: R1-R8_
 
-- [ ] 11.2 运行后端全量检查
+- [x] 11.2 运行后端全量检查
   - ruff、mypy、pytest 全绿。
   - CloudBase REST repository 与 MySQL migration 相关测试全绿。
   - _Requirements: R7_
