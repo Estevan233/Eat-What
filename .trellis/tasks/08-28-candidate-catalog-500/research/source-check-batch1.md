@@ -17,3 +17,7 @@
 ## 审核结果
 
 首批 52 条已写入 backend/data/external_dining_seed.json，每条有稳定 catalog_key、anchor_food 和 68–92 的连续性评分；没有任何记录被自动批准。审核清单由 build_candidate_review_manifest.py 生成，当前总行数 109，线上导入器仍只接收 approved && is_active。
+
+## 自动可达性检查
+
+新增 `validate_external_dining_seed.py --check-sources` 只请求去重后的 URL 响应头，遇到站点拒绝 HEAD 时回退为 Range GET，不下载页面正文。2026-08-31 在 WSL 实测结果：GitHub 来源可达；中国非物质文化遗产网在该 WSL 网络链路出现 TLS `UNEXPECTED_EOF_WHILE_READING`，因此本次不能把“WSL 请求失败”记为来源失效。浏览器已能读取该页面正文，但正式 source_verified 仍需在部署/CI 网络中再次执行检查并由人工确认页面事实边界。

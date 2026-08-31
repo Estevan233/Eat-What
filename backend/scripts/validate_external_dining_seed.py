@@ -11,6 +11,8 @@ import json
 from collections import Counter
 import sys
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 if str(BACKEND_ROOT) not in sys.path:
@@ -118,6 +120,53 @@ def validate(rows: object, *, allow_draft: bool) -> list[str]:
     return errors
 
 
+def check_sources(rows: object, *, timeout_seconds: float = 8.0) -> list[str]:
+    """Check each distinct HTTPS source without downloading page bodies."""
+    if not isinstance(rows, list):
+        return ["顶层必须是 list"]
+    urls = sorted(
+        {
+            row.get("source_url")
+            for row in rows
+            if isinstance(row, dict) and isinstance(row.get("source_url"), str)
+        }
+    )
+    errors: list[str] = []
+    for url in urls:
+        request = Request(
+            url,
+            method="HEAD",
+            headers={"User-Agent": "Eat-What-catalog-check/1.0"},
+        )
+        try:
+            with urlopen(request, timeout=timeout_seconds) as response:
+                status = getattr(response, "status", 200)
+                if not 200 <= status < 400:
+                    errors.append(f"source_url 不可访问 ({status}): {url}")
+        except HTTPError as exc:
+            # Some official sites reject HEAD; retry a bounded range GET.
+            if exc.code not in {405, 501}:
+                errors.append(f"source_url HTTP {exc.code}: {url}")
+                continue
+            try:
+                fallback = Request(
+                    url,
+                    headers={
+                        "User-Agent": "Eat-What-catalog-check/1.0",
+                        "Range": "bytes=0-0",
+                    },
+                )
+                with urlopen(fallback, timeout=timeout_seconds) as response:
+                    status = getattr(response, "status", 200)
+                    if not 200 <= status < 400:
+                        errors.append(f"source_url 不可访问 ({status}): {url}")
+            except (HTTPError, URLError, TimeoutError) as fallback_exc:
+                errors.append(f"source_url 检查失败 ({fallback_exc}): {url}")
+        except (URLError, TimeoutError) as exc:
+            errors.append(f"source_url 检查失败 ({exc}): {url}")
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=Path, default=DEFAULT_PATH)
@@ -128,9 +177,19 @@ def main() -> int:
         action="store_true",
         help="仅执行结构/分布校验，不请求 source_url（当前默认行为）",
     )
+    parser.add_argument(
+        "--check-sources",
+        action="store_true",
+        help="联网检查去重后的 source_url（与 --offline 互斥）",
+    )
+    parser.add_argument("--source-timeout", type=float, default=8.0)
     args = parser.parse_args()
     rows: object = json.loads(args.path.read_text(encoding="utf-8"))
     errors = validate(rows, allow_draft=args.allow_draft)
+    if args.offline and args.check_sources:
+        parser.error("--offline 与 --check-sources 不能同时使用")
+    if args.check_sources:
+        errors.extend(check_sources(rows, timeout_seconds=args.source_timeout))
     if errors:
         print(f"[FAIL] {len(errors)} 个错误")
         for error in errors:
