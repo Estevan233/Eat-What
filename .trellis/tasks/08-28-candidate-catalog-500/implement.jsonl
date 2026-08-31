@@ -20,3 +20,5 @@
 {"file": "backend/data/external_dining_seed.json", "reason": "Record 133 total external candidates; third batch is source-backed but remains draft pending menu and nutrition evidence."}
 {"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the third candidate batch."}
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch3.md", "reason": "Record page-level official source evidence and explicit non-inference boundaries for batch 3."}
+{"file": "backend/scripts/release.sh", "reason": "Route CloudBase REST releases through the HTTP gateway read-contract check and skip Alembic DDL; retain Alembic only for SQLAlchemy deployments."}
+{"file": "backend/README.md", "reason": "Document the REST release preflight and the explicit schema-migration boundary."}
