@@ -12,3 +12,7 @@
 {"file": "backend/scripts/validate_external_dining_seed.py", "reason": "Add explicit opt-in source URL reachability checks with bounded HEAD/Range GET fallback."}
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch1.md", "reason": "Record actual WSL source-check result and browser/network boundary."}
 {"file": "backend/scripts/validate_candidate_catalog.py", "reason": "Accept an explicit --offline switch used by the documented release validation command."}
+{"file": "backend/scripts/build_external_catalog_batch2.py", "reason": "Idempotently append 14 browser-verified ICH project-name drafts with conservative unknown fields."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 123 total external candidates; second batch remains draft pending menu and nutrition evidence."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the second candidate batch."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch2.md", "reason": "Record page-level source evidence and explicit usage boundaries for batch 2."}
