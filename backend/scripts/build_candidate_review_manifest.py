@@ -63,7 +63,10 @@ def main() -> int:
         writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
-    print(f"candidate_review_manifest_ok rows={len(rows)} status=draft")
+    statuses = sorted({str(row["review_status"]) for row in rows})
+    print(
+        f"candidate_review_manifest_ok rows={len(rows)} statuses={','.join(statuses)}"
+    )
     return 0
 
 
