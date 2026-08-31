@@ -22,3 +22,5 @@
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch3.md", "reason": "Record page-level official source evidence and explicit non-inference boundaries for batch 3."}
 {"file": "backend/scripts/release.sh", "reason": "Route CloudBase REST releases through the HTTP gateway read-contract check and skip Alembic DDL; retain Alembic only for SQLAlchemy deployments."}
 {"file": "backend/README.md", "reason": "Document the REST release preflight and the explicit schema-migration boundary."}
+{"file": "backend/app/services/recipe_seed.py", "reason": "Recover recipe seed inserts/updates when the CloudBase REST gateway returns an empty representation after a successful write; re-read by food_id/id and fail closed if the row is absent."}
+{"file": "backend/tests/services/test_seed_import_cloudbase_rest.py", "reason": "Add a REST-shaped regression double that returns an empty recipe insert body while persisting the row."}

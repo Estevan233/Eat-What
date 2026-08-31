@@ -5,8 +5,23 @@ from __future__ import annotations
 import json
 
 from app.repositories.cloudbase_repository import CloudBaseRepository
+from app.repositories.cloudbase_rdb import RdbResult
 from app.services import food_seed, recipe_seed
 from tests.test_cloudbase_rest_services import MemoryRdbClient
+
+
+class NoRepresentationRecipeInsertClient(MemoryRdbClient):
+    """Model the gateway's successful recipe insert with an empty body."""
+
+    def insert(self, table: str, values) -> RdbResult:
+        result = super().insert(table, values)
+        if table == "recipes":
+            return RdbResult(
+                rows=[],
+                status_code=result.status_code,
+                affected=result.affected,
+            )
+        return result
 
 
 def test_food_seed_upserts_through_cloudbase_repository(session, tmp_path) -> None:
@@ -39,7 +54,7 @@ def test_food_seed_upserts_through_cloudbase_repository(session, tmp_path) -> No
 
 
 def test_recipe_seed_upserts_food_and_recipe_through_cloudbase_repository(tmp_path) -> None:
-    client = MemoryRdbClient()
+    client = NoRepresentationRecipeInsertClient()
     repository = CloudBaseRepository(client)
     food_path = tmp_path / "foods.json"
     food_path.write_text(

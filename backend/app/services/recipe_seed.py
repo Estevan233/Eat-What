@@ -28,6 +28,35 @@ def _load_recipes(session: DatabaseSession) -> dict[int, Recipe]:
     return {recipe.food_id: recipe for recipe in session.exec(select(Recipe)).all()}
 
 
+def _insert_cloudbase_recipe(
+    session: DatabaseSession,
+    recipe: Recipe,
+) -> Recipe:
+    """Insert a recipe and recover rows when REST omits representation.
+
+    CloudBase can acknowledge a successful insert with an empty response for
+    tables containing JSON columns, even when ``Prefer: return=representation``
+    is sent.  The write is still committed, so re-read by the unique
+    ``food_id`` key before treating it as a failure.
+    """
+    if not is_cloudbase_repository(session):
+        raise TypeError("_insert_cloudbase_recipe requires CloudBaseRepository")
+    try:
+        return session.insert(recipe)
+    except RuntimeError as error:
+        if "no representation" not in str(error) or recipe.food_id is None:
+            raise
+        recovered = session.first(
+            Recipe,
+            filters=(RdbFilter("food_id", "eq", recipe.food_id),),
+        )
+        if recovered is None:
+            raise RuntimeError(
+                "CloudBase REST recipe insert returned no representation and row was not found",
+            ) from error
+        return recovered
+
+
 def _save_cloudbase_recipe_and_food(
     session: DatabaseSession,
     recipe: Recipe,
@@ -37,8 +66,41 @@ def _save_cloudbase_recipe_and_food(
         return
     if recipe.id is None or food.id is None:
         raise RuntimeError(f"CloudBase recipe/food row missing id: {food.name}")
-    session.update(recipe, filters=(RdbFilter("id", "eq", recipe.id),))
-    session.update(food, filters=(RdbFilter("id", "eq", food.id),))
+    _update_cloudbase_record(
+        session,
+        recipe,
+        filters=(RdbFilter("id", "eq", recipe.id),),
+    )
+    _update_cloudbase_record(
+        session,
+        food,
+        filters=(RdbFilter("id", "eq", food.id),),
+    )
+
+
+def _update_cloudbase_record(
+    session: DatabaseSession,
+    record: Recipe | Food,
+    *,
+    filters: tuple[RdbFilter, ...],
+) -> None:
+    """Accept successful REST updates whose gateway body is empty.
+
+    The row is re-read with the same key filter so a genuinely missing row
+    still fails closed instead of silently masking a permission or transport
+    problem.
+    """
+    if not is_cloudbase_repository(session):
+        raise TypeError("_update_cloudbase_record requires CloudBaseRepository")
+    try:
+        session.update(record, filters=filters)
+    except RuntimeError as error:
+        if "no representation" not in str(error):
+            raise
+        if session.first(type(record), filters=filters) is None:
+            raise RuntimeError(
+                "CloudBase REST update returned no representation and row was not found",
+            ) from error
 
 
 def import_recipe_seed(
@@ -63,7 +125,7 @@ def import_recipe_seed(
         if recipe is None:
             recipe = Recipe(food_id=food.id, nutrition_basis=item['nutrition_basis'])
             if is_cloudbase_repository(session):
-                recipe = session.insert(recipe)
+                recipe = _insert_cloudbase_recipe(session, recipe)
             else:
                 session.add(recipe)
             recipes[food.id] = recipe
