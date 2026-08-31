@@ -393,7 +393,7 @@ def _rule_suggestion(
         energy_kcal_max_per_person=candidate.energy_max,
         search_keywords=keywords,
         order_tips=tips,
-        reason="兼顾营养结构、可执行性和近期不重复；天气只做很小修正。",
+        reason=candidate.nutrition_note or "兼顾营养结构与近期不重复。",
         seasonal_note=seasonal_note,
         nutrition_note=candidate.nutrition_note,
         source="rules",

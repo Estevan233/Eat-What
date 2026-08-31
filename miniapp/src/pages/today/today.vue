@@ -156,6 +156,8 @@
           @choose="chooseCurrentMeal"
         />
 
+        <AiRecommendationExplanation :meal-names="recommendedMealNames" />
+
         <view v-if="dailyStore.availableSubstitutions.length" class="substitutions">
           <view class="section-head">
             <text class="section-title">想换个口味？</text>
@@ -221,6 +223,7 @@ import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import AiMealIntentInput from '@/components/AiMealIntentInput.vue'
+import AiRecommendationExplanation from '@/components/AiRecommendationExplanation.vue'
 import ExternalDiningCard from '@/components/ExternalDiningCard.vue'
 import MealPlateCard from '@/components/MealPlateCard.vue'
 import MealSubstitution from '@/components/MealSubstitution.vue'
@@ -290,6 +293,9 @@ const ctaText = computed(() => {
 const chosenMealNames = computed(() => {
   const items = dailyStore.todayLog?.chosenMeal?.items
   return items?.length ? items.map((item) => item.name).join(' · ') : ''
+})
+const recommendedMealNames = computed(() => {
+  return dailyStore.currentMeal?.items?.map((item) => item.name) || []
 })
 
 function selectMode(mode: DiningMode): void {
