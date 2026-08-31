@@ -233,6 +233,11 @@ def main() -> int:
     parser.add_argument("--external-path", type=Path, default=DEFAULT_EXTERNAL_PATH)
     parser.add_argument("--report", type=Path)
     parser.add_argument("--allow-draft", action="store_true")
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="仅执行本地结构/分布校验；保留该开关以明确不请求外部来源",
+    )
     args = parser.parse_args()
     errors, summary = validate_catalog(
         food_path=args.food_path,

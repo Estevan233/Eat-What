@@ -11,3 +11,4 @@
 {"file": "backend/tests/services/test_candidate_catalog_validation.py", "reason": "Cover serving-modifier normalization while retaining protein differences."}
 {"file": "backend/scripts/validate_external_dining_seed.py", "reason": "Add explicit opt-in source URL reachability checks with bounded HEAD/Range GET fallback."}
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch1.md", "reason": "Record actual WSL source-check result and browser/network boundary."}
+{"file": "backend/scripts/validate_candidate_catalog.py", "reason": "Accept an explicit --offline switch used by the documented release validation command."}
