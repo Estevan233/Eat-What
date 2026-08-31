@@ -24,6 +24,30 @@ class NoRepresentationRecipeInsertClient(MemoryRdbClient):
         return result
 
 
+class NoRepresentationFoodWriteClient(MemoryRdbClient):
+    """Model successful foods writes whose gateway body is empty."""
+
+    def insert(self, table: str, values) -> RdbResult:
+        result = super().insert(table, values)
+        if table == "foods":
+            return RdbResult(
+                rows=[],
+                status_code=result.status_code,
+                affected=result.affected,
+            )
+        return result
+
+    def update(self, table: str, values, *, filters) -> RdbResult:
+        result = super().update(table, values, filters=filters)
+        if table == "foods":
+            return RdbResult(
+                rows=[],
+                status_code=result.status_code,
+                affected=result.affected,
+            )
+        return result
+
+
 def test_food_seed_upserts_through_cloudbase_repository(session, tmp_path) -> None:
     del session
     client = MemoryRdbClient()
@@ -51,6 +75,33 @@ def test_food_seed_upserts_through_cloudbase_repository(session, tmp_path) -> No
     assert len(rows) == 1
     assert rows[0].catalog_key is not None
     assert rows[0].name == "REST 测试饭"
+
+
+def test_food_seed_recovers_empty_rest_write_representation(tmp_path) -> None:
+    client = NoRepresentationFoodWriteClient()
+    repository = CloudBaseRepository(client)
+    seed_path = tmp_path / "foods.json"
+    seed_path.write_text(
+        json.dumps(
+            [
+                {
+                    "name": "REST 空响应饭",
+                    "category": "staple",
+                    "ingredients": ["大米"],
+                    "nature": "neutral",
+                    "cooking_method": "boil",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    assert food_seed.import_seed(repository, seed_path) == 1
+    assert food_seed.import_seed(repository, seed_path) == 1
+    rows = repository.list(food_seed.Food, limit=10)
+    assert len(rows) == 1
+    assert rows[0].name == "REST 空响应饭"
 
 
 def test_recipe_seed_upserts_food_and_recipe_through_cloudbase_repository(tmp_path) -> None:

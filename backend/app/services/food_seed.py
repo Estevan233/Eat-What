@@ -11,7 +11,11 @@ from sqlmodel import select
 
 from app.models.food import Food
 from app.repositories.cloudbase_rdb import RdbFilter
-from app.repositories.cloudbase_repository import DatabaseSession, is_cloudbase_repository
+from app.repositories.cloudbase_repository import (
+    CloudBaseRepository,
+    DatabaseSession,
+    is_cloudbase_repository,
+)
 
 
 def resolve_seed_path(filename: str, *, module_file: Path | str = __file__) -> Path:
@@ -87,6 +91,53 @@ def _apply_catalog_fields(record: Food, item: dict[str, Any]) -> None:
     _apply_catalog_lists_and_dates(record, item)
 
 
+def _insert_cloudbase_food(
+    session: CloudBaseRepository,
+    record: Food,
+    *,
+    name: str,
+) -> Food:
+    """Recover a committed REST insert when the gateway omits its body."""
+    try:
+        return session.insert(record)
+    except RuntimeError as error:
+        if "no representation" not in str(error):
+            raise
+        recovered = session.first(
+            Food,
+            filters=(RdbFilter("name", "eq", name),),
+        )
+        if recovered is None:
+            raise RuntimeError(
+                "CloudBase REST food insert returned no representation and row was not found",
+            ) from error
+        return recovered
+
+
+def _update_cloudbase_food(
+    session: CloudBaseRepository,
+    record: Food,
+    *,
+    food_id: int,
+    name: str,
+) -> Food:
+    """Recover a committed REST update when the gateway omits its body."""
+    try:
+        return session.update(
+            record,
+            filters=(RdbFilter("id", "eq", food_id),),
+        )
+    except RuntimeError as error:
+        if "no representation" not in str(error):
+            raise
+        recovered = session.get(Food, food_id)
+        if recovered is None:
+            raise RuntimeError(
+                f"CloudBase REST food update returned no representation and row was not found: {name}",
+            ) from error
+        return recovered
+
+
 def import_seed(session: DatabaseSession, json_path: Path | str = DEFAULT_SEED_PATH) -> int:
     """Upsert seed rows by name and never delete production-created foods."""
     path = Path(json_path)
@@ -112,14 +163,16 @@ def import_seed(session: DatabaseSession, json_path: Path | str = DEFAULT_SEED_P
             if record is None:
                 record = _build_food_record(item)
                 record.catalog_key = key
-                record = session.insert(record)
+                record = _insert_cloudbase_food(session, record, name=name)
             else:
                 _apply_food_item(record, item)
                 if record.id is None:
                     raise RuntimeError(f"CloudBase foods row missing id: {name}")
-                record = session.update(
+                record = _update_cloudbase_food(
+                    session,
                     record,
-                    filters=(RdbFilter("id", "eq", record.id),),
+                    food_id=record.id,
+                    name=name,
                 )
             existing_by_key[key] = record
             existing_by_name[record.name] = record
