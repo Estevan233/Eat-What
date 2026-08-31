@@ -122,6 +122,12 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=Path, default=DEFAULT_PATH)
     parser.add_argument("--allow-draft", action="store_true")
+    # 与全目录校验器保持一致；来源检查需要显式联网，不在离线构建中偷偷访问网络。
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="仅执行结构/分布校验，不请求 source_url（当前默认行为）",
+    )
     args = parser.parse_args()
     rows: object = json.loads(args.path.read_text(encoding="utf-8"))
     errors = validate(rows, allow_draft=args.allow_draft)

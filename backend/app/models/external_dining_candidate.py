@@ -71,6 +71,9 @@ class ExternalDiningCandidate(SQLModel, table=True):
     reviewed_by: str | None = Field(default=None, max_length=64)
     reviewed_at: datetime | None = Field(default=None)
     review_notes: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    # 来源核验后的人工锚点与连续性分；草稿可为空，source_verified 及以上必须填写。
+    anchor_food: str | None = Field(default=None, max_length=96)
+    continuity_score: int | None = Field(default=None, ge=0, le=100)
     is_active: bool = Field(default=True)
     catalog_version: int = Field(default=1, ge=1)
     taxonomy_version: int = Field(default=1, ge=1)

@@ -37,8 +37,8 @@ def test_catalog_report_distinguishes_draft_from_approved() -> None:
     finally:
         report.unlink(missing_ok=True)
     assert summary["food"]["rows"] == 205
-    assert summary["external"]["rows"] == 57
-    assert summary["external"]["draft"] == 57
+    assert summary["external"]["rows"] == 109
+    assert summary["external"]["draft"] == 109
     assert summary["approved_total"] == 0
     assert summary["catalog_total"] == 205
     assert summary["cross_catalog_exact_name_overlap"] == 0
@@ -63,5 +63,5 @@ def test_review_manifest_preserves_draft_and_source_evidence() -> None:
         lines = output.read_text(encoding="utf-8").splitlines()
     finally:
         output.unlink(missing_ok=True)
-    assert len(lines) == 58
+    assert len(lines) == 110
     assert all("draft" in line for line in lines[1:])

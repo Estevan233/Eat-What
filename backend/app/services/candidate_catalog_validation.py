@@ -149,6 +149,36 @@ def _validate_identity_and_family(
     return issues
 
 
+def _validate_audit_fields(item: Mapping[str, object]) -> list[CatalogIssue]:
+    """来源核验后必须留下可复核的锚点和连续性分。"""
+    issues: list[CatalogIssue] = []
+    status = item.get("review_status")
+    if status in {"source_verified", "content_reviewed", "approved"}:
+        anchor = item.get("anchor_food")
+        if not isinstance(anchor, str) or not anchor.strip():
+            issues.append(
+                CatalogIssue(
+                    "missing_audit",
+                    "anchor_food",
+                    "source_verified 及以上状态必须关联现有 anchor_food",
+                )
+            )
+        score = item.get("continuity_score")
+        if (
+            not isinstance(score, int)
+            or isinstance(score, bool)
+            or not 0 <= score <= 100
+        ):
+            issues.append(
+                CatalogIssue(
+                    "invalid_audit",
+                    "continuity_score",
+                    "source_verified 及以上状态必须为 0-100 整数",
+                )
+            )
+    return issues
+
+
 def _validate_enums(
     item: Mapping[str, object],
     taxonomy: CatalogTaxonomy,
@@ -326,4 +356,5 @@ def validate_common_candidate(
         *_validate_controlled_lists(item, taxonomy),
         *_validate_source_and_versions(item, taxonomy),
         *_validate_review_state(item),
+        *_validate_audit_fields(item),
     ]

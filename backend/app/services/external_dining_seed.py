@@ -61,6 +61,8 @@ def _build(item: dict[str, object]) -> ExternalDiningCandidate:
         reviewed_by=str(item["reviewed_by"]) if item.get("reviewed_by") else None,
         reviewed_at=datetime.fromisoformat(str(reviewed_at_raw)) if reviewed_at_raw else None,
         review_notes=str(item["review_notes"]) if item.get("review_notes") else None,
+        anchor_food=str(item["anchor_food"]) if item.get("anchor_food") else None,
+        continuity_score=int(str(item["continuity_score"])) if item.get("continuity_score") is not None else None,
         is_active=bool(item["is_active"]),
         catalog_version=int(str(item["catalog_version"])),
         taxonomy_version=int(str(item["taxonomy_version"])),

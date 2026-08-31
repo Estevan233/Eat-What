@@ -38,6 +38,8 @@ def _valid_external() -> dict[str, object]:
         "is_active": True,
         "catalog_version": 1,
         "taxonomy_version": 1,
+        "anchor_food": "牛肉面",
+        "continuity_score": 80,
     }
 
 
@@ -71,6 +73,17 @@ def test_approved_candidate_requires_reviewer_and_timestamp() -> None:
     assert {(issue.code, issue.field) for issue in issues} >= {
         ("missing_review", "reviewed_by"),
         ("missing_review", "reviewed_at"),
+    }
+
+
+def test_source_verified_candidate_requires_audit_anchor_and_score() -> None:
+    item = deepcopy(_valid_external())
+    item.pop("anchor_food")
+    item.pop("continuity_score")
+    issues = validate_common_candidate(item, TAXONOMY, kind="external")
+    assert {(issue.code, issue.field) for issue in issues} >= {
+        ("missing_audit", "anchor_food"),
+        ("invalid_audit", "continuity_score"),
     }
 
 

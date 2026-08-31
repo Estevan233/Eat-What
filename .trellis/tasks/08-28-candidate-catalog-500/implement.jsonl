@@ -1,1 +1,8 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": "backend/app/models/external_dining_candidate.py", "reason": "Add auditable anchor_food and continuity_score fields for source-reviewed candidates."}
+{"file": "backend/app/services/candidate_catalog_validation.py", "reason": "Require anchor and 0-100 continuity score from source_verified onward."}
+{"file": "backend/app/services/external_dining_seed.py", "reason": "Persist audit fields during idempotent seed import."}
+{"file": "backend/scripts/build_external_catalog_batch1.py", "reason": "Deterministically append first 52 source-backed draft candidates."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 109 total external candidates while keeping all unapproved."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Expose per-row anchor and continuity audit columns."}
+{"file": "backend/alembic/versions/20260831_09_candidate_audit.py", "reason": "Add nullable audit columns without destructive changes."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch1.md", "reason": "Record browser-verified source page and usage boundaries."}

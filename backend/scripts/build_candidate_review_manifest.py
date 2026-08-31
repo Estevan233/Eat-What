@@ -39,8 +39,8 @@ def build_manifest(seed_path: Path) -> list[dict[str, object]]:
                 "catalog_key": item.get("catalog_key", ""),
                 "dish_name": item.get("dish_name", ""),
                 "candidate_kind": "external",
-                "anchor_food": "待人工关联现有菜品",
-                "continuity_score": "pending",
+                "anchor_food": item.get("anchor_food", ""),
+                "continuity_score": item.get("continuity_score", "pending"),
                 "source_url": item.get("source_url", ""),
                 "source_type": item.get("source_type", ""),
                 "source_checked_at": item.get("source_checked_at", ""),
@@ -60,7 +60,7 @@ def main() -> int:
     args = parser.parse_args()
     rows = build_manifest(args.seed)
     with args.output.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=FIELDS)
+        writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     print(f"candidate_review_manifest_ok rows={len(rows)} status=draft")
