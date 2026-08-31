@@ -44,3 +44,5 @@
 {"file": "backend/data/external_dining_seed.json", "reason": "Record 315 external candidates after batch 7; all remain draft pending merchant/menu review."}
 {"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the final 26 candidates with direct source URL, anchor, continuity score and review state."}
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch7.md", "reason": "Record parallel page-level verification for the final 26 Meishichina sources and approval boundaries."}
+{"file": "backend/app/services/external_dining_seed.py", "reason": "Recover committed CloudBase REST candidate inserts/updates when the gateway omits a representation; re-read by catalog_key/id and fail closed if absent."}
+{"file": "backend/tests/services/test_seed_import_cloudbase_rest.py", "reason": "Add a regression double for empty external-candidate REST write responses and verify idempotent recovery."}

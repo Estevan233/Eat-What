@@ -12,6 +12,7 @@ from sqlmodel import Session, select
 from app.models.external_dining_candidate import ExternalDiningCandidate
 from app.repositories.cloudbase_rdb import RdbFilter
 from app.repositories.cloudbase_repository import (
+    CloudBaseRepository,
     DatabaseSession,
     is_cloudbase_repository,
 )
@@ -82,6 +83,47 @@ def _apply(target: ExternalDiningCandidate, source: ExternalDiningCandidate) -> 
     target.updated_at = datetime.utcnow()
 
 
+def _insert_cloudbase_candidate(
+    session: CloudBaseRepository,
+    record: ExternalDiningCandidate,
+) -> ExternalDiningCandidate:
+    """Recover a committed REST insert when the gateway omits its body."""
+    try:
+        return session.insert(record)
+    except RuntimeError as error:
+        if "no representation" not in str(error):
+            raise
+        recovered = session.first(
+            ExternalDiningCandidate,
+            filters=(RdbFilter("catalog_key", "eq", record.catalog_key),),
+        )
+        if recovered is None:
+            raise RuntimeError(
+                "CloudBase REST candidate insert returned no representation and row was not found",
+            ) from error
+        return recovered
+
+
+def _update_cloudbase_candidate(
+    session: CloudBaseRepository,
+    record: ExternalDiningCandidate,
+    *,
+    filters: tuple[RdbFilter, ...],
+) -> ExternalDiningCandidate:
+    """Recover a committed REST update when the gateway omits its body."""
+    try:
+        return session.update(record, filters=filters)
+    except RuntimeError as error:
+        if "no representation" not in str(error):
+            raise
+        recovered = session.first(ExternalDiningCandidate, filters=filters)
+        if recovered is None:
+            raise RuntimeError(
+                "CloudBase REST candidate update returned no representation and row was not found",
+            ) from error
+        return recovered
+
+
 def import_seed(
     session: DatabaseSession,
     json_path: Path | str = DEFAULT_SEED_PATH,
@@ -103,7 +145,7 @@ def import_seed(
         current = existing.get(record.catalog_key)
         if current is None:
             if is_cloudbase_repository(session):
-                current = session.insert(record)
+                current = _insert_cloudbase_candidate(session, record)
             else:
                 session.add(record)
                 current = record
@@ -113,7 +155,11 @@ def import_seed(
         if is_cloudbase_repository(session):
             if current.id is None:
                 raise RuntimeError("CloudBase candidate row is missing id")
-            session.update(current, filters=(RdbFilter("id", "eq", current.id),))
+            current = _update_cloudbase_candidate(
+                session,
+                current,
+                filters=(RdbFilter("id", "eq", current.id),),
+            )
     if isinstance(session, Session):
         session.commit()
     return len(records)
