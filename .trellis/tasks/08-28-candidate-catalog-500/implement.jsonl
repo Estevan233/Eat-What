@@ -40,3 +40,7 @@
 {"file": "backend/data/external_dining_seed.json", "reason": "Record 289 external candidates after batch 6; Meishichina-backed rows remain draft and excluded from production recommendation."}
 {"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the 52 sixth-batch candidates with direct source URL, anchor, continuity score and review state."}
 {"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch6.md", "reason": "Record parallel page-level verification for Meishichina pages 21-30 and the discovery-only approval boundary."}
+{"file": "backend/scripts/build_external_catalog_batch7.py", "reason": "Complete the 315-row external discovery target with 26 ordinary shared/individual candidates from verified Meishichina pages."}
+{"file": "backend/data/external_dining_seed.json", "reason": "Record 315 external candidates after batch 7; all remain draft pending merchant/menu review."}
+{"file": "backend/data/candidate_review_manifest.csv", "reason": "Synchronize audit rows for the final 26 candidates with direct source URL, anchor, continuity score and review state."}
+{"file": ".trellis/tasks/08-28-candidate-catalog-500/research/source-check-batch7.md", "reason": "Record parallel page-level verification for the final 26 Meishichina sources and approval boundaries."}
