@@ -5,13 +5,14 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, timedelta
 from hashlib import sha1, sha256
-from typing import Literal
+from typing import Literal, cast
 from uuid import uuid4
 
 import structlog
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
+from app.core.config import get_settings
 from app.core.errors import ValidationError
 from app.models.dining_memory import DiningMemory
 from app.models.recommendation_event import RecommendationEvent
@@ -44,6 +45,8 @@ class RuleCandidate:
     high_protein: bool = False
     meal_format: str = "individual_meal"
     serving_style: Literal["individual", "shared"] = "individual"
+    catalog_key: str | None = None
+    legacy_key: str | None = None
 
 
 RULE_CANDIDATES: tuple[RuleCandidate, ...] = (
@@ -381,7 +384,7 @@ def _rule_suggestion(
     if request.audience == "family":
         tips.insert(0, f"按 {request.party_size} 人份下单，先确定共享菜再补主食")
     return ExternalDiningSuggestion(
-        key=f"rule-{digest}",
+        key=candidate.legacy_key or candidate.catalog_key or f"rule-{digest}",
         dish_name=candidate.dish_name,
         category=candidate.category,
         meal_format=candidate.meal_format,
@@ -650,6 +653,65 @@ def _select_response_suggestions(
     return select_rotating_suggestions(ordered_suggestions, excluded_keys)
 
 
+def _load_catalog_rule_candidates(
+    session: DatabaseSession,
+) -> tuple[RuleCandidate, ...] | None:
+    """Read approved catalog rows and adapt them to the legacy response contract."""
+    from app.models.external_dining_candidate import ExternalDiningCandidate
+
+    try:
+        if is_cloudbase_repository(session):
+            rows = session.list(
+                ExternalDiningCandidate,
+                filters=(
+                    RdbFilter("review_status", "eq", "approved"),
+                    RdbFilter("is_active", "is", True),
+                ),
+                order=(RdbOrder("id", "asc"),),
+                limit=1000,
+            )
+        else:
+            rows = list(session.exec(select(ExternalDiningCandidate)).all())
+    except Exception as exc:
+        log.warning(
+            "external_catalog_read_failed",
+            error_type=type(exc).__name__,
+        )
+        return None
+
+    adapted: list[RuleCandidate] = []
+    for row in rows:
+        if row.energy_kcal_min_per_person is None or row.energy_kcal_max_per_person is None:
+            continue
+        adapted.append(
+            RuleCandidate(
+                dish_name=row.dish_name,
+                category=row.category,
+                energy_min=row.energy_kcal_min_per_person,
+                energy_max=row.energy_kcal_max_per_person,
+                forbidden_tags=frozenset(row.forbidden_tags_json or []),
+                nutrition_note=row.nutrition_note or "门店配方和分量未知，能量仅作宽区间参考。",
+                high_protein=row.high_protein,
+                meal_format=row.sub_family,
+                serving_style=(
+                    "individual"
+                    if row.serving_style == "either"
+                    else cast(Literal["individual", "shared"], row.serving_style)
+                ),
+                catalog_key=row.catalog_key,
+                legacy_key=row.legacy_key,
+            )
+        )
+    return tuple(adapted) or None
+
+
+def _rule_candidates_for_request(session: DatabaseSession) -> tuple[RuleCandidate, ...]:
+    """Use the catalog only after an explicit flag and approved rows exist."""
+    if not get_settings().external_catalog_enabled:
+        return RULE_CANDIDATES
+    return _load_catalog_rule_candidates(session) or RULE_CANDIDATES
+
+
 def recommend_external(
     session: DatabaseSession,
     user_id: int,
@@ -692,12 +754,13 @@ def recommend_external(
         )
 
     serving_style = "shared" if request.audience == "family" else "individual"
+    rule_candidates = _rule_candidates_for_request(session)
     scored_suggestions.extend(
         (
             _rule_suggestion(candidate, request, seasonal_note, city_label),
             _rule_score(candidate, request, month),
         )
-        for candidate in RULE_CANDIDATES
+        for candidate in rule_candidates
         if candidate.serving_style == serving_style
         and not (candidate.forbidden_tags & forbidden)
     )

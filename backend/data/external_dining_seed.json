@@ -1,0 +1,2564 @@
+[
+  {
+    "catalog_key": "external:legacy-5ae16fd87b:v1",
+    "legacy_key": "rule-5ae16fd87b",
+    "dish_name": "番茄鸡蛋盖饭",
+    "aliases": [],
+    "category": "家常盖饭",
+    "meal_family": "rice_meal",
+    "sub_family": "rice_bowl",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry",
+      "egg"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 480,
+    "energy_kcal_max_per_person": 650,
+    "nutrition_note": "蛋类搭配番茄和主食，结构简单，注意酱汁少油。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-9c65bea6d3:v1",
+    "legacy_key": "rule-9c65bea6d3",
+    "dish_name": "菌菇豆腐煲配米饭",
+    "aliases": [],
+    "category": "砂锅简餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "soy"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 450,
+    "energy_kcal_max_per_person": 620,
+    "nutrition_note": "豆制品和菌菇提供蛋白质与膳食纤维，搭配米饭组成一人份简餐。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-6029661dce:v1",
+    "legacy_key": "rule-6029661dce",
+    "dish_name": "鸡肉时蔬饭",
+    "aliases": [],
+    "category": "均衡套餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 700,
+    "nutrition_note": "鸡肉补充蛋白质，蔬菜和米饭组成相对完整的一餐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-1a19aedaab:v1",
+    "legacy_key": "rule-1a19aedaab",
+    "dish_name": "南瓜小米粥配蒸蛋",
+    "aliases": [],
+    "category": "粥品套餐",
+    "meal_family": "grain_congee",
+    "sub_family": "congee",
+    "cuisine_region": "cn_national",
+    "staple_type": "congee",
+    "protein_types": [
+      "egg"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "breakfast",
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 380,
+    "energy_kcal_max_per_person": 560,
+    "nutrition_note": "整体较清淡，蒸蛋补充蛋白质；粥类饱腹感因人而异。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-27dbe18134:v1",
+    "legacy_key": "rule-27dbe18134",
+    "dish_name": "清汤牛肉面",
+    "aliases": [],
+    "category": "汤面",
+    "meal_family": "noodle_meal",
+    "sub_family": "noodle_soup",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_noodle",
+    "protein_types": [
+      "beef",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "beef",
+      "gluten"
+    ],
+    "energy_kcal_min_per_person": 550,
+    "energy_kcal_max_per_person": 750,
+    "nutrition_note": "牛肉提供蛋白质，面食提供碳水；建议少汤少盐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-e1edd76e6f:v1",
+    "legacy_key": "rule-e1edd76e6f",
+    "dish_name": "清蒸鱼时蔬套餐",
+    "aliases": [],
+    "category": "蒸菜套餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "fish"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 480,
+    "energy_kcal_max_per_person": 680,
+    "nutrition_note": "鱼类和时蔬组合较清爽，确认鱼刺并少淋油汁。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-559e9ec500:v1",
+    "legacy_key": "rule-559e9ec500",
+    "dish_name": "凉拌鸡丝荞麦面",
+    "aliases": [],
+    "category": "轻食拌面",
+    "meal_family": "noodle_meal",
+    "sub_family": "noodle_soup",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_noodle",
+    "protein_types": [
+      "poultry"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten",
+      "raw_cold"
+    ],
+    "energy_kcal_min_per_person": 430,
+    "energy_kcal_max_per_person": 620,
+    "nutrition_note": "鸡丝提供蛋白质，荞麦面和蔬菜增加饱腹感。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-06cb3ab931:v1",
+    "legacy_key": "rule-06cb3ab931",
+    "dish_name": "鱼香肉丝饭",
+    "aliases": [],
+    "category": "川味盖饭",
+    "meal_family": "rice_meal",
+    "sub_family": "rice_bowl",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "pork",
+      "fish"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "greasy",
+      "pork",
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 650,
+    "energy_kcal_max_per_person": 850,
+    "nutrition_note": "能量通常偏高，建议少油少糖并加一份蔬菜。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-da6422131f:v1",
+    "legacy_key": "rule-da6422131f",
+    "dish_name": "鲜虾蔬菜馄饨",
+    "aliases": [],
+    "category": "汤馄饨",
+    "meal_family": "dumpling_bun",
+    "sub_family": "wonton",
+    "cuisine_region": "cn_national",
+    "staple_type": "dumpling_wrapper",
+    "protein_types": [
+      "crustacean"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "breakfast",
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten",
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 430,
+    "energy_kcal_max_per_person": 620,
+    "nutrition_note": "馄饨提供主食和蛋白质，另加青菜比只喝汤更完整。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-d0cc90314a:v1",
+    "legacy_key": "rule-d0cc90314a",
+    "dish_name": "香菇鸡肉焖饭",
+    "aliases": [],
+    "category": "焖饭",
+    "meal_family": "rice_meal",
+    "sub_family": "braised_rice",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 500,
+    "energy_kcal_max_per_person": 700,
+    "nutrition_note": "鸡肉、香菇和米饭一碗组合，建议额外搭配一份深色蔬菜。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-c303593271:v1",
+    "legacy_key": "rule-c303593271",
+    "dish_name": "鸡蛋蔬菜卷配玉米",
+    "aliases": [],
+    "category": "轻简套餐",
+    "meal_family": "wrap_light_meal",
+    "sub_family": "wrap",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_bread",
+    "protein_types": [
+      "poultry",
+      "egg"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten"
+    ],
+    "energy_kcal_min_per_person": 420,
+    "energy_kcal_max_per_person": 600,
+    "nutrition_note": "蛋类和蔬菜卷搭配玉米，适合作为分量清楚的一人餐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-a6ca1a2052:v1",
+    "legacy_key": "rule-a6ca1a2052",
+    "dish_name": "番茄牛腩粉",
+    "aliases": [],
+    "category": "汤粉",
+    "meal_family": "noodle_meal",
+    "sub_family": "rice_noodle_soup",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_noodle",
+    "protein_types": [
+      "beef"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "beef"
+    ],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 740,
+    "nutrition_note": "牛腩补充蛋白质，番茄汤底注意盐分，粉量按活动量调整。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-9121a57f50:v1",
+    "legacy_key": "rule-9121a57f50",
+    "dish_name": "鸡腿肉蔬菜糙米饭",
+    "aliases": [],
+    "category": "谷物套餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 720,
+    "nutrition_note": "鸡腿肉、蔬菜和糙米构成完整一餐，酱汁分装更容易控制油盐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-7fc3415d50:v1",
+    "legacy_key": "rule-7fc3415d50",
+    "dish_name": "海南鸡饭配青菜",
+    "aliases": [],
+    "category": "东南亚简餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 560,
+    "energy_kcal_max_per_person": 760,
+    "nutrition_note": "鸡肉提供蛋白质，米饭和蘸料能量不低，建议加青菜并按需减饭。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-e38d4f29a8:v1",
+    "legacy_key": "rule-e38d4f29a8",
+    "dish_name": "虾仁滑蛋饭配时蔬",
+    "aliases": [],
+    "category": "滑蛋饭",
+    "meal_family": "rice_meal",
+    "sub_family": "rice_bowl",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "crustacean",
+      "egg"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 720,
+    "nutrition_note": "虾仁和鸡蛋提供蛋白质，搭配时蔬后结构更完整。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-3282c07998:v1",
+    "legacy_key": "rule-3282c07998",
+    "dish_name": "烤鲭鱼定食",
+    "aliases": [],
+    "category": "烤鱼定食",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "fish"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 740,
+    "nutrition_note": "鱼类、米饭和小菜组成定食，注意酱汁与腌菜的钠含量。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-65a1fa102e:v1",
+    "legacy_key": "rule-65a1fa102e",
+    "dish_name": "香煎豆腐杂蔬饭",
+    "aliases": [],
+    "category": "豆腐简餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "soy"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 440,
+    "energy_kcal_max_per_person": 640,
+    "nutrition_note": "豆腐搭配多种蔬菜和主食，煎制用油量决定实际能量。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-42f88b2248:v1",
+    "legacy_key": "rule-42f88b2248",
+    "dish_name": "番茄鸡蛋面配青菜",
+    "aliases": [],
+    "category": "家常汤面",
+    "meal_family": "noodle_meal",
+    "sub_family": "noodle_soup",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_noodle",
+    "protein_types": [
+      "poultry",
+      "egg"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten"
+    ],
+    "energy_kcal_min_per_person": 480,
+    "energy_kcal_max_per_person": 680,
+    "nutrition_note": "番茄鸡蛋面容易执行，额外加青菜并少喝汤更均衡。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-30e637ee79:v1",
+    "legacy_key": "rule-30e637ee79",
+    "dish_name": "三鲜米线配青菜",
+    "aliases": [],
+    "category": "米线",
+    "meal_family": "noodle_meal",
+    "sub_family": "rice_noodle_soup",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice_noodle",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 480,
+    "energy_kcal_max_per_person": 700,
+    "nutrition_note": "米线提供主食，三鲜配料与青菜补充蛋白质和蔬菜，汤底宜少盐。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-2a4cc96746:v1",
+    "legacy_key": "rule-2a4cc96746",
+    "dish_name": "鸡肉蔬菜河粉",
+    "aliases": [],
+    "category": "清汤河粉",
+    "meal_family": "noodle_meal",
+    "sub_family": "rice_noodle_soup",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice_noodle",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 500,
+    "energy_kcal_max_per_person": 700,
+    "nutrition_note": "鸡肉、河粉和蔬菜组成清汤简餐，可要求少汤少盐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-48e218cc3a:v1",
+    "legacy_key": "rule-48e218cc3a",
+    "dish_name": "牛肉蔬菜卷饼",
+    "aliases": [],
+    "category": "卷饼套餐",
+    "meal_family": "wrap_light_meal",
+    "sub_family": "wrap",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_bread",
+    "protein_types": [
+      "beef",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "beef",
+      "gluten"
+    ],
+    "energy_kcal_min_per_person": 500,
+    "energy_kcal_max_per_person": 720,
+    "nutrition_note": "牛肉和蔬菜卷入饼中，酱料分装并搭配无糖饮品更稳妥。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-d97c3755b8:v1",
+    "legacy_key": "rule-d97c3755b8",
+    "dish_name": "鹰嘴豆蔬菜卷配玉米",
+    "aliases": [],
+    "category": "素食卷饼",
+    "meal_family": "wrap_light_meal",
+    "sub_family": "wrap",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_bread",
+    "protein_types": [
+      "legume"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten"
+    ],
+    "energy_kcal_min_per_person": 430,
+    "energy_kcal_max_per_person": 620,
+    "nutrition_note": "鹰嘴豆提供植物蛋白，蔬菜卷与玉米组合成分量清楚的一餐。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-3171cb2517:v1",
+    "legacy_key": "rule-3171cb2517",
+    "dish_name": "莲藕排骨汤配时蔬饭",
+    "aliases": [],
+    "category": "汤菜套餐",
+    "meal_family": "soup_meal",
+    "sub_family": "stew_soup_set",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "pork"
+    ],
+    "energy_kcal_min_per_person": 560,
+    "energy_kcal_max_per_person": 780,
+    "nutrition_note": "排骨、莲藕、时蔬和米饭组成套餐，汤不必全部喝完。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-15f271c922:v1",
+    "legacy_key": "rule-15f271c922",
+    "dish_name": "冬瓜虾仁汤配杂粮饭",
+    "aliases": [],
+    "category": "清汤套餐",
+    "meal_family": "soup_meal",
+    "sub_family": "stew_soup_set",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "crustacean"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 460,
+    "energy_kcal_max_per_person": 660,
+    "nutrition_note": "虾仁补充蛋白质，冬瓜汤和杂粮饭组成较清爽的一餐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-55d751a640:v1",
+    "legacy_key": "rule-55d751a640",
+    "dish_name": "麻婆豆腐饭配青菜",
+    "aliases": [],
+    "category": "川味豆腐饭",
+    "meal_family": "rice_meal",
+    "sub_family": "rice_bowl",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "soy"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 560,
+    "energy_kcal_max_per_person": 780,
+    "nutrition_note": "豆腐搭配米饭和青菜，实际油盐差异较大，可备注少油少辣。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-51265ea569:v1",
+    "legacy_key": "rule-51265ea569",
+    "dish_name": "咖喱鸡肉饭配蔬菜",
+    "aliases": [],
+    "category": "咖喱饭",
+    "meal_family": "rice_meal",
+    "sub_family": "curry_rice",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 600,
+    "energy_kcal_max_per_person": 820,
+    "nutrition_note": "鸡肉提供蛋白质，咖喱酱和米饭较易超量，建议酱汁减半并加蔬菜。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-0e1df5fe1a:v1",
+    "legacy_key": "rule-0e1df5fe1a",
+    "dish_name": "黑椒牛柳饭配彩椒",
+    "aliases": [],
+    "category": "铁板牛肉饭",
+    "meal_family": "rice_meal",
+    "sub_family": "rice_bowl",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "beef"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "beef"
+    ],
+    "energy_kcal_min_per_person": 620,
+    "energy_kcal_max_per_person": 840,
+    "nutrition_note": "牛柳和彩椒提供蛋白质与蔬菜，黑椒汁宜分装以控制油盐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-d567ca91bb:v1",
+    "legacy_key": "rule-d567ca91bb",
+    "dish_name": "红烧豆腐杂粮饭",
+    "aliases": [],
+    "category": "家常素套餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "soy"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 460,
+    "energy_kcal_max_per_person": 660,
+    "nutrition_note": "豆腐、蔬菜和杂粮饭组成家常套餐，红烧汁少一些更合适。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-331bddef7c:v1",
+    "legacy_key": "rule-331bddef7c",
+    "dish_name": "云吞面配白灼菜",
+    "aliases": [],
+    "category": "粤式面食",
+    "meal_family": "dumpling_bun",
+    "sub_family": "wonton",
+    "cuisine_region": "cn_national",
+    "staple_type": "dumpling_wrapper",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "breakfast",
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten",
+      "pork"
+    ],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 720,
+    "nutrition_note": "云吞和面提供主食与蛋白质，另配白灼菜并少喝汤。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-138ae95d95:v1",
+    "legacy_key": "rule-138ae95d95",
+    "dish_name": "鸡肉蔬菜沙拉配玉米",
+    "aliases": [],
+    "category": "轻食套餐",
+    "meal_family": "wrap_light_meal",
+    "sub_family": "salad_set",
+    "cuisine_region": "cn_national",
+    "staple_type": "corn",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "raw_cold"
+    ],
+    "energy_kcal_min_per_person": 400,
+    "energy_kcal_max_per_person": 620,
+    "nutrition_note": "鸡肉、蔬菜和玉米组成轻食，沙拉酱另放，避免只吃菜不吃主食。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-49b4720529:v1",
+    "legacy_key": "rule-49b4720529",
+    "dish_name": "烤鸡腿土豆时蔬套餐",
+    "aliases": [],
+    "category": "烤物套餐",
+    "meal_family": "set_meal",
+    "sub_family": "balanced_plate",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 560,
+    "energy_kcal_max_per_person": 780,
+    "nutrition_note": "烤鸡腿、土豆和时蔬结构完整，选择非油炸并减少重口酱料。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-7a9f910364:v1",
+    "legacy_key": "rule-7a9f910364",
+    "dish_name": "韩式杂蔬拌饭",
+    "aliases": [],
+    "category": "拌饭",
+    "meal_family": "rice_meal",
+    "sub_family": "rice_bowl",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 740,
+    "nutrition_note": "多种蔬菜、鸡蛋和米饭组合，辣酱分装可减少盐和糖。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-099ef239e3:v1",
+    "legacy_key": "rule-099ef239e3",
+    "dish_name": "腊味煲仔饭配青菜",
+    "aliases": [],
+    "category": "煲仔饭",
+    "meal_family": "rice_meal",
+    "sub_family": "claypot_rice",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "greasy",
+      "pork"
+    ],
+    "energy_kcal_min_per_person": 680,
+    "energy_kcal_max_per_person": 900,
+    "nutrition_note": "腊味和锅巴使能量、钠含量偏高，适合偶尔选择并加一份青菜。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-3d71a2e1d3:v1",
+    "legacy_key": "rule-3d71a2e1d3",
+    "dish_name": "酸汤鱼片粉",
+    "aliases": [],
+    "category": "酸汤粉",
+    "meal_family": "noodle_meal",
+    "sub_family": "noodle_soup",
+    "cuisine_region": "cn_national",
+    "staple_type": "wheat_noodle",
+    "protein_types": [
+      "fish"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood",
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 540,
+    "energy_kcal_max_per_person": 760,
+    "nutrition_note": "鱼片补充蛋白质，酸汤和配料钠含量可能较高，少喝汤更稳妥。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-462d477369:v1",
+    "legacy_key": "rule-462d477369",
+    "dish_name": "肉末茄子饭配青菜",
+    "aliases": [],
+    "category": "家常盖浇饭",
+    "meal_family": "rice_meal",
+    "sub_family": "rice_bowl",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "greasy",
+      "pork"
+    ],
+    "energy_kcal_min_per_person": 600,
+    "energy_kcal_max_per_person": 820,
+    "nutrition_note": "茄子吸油，建议备注少油并搭配一份清淡青菜。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-aaaeb440fe:v1",
+    "legacy_key": "rule-aaaeb440fe",
+    "dish_name": "香菇鸡肉蒸饭",
+    "aliases": [],
+    "category": "蒸饭",
+    "meal_family": "rice_meal",
+    "sub_family": "braised_rice",
+    "cuisine_region": "cn_national",
+    "staple_type": "rice",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "individual",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "high",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 500,
+    "energy_kcal_max_per_person": 700,
+    "nutrition_note": "鸡肉、香菇和米饭同蒸，搭配一份蔬菜即可形成完整简餐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-dd71c9f71a:v1",
+    "legacy_key": "rule-dd71c9f71a",
+    "dish_name": "番茄炒蛋＋菌菇豆腐＋时蔬＋杂粮饭",
+    "aliases": [],
+    "category": "家常合菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "egg",
+      "soy"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 480,
+    "energy_kcal_max_per_person": 680,
+    "nutrition_note": "共享菜兼顾蛋类、豆制品、蔬菜和主食，按人数控制总量。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-b1c0127209:v1",
+    "legacy_key": "rule-b1c0127209",
+    "dish_name": "菌汤火锅＋豆腐蔬菜拼盘＋主食",
+    "aliases": [],
+    "category": "清汤火锅",
+    "meal_family": "hotpot_grill",
+    "sub_family": "hotpot",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "soy"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 760,
+    "nutrition_note": "清汤锅底便于多人共享，优先蔬菜和豆制品，蘸料少油少盐。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-91f323eab9:v1",
+    "legacy_key": "rule-91f323eab9",
+    "dish_name": "蒸点拼盘＋粥＋青菜",
+    "aliases": [],
+    "category": "广式茶点",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten"
+    ],
+    "energy_kcal_min_per_person": 480,
+    "energy_kcal_max_per_person": 720,
+    "nutrition_note": "小份蒸点适合多人分食，搭配粥和青菜，避免只点精制点心。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-51468cfef4:v1",
+    "legacy_key": "rule-51468cfef4",
+    "dish_name": "清蒸鱼＋时蔬＋杂粮饭",
+    "aliases": [],
+    "category": "清蒸合菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "fish"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 500,
+    "energy_kcal_max_per_person": 720,
+    "nutrition_note": "鱼类、时蔬和主食组成共享套餐，注意鱼刺并少淋油汁。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-b733c2a2da:v1",
+    "legacy_key": "rule-b733c2a2da",
+    "dish_name": "砂锅鸡煲＋双份青菜＋米饭",
+    "aliases": [],
+    "category": "砂锅合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "poultry"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 580,
+    "energy_kcal_max_per_person": 820,
+    "nutrition_note": "鸡肉煲适合共享，另点两份不同青菜，酱汁和米饭按需添加。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-53f5ef91fd:v1",
+    "legacy_key": "rule-53f5ef91fd",
+    "dish_name": "番茄牛腩锅＋凉热双蔬＋主食",
+    "aliases": [],
+    "category": "炖锅合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "beef"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "beef"
+    ],
+    "energy_kcal_min_per_person": 600,
+    "energy_kcal_max_per_person": 850,
+    "nutrition_note": "炖锅便于多人分享，搭配两种蔬菜和适量主食，避免汤汁泡饭过量。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-74b3e8ad97:v1",
+    "legacy_key": "rule-74b3e8ad97",
+    "dish_name": "铁板鸡肉＋彩椒洋葱＋米饭",
+    "aliases": [],
+    "category": "铁板合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "poultry",
+      "pork"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 560,
+    "energy_kcal_max_per_person": 800,
+    "nutrition_note": "铁板鸡肉适合多人分食，搭配彩色蔬菜，酱汁另放可减少油盐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-af09f66ffa:v1",
+    "legacy_key": "rule-af09f66ffa",
+    "dish_name": "云南菌菇汽锅＋豆腐＋时蔬＋杂粮饭",
+    "aliases": [],
+    "category": "云南汽锅",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "soy"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 460,
+    "energy_kcal_max_per_person": 680,
+    "nutrition_note": "菌菇、豆腐和时蔬组成清淡共享餐，汤只作搭配，不靠喝汤补营养。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-0842437553:v1",
+    "legacy_key": "rule-0842437553",
+    "dish_name": "什锦素烩菜＋蒸蛋＋杂粮饭",
+    "aliases": [],
+    "category": "北方烩菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "egg"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 500,
+    "energy_kcal_max_per_person": 720,
+    "nutrition_note": "烩菜和蒸蛋便于多人分食，食材种类较多，主食按家庭习惯选择。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-d23fb8549c:v1",
+    "legacy_key": "rule-d23fb8549c",
+    "dish_name": "白切鸡＋白灼时蔬＋例汤＋米饭",
+    "aliases": [],
+    "category": "粤式合菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "poultry"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 760,
+    "nutrition_note": "白切鸡和白灼菜适合共享，蘸料分装、米饭按人数添加。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-71668ac38e:v1",
+    "legacy_key": "rule-71668ac38e",
+    "dish_name": "客家酿豆腐＋时蔬小炒＋杂粮饭",
+    "aliases": [],
+    "category": "客家合菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "soy"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "pork"
+    ],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 760,
+    "nutrition_note": "酿豆腐兼有豆制品和肉类，搭配时蔬与主食组成共享餐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-596ad97267:v1",
+    "legacy_key": "rule-596ad97267",
+    "dish_name": "小鸡炖蘑菇＋凉拌菜＋杂粮饭",
+    "aliases": [],
+    "category": "东北炖菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "poultry"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 560,
+    "energy_kcal_max_per_person": 800,
+    "nutrition_note": "炖鸡和蘑菇适合多人共享，另配清爽蔬菜，主食按需选择。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-419afe6f3a:v1",
+    "legacy_key": "rule-419afe6f3a",
+    "dish_name": "清炖狮子头＋双份时蔬＋米饭",
+    "aliases": [],
+    "category": "江浙合菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "pork"
+    ],
+    "energy_kcal_min_per_person": 620,
+    "energy_kcal_max_per_person": 850,
+    "nutrition_note": "狮子头分食并搭配两种蔬菜，减少浓汁拌饭可控制能量。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-c8d07bd0bd:v1",
+    "legacy_key": "rule-c8d07bd0bd",
+    "dish_name": "湘味小炒肉＋蒸蛋＋时蔬＋米饭",
+    "aliases": [],
+    "category": "湘菜合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "pork",
+      "egg"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "greasy",
+      "pork",
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 650,
+    "energy_kcal_max_per_person": 880,
+    "nutrition_note": "小炒肉口味较重，以蒸蛋和时蔬平衡，备注少油少辣。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-d2e5fdc3b9:v1",
+    "legacy_key": "rule-d2e5fdc3b9",
+    "dish_name": "烧味双拼＋白灼菜＋例汤＋米饭",
+    "aliases": [],
+    "category": "烧味合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "unknown"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "greasy",
+      "pork"
+    ],
+    "energy_kcal_min_per_person": 650,
+    "energy_kcal_max_per_person": 900,
+    "nutrition_note": "烧味便于多人分食但钠和脂肪偏高，搭配白灼菜且少淋汁。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-7ef33cd6b3:v1",
+    "legacy_key": "rule-7ef33cd6b3",
+    "dish_name": "清汤牛肉锅＋菌菇蔬菜拼盘＋主食",
+    "aliases": [],
+    "category": "牛肉锅",
+    "meal_family": "hotpot_grill",
+    "sub_family": "hotpot",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "beef",
+      "pork"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "beef"
+    ],
+    "energy_kcal_min_per_person": 580,
+    "energy_kcal_max_per_person": 820,
+    "nutrition_note": "清汤牛肉锅适合共享，蔬菜和菌菇先点足，蘸料少油少盐。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-951256a783:v1",
+    "legacy_key": "rule-951256a783",
+    "dish_name": "酸菜鱼小份＋时蔬＋豆腐＋米饭",
+    "aliases": [],
+    "category": "酸菜鱼合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "fish",
+      "soy"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood",
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 620,
+    "energy_kcal_max_per_person": 860,
+    "nutrition_note": "鱼片、豆腐和蔬菜可共享，酸菜汤钠含量高，不建议大量喝汤。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-0cb692b739:v1",
+    "legacy_key": "rule-0cb692b739",
+    "dish_name": "烤鱼小份＋双拼蔬菜＋主食",
+    "aliases": [],
+    "category": "烤鱼合餐",
+    "meal_family": "hotpot_grill",
+    "sub_family": "grilled_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "fish"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "greasy",
+      "seafood",
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 650,
+    "energy_kcal_max_per_person": 900,
+    "nutrition_note": "烤鱼适合多人分享，选择小份并加两种蔬菜，避免额外油炸小吃。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-f2b90fb2f8:v1",
+    "legacy_key": "rule-f2b90fb2f8",
+    "dish_name": "家常豆腐＋地三鲜少油版＋蒸蛋＋杂粮饭",
+    "aliases": [],
+    "category": "素菜合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "egg",
+      "soy"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [],
+    "energy_kcal_min_per_person": 520,
+    "energy_kcal_max_per_person": 760,
+    "nutrition_note": "豆腐、鸡蛋和多种蔬菜适合共享，地三鲜可备注少油。",
+    "order_tips": [],
+    "high_protein": false
+  },
+  {
+    "catalog_key": "external:legacy-78a291b574:v1",
+    "legacy_key": "rule-78a291b574",
+    "dish_name": "大盘鸡小份＋拌青菜＋面或米饭",
+    "aliases": [],
+    "category": "西北合餐",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "poultry"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "gluten",
+      "spicy"
+    ],
+    "energy_kcal_min_per_person": 650,
+    "energy_kcal_max_per_person": 900,
+    "nutrition_note": "鸡肉和土豆适合共享，主食二选一并加一份清淡蔬菜。",
+    "order_tips": [],
+    "high_protein": true
+  },
+  {
+    "catalog_key": "external:legacy-958cd74092:v1",
+    "legacy_key": "rule-958cd74092",
+    "dish_name": "铁板豆腐＋清炒虾仁＋双份时蔬＋米饭",
+    "aliases": [],
+    "category": "海陆合菜",
+    "meal_family": "shared_dishes",
+    "sub_family": "regional_share",
+    "cuisine_region": "cn_national",
+    "staple_type": "mixed",
+    "protein_types": [
+      "crustacean",
+      "soy"
+    ],
+    "serving_style": "shared",
+    "meal_periods": [
+      "lunch",
+      "dinner"
+    ],
+    "delivery_fit": "medium",
+    "price_band": "standard",
+    "nature": "unknown",
+    "seasonal_solar_terms": [
+      "all_season"
+    ],
+    "source_url": "https://github.com/Estevan233/Eat-What/blob/b102480f0ec4857a05b7e71647f1bb272d47bb9c/backend/app/services/external_dining.py",
+    "source_type": "original_publisher",
+    "source_checked_at": "2026-08-31T00:00:00+08:00",
+    "nutrition_source_url": null,
+    "nutrition_basis": "沿用旧规则宽区间，待按正式菜单或原料成分复核",
+    "review_status": "draft",
+    "reviewed_by": null,
+    "reviewed_at": null,
+    "review_notes": "B0 自动映射；上线前必须完成来源、连续性与营养边界审核",
+    "is_active": true,
+    "catalog_version": 1,
+    "taxonomy_version": 1,
+    "forbidden_tags": [
+      "seafood"
+    ],
+    "energy_kcal_min_per_person": 560,
+    "energy_kcal_max_per_person": 800,
+    "nutrition_note": "豆腐、虾仁和两种蔬菜覆盖多类食材，酱汁分装更易控制油盐。",
+    "order_tips": [],
+    "high_protein": true
+  }
+]
