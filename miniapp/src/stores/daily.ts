@@ -343,17 +343,15 @@ export const useDailyStore = defineStore('daily', () => {
 
   /**
    * 设置 AI 解析出的用餐意图。传入 null 表示清除。
-   * 变更会让当前推荐失效，下一次推荐请求带上新的意图约束。
+   * 不清空当前推荐：用户点"换一套"时 fetchRecommend 会用新意图重新生成。
    */
   function setMealIntent(intent: MealIntent | null): void {
     mealIntent.value = intent
-    clearMealRecommendation()
   }
 
   function clearMealIntent(): void {
     if (mealIntent.value === null) return
     mealIntent.value = null
-    clearMealRecommendation()
   }
 
   return {

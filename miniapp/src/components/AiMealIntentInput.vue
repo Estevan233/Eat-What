@@ -1,5 +1,5 @@
 <template>
-  <view v-if="enabled" class="ai-panel">
+  <view v-if="enabled && dailyStore.diningMode === 'cook'" class="ai-panel">
     <view class="ai-row">
       <input
         v-model="text"
