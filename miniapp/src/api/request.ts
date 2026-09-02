@@ -48,15 +48,25 @@ function sleep(ms: number): Promise<void> {
   })
 }
 
+/** 无副作用的方法：重复执行不会落库，可以放心重试。 */
+const SAFE_METHODS = new Set<TransportMethod>(['GET'])
+
 /**
- * 判断是否值得重试：仅当请求没有拿到 HTTP 状态码（说明服务未响应，可能是冷启动/网络抖动）时重试。
- * 已经拿到状态码的错误是业务结果，重试只会制造重复写入。
+ * 判断是否值得重试。
+ *
+ * 两种情况值得重试：
+ * 1. 没拿到 HTTP 状态码 —— 服务完全没响应，属于冷启动或网络抖动。
+ * 2. 拿到 5xx 且是安全方法 —— 个人版 MySQL 自动暂停是设计上开启的，数据库唤醒前
+ *    后端会统一返回 502 DATABASE_ERROR，此时失败发生在落库之前，唤醒后重试即可。
+ *
+ * 非安全方法（POST/PUT/DELETE）拿到 5xx 时不重试：请求已经进入业务处理，
+ * 重试有重复写入的风险。
  */
-function isColdStartRetryable(error: ApiError): boolean {
-  if (error.statusCode !== undefined) return false
+function isRetryable(error: ApiError, method: TransportMethod): boolean {
   if (error.code === 'CLOUDBASE_AUTH_ERROR') return false
   if (error.code === 'SERVICE_CONFIG_ERROR') return false
-  return error.code === 'NETWORK_ERROR'
+  if (error.statusCode === undefined) return error.code === 'NETWORK_ERROR'
+  return SAFE_METHODS.has(method) && error.statusCode >= 500
 }
 
 function cloudTransportAvailable(): boolean {
@@ -107,21 +117,22 @@ function showRequestError(error: ApiError, silentStatuses: number[] = []): void 
 /**
  * 执行一次请求，并在遇到"服务未响应"类错误时重试一次。
  *
- * 这是针对个人版套餐冷启动的兜底：容器缩容到 0 且数据库自动暂停时，首次真实请求会超时，
- * 第二次请求通常命中已唤醒的实例。业务错误（已拿到 HTTP 状态码）不重试。
+ * 这是针对个人版套餐冷启动的兜底：容器缩容到 0 且数据库自动暂停时，首次真实请求会失败，
+ * 第二次请求通常命中已唤醒的实例。
  */
 async function executeWithColdStartRetry<T, TData>(
   options: RequestOptions<TData>,
   headers: Record<string, string>,
 ): Promise<T> {
   const transport = createPlatformTransport()
+  const method = options.method || 'GET'
   let lastError: ApiError | null = null
 
   for (let attempt = 0; attempt <= COLD_START_MAX_RETRIES; attempt += 1) {
     try {
       const response = await transport.execute({
         path: options.url,
-        method: options.method || 'GET',
+        method,
         data: options.data ? camelToSnake(options.data) : undefined,
         headers,
         timeout: options.timeout || DEFAULT_TIMEOUT,
@@ -143,7 +154,7 @@ async function executeWithColdStartRetry<T, TData>(
         throw new ApiError('未登录', 'AUTH_ERROR', 401, apiError.requestId)
       }
 
-      if (attempt < COLD_START_MAX_RETRIES && isColdStartRetryable(apiError)) {
+      if (attempt < COLD_START_MAX_RETRIES && isRetryable(apiError, method)) {
         await sleep(COLD_START_RETRY_DELAY_MS)
         continue
       }

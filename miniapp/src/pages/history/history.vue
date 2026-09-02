@@ -486,8 +486,10 @@ async function loadList(): Promise<void> {
 
 async function loadDiningMemories(): Promise<void> {
   try {
-    // 拉取最近最多 200 条外食记忆（个人级数据量），按本地日期分组。
-    const list = await listDiningMemories(1, 200)
+    // 外食记忆只用于日历/列表的 🥡 计数。后端 GET /dining/memories 限制 size ≤ 50，
+    // 超过会返回 422（响应体是 FastAPI 的 {detail:[...]}，不含 message 字段），
+    // response.ts 会兜底成「请求失败」并弹 toast，所以这里取后端允许的最大单页。
+    const list = await listDiningMemories(1, 50)
     const map = new Map<string, DiningMemoryRead[]>()
     for (const memory of list.items) {
       const iso = memory.createdAt.slice(0, 10)

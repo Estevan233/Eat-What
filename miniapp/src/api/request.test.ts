@@ -150,11 +150,94 @@ describe('request', () => {
       navigateTo: vi.fn(),
     })
 
-    await expect(request({
-      url: '/profile/constitution',
-      loading: false,
-      silentErrorStatuses: [404],
-    })).rejects.toMatchObject({ statusCode: 404, code: 'NOT_FOUND' })
-    expect(showToast).not.toHaveBeenCalled()
+  await expect(request({
+    url: '/profile/constitution',
+    loading: false,
+    silentErrorStatuses: [404],
+  })).rejects.toMatchObject({ statusCode: 404, code: 'NOT_FOUND' })
+  expect(showToast).not.toHaveBeenCalled()
+})
+
+it('retries a GET once while the paused database wakes up', async () => {
+  const requestMock = vi.fn((options: UniApp.RequestOptions) => {
+    const isFirstAttempt = requestMock.mock.calls.length === 1
+    options.success?.(
+      isFirstAttempt
+        ? {
+            data: {
+              ok: false,
+              code: 'DATABASE_ERROR',
+              message: '数据服务请求失败，请稍后重试',
+              data: null,
+            },
+            statusCode: 502,
+            header: {},
+            cookies: [],
+            errMsg: 'request:ok',
+          }
+        : {
+            data: { ok: true, data: { value: 'recovered' } },
+            statusCode: 200,
+            header: {},
+            cookies: [],
+            errMsg: 'request:ok',
+          },
+    )
+    options.complete?.({ errMsg: 'request:ok' })
+    return {} as UniApp.RequestTask
   })
+  vi.stubGlobal('uni', {
+    getStorageSync: vi.fn(() => 'stored-token'),
+    request: requestMock,
+    showLoading: vi.fn(),
+    hideLoading: vi.fn(),
+    showToast: vi.fn(),
+    navigateTo: vi.fn(),
+  })
+
+  await expect(
+    request<{ value: string }>({
+      url: '/api/v1/daily/history?days=90',
+      loading: false,
+    }),
+  ).resolves.toEqual({ value: 'recovered' })
+  expect(requestMock).toHaveBeenCalledTimes(2)
+})
+
+it('does not retry a POST that already reached the server', async () => {
+  const requestMock = vi.fn((options: UniApp.RequestOptions) => {
+    options.success?.({
+      data: {
+        ok: false,
+        code: 'DATABASE_ERROR',
+        message: '数据服务请求失败，请稍后重试',
+        data: null,
+      },
+      statusCode: 502,
+      header: {},
+      cookies: [],
+      errMsg: 'request:ok',
+    })
+    options.complete?.({ errMsg: 'request:ok' })
+    return {} as UniApp.RequestTask
+  })
+  vi.stubGlobal('uni', {
+    getStorageSync: vi.fn(() => 'stored-token'),
+    request: requestMock,
+    showLoading: vi.fn(),
+    hideLoading: vi.fn(),
+    showToast: vi.fn(),
+    navigateTo: vi.fn(),
+  })
+
+  await expect(
+    request({
+      url: '/api/v1/daily/logs/manual',
+      method: 'POST',
+      data: { logDate: '2026-09-02', mealSlot: 'lunch', dishes: [] },
+      loading: false,
+    }),
+  ).rejects.toMatchObject({ statusCode: 502, code: 'DATABASE_ERROR' })
+  expect(requestMock).toHaveBeenCalledTimes(1)
+})
 })
