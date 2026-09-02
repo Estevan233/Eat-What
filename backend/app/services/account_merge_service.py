@@ -165,6 +165,8 @@ def _merge_daily_logs_sqlalchemy(
             select(DailyLog).where(
                 DailyLog.user_id == target_id,
                 DailyLog.log_date == source_row.log_date,
+                DailyLog.meal_slot == source_row.meal_slot,
+                DailyLog.source == source_row.source,
             )
         ).first()
         if target_row is None:
@@ -496,6 +498,8 @@ def _merge_daily_logs_cloudbase(
                 filters=(
                     RdbFilter("user_id", "eq", target_id),
                     RdbFilter("log_date", "eq", source_row.log_date),
+                    RdbFilter("meal_slot", "eq", source_row.meal_slot),
+                    RdbFilter("source", "eq", source_row.source),
                 ),
             )
             if target_row is None:

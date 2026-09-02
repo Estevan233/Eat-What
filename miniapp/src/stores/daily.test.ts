@@ -4,9 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ApiError } from '@/types/api'
 import type { MealRecommendation, MealSubstitution } from '@/types/api'
 
-const { chooseMealMock, getTodayLogMock, recommendMock } = vi.hoisted(() => ({
+const { chooseMealMock, getTodayLogsMock, recommendMock } = vi.hoisted(() => ({
   chooseMealMock: vi.fn(),
-  getTodayLogMock: vi.fn(),
+  getTodayLogsMock: vi.fn(),
   recommendMock: vi.fn(),
 }))
 
@@ -14,7 +14,7 @@ vi.mock('@/api/daily', () => ({
   chooseFood: vi.fn(),
   chooseMeal: chooseMealMock,
   getHistory: vi.fn(),
-  getTodayLog: getTodayLogMock,
+  getTodayLogs: getTodayLogsMock,
   recommend: recommendMock,
 }))
 
@@ -168,7 +168,7 @@ describe('daily complete meal store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     chooseMealMock.mockReset()
-    getTodayLogMock.mockReset().mockResolvedValue(null)
+    getTodayLogsMock.mockReset().mockResolvedValue({ items: [] })
     recommendMock.mockReset().mockResolvedValue(recommendation)
     vi.stubGlobal('uni', storageStub())
   })
@@ -248,11 +248,46 @@ describe('daily complete meal store', () => {
     expect(store.currentMeal?.totalNutrition.energyKcal).toBe(590)
 
     await store.chooseCurrentMeal()
-    expect(chooseMealMock).toHaveBeenCalledWith({
-      recommendationId: 17,
-      selectedFoodIds: [1, 4, 3],
-      substitutions: [{ targetRole: 'vegetable', replacementFoodId: 4 }],
-    })
+    expect(chooseMealMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recommendationId: 17,
+        selectedFoodIds: [1, 4, 3],
+        substitutions: [{ targetRole: 'vegetable', replacementFoodId: 4 }],
+        mealSlot: expect.any(String),
+      }),
+    )
+  })
+
+  it('persists the configured meal slot and sends it with the choose request', async () => {
+    chooseMealMock.mockResolvedValue({ id: 1, chosenFoodIds: [1, 4, 3] })
+    const store = useDailyStore()
+
+    store.setMealSlot('lunch')
+    await store.fetchRecommend()
+    await store.chooseCurrentMeal()
+    expect(chooseMealMock.mock.calls[0][0].mealSlot).toBe('lunch')
+  })
+
+  it('switches the active meal slot, persists it, and lists today logs on fetch', async () => {
+    const todayLogs = [
+      {
+        id: 11,
+        mealSlot: 'breakfast',
+        source: 'recommendation',
+        chosenMeal: { items: [{ foodId: 1, name: '番茄鸡蛋', mealRole: 'main' }] },
+      },
+      { id: 12, mealSlot: 'breakfast', source: 'manual', chosenMeal: { items: [] } },
+    ]
+    getTodayLogsMock.mockReset().mockResolvedValue({ items: todayLogs })
+    const store = useDailyStore()
+
+    store.setMealSlot('dinner')
+    expect(store.mealSlot).toBe('dinner')
+
+    await store.fetchTodayLogs()
+    expect(store.todayLogs).toHaveLength(2)
+    // 同一餐次多条记录只计 1 餐。
+    expect(store.todayCount).toBe(1)
   })
 
   it('persists meal context and sends family party size to recommendation API', async () => {
@@ -288,7 +323,7 @@ describe('daily complete meal store', () => {
     expect(recommendMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
       excludeFoodIds: [1, 2, 3, 4, 5, 6],
     }))
-    expect(getTodayLogMock).not.toHaveBeenCalled()
+    expect(getTodayLogsMock).not.toHaveBeenCalled()
   })
 
   it('keeps at least five prior batches when requesting the sixth recommendation', async () => {

@@ -1,5 +1,6 @@
 import { request } from './request'
 import type {
+  CitySpecialtiesResponse,
   DiningMemoryList,
   DiningMemoryRead,
   DiningMemoryUpsert,
@@ -7,6 +8,8 @@ import type {
   ExternalDiningRequest,
   ExternalDiningResponse,
 } from '@/types/api'
+
+export type { DiningMemoryRead }
 
 export const recommendExternal = (
   data: ExternalDiningRequest,
@@ -22,10 +25,15 @@ export const listDiningMemories = (
   page = 1,
   size = 20,
   verdict?: DiningVerdict,
+  query = '',
+  date?: string,
 ): Promise<DiningMemoryList> => {
   const verdictQuery = verdict ? `&verdict=${verdict}` : ''
+  const queryQuery = query.trim() ? `&query=${encodeURIComponent(query.trim())}` : ''
+  const dateQuery = date ? `&date=${encodeURIComponent(date)}` : ''
   return request<DiningMemoryList>({
-    url: `/api/v1/dining/memories?page=${page}&size=${size}${verdictQuery}`,
+    url: `/api/v1/dining/memories?page=${page}&size=${size}${verdictQuery}${queryQuery}${dateQuery}`,
+    loading: false,
   })
 }
 
@@ -44,4 +52,11 @@ export const deleteDiningMemory = (
   request<{ deleted: boolean }>({
     url: `/api/v1/dining/memories/${memoryId}`,
     method: 'DELETE',
+  })
+
+export const getCitySpecialties = (city: string): Promise<CitySpecialtiesResponse> =>
+  request<CitySpecialtiesResponse>({
+    url: `/api/v1/dining/specialties?city=${encodeURIComponent(city.trim())}`,
+    method: 'GET',
+    loading: false,
   })

@@ -37,13 +37,14 @@
 
     <AiMealIntentInput />
 
-    <view v-if="dailyStore.diningMode === 'cook' && chosenMealNames" class="chosen-banner">
+    <view v-if="dailyStore.todayCount > 0" class="chosen-banner" hover-class="chosen-banner-hover" @click="goDiary">
       <text class="chosen-mark">✓</text>
       <view class="chosen-copy">
-        <text class="chosen-title">今天就吃这套</text>
-        <text class="chosen-text">{{ chosenMealNames }}</text>
+        <text class="chosen-title">今日已安排 {{ dailyStore.todayCount }}/3 餐</text>
+        <text v-if="chosenMealNames" class="chosen-text">{{ chosenMealNames }}</text>
+        <text v-else class="chosen-text">去餐食日记看看今天吃了什么吧</text>
       </view>
-      <navigator url="/pages/history/history" class="history-link">历史 ›</navigator>
+      <text class="history-link">日记 ›</text>
     </view>
 
     <!-- 选择器 summary（收起态） -->
@@ -57,6 +58,18 @@
       <view class="panel-header">
         <text class="panel-header-label">用餐设置</text>
         <text class="panel-header-toggle" @click="toggleSelectors">收起</text>
+      </view>
+      <view class="panel-row">
+        <text class="panel-label">哪一餐</text>
+        <view class="chip-row">
+          <text
+            v-for="option in MEAL_SLOT_OPTIONS"
+            :key="option.value"
+            class="chip meal-chip"
+            :class="{ 'chip-on': dailyStore.mealSlot === option.value }"
+            @click="selectMealSlot(option.value)"
+          >{{ option.emoji }} {{ option.label }}<text v-if="recordedSlots.has(option.value)" class="slot-done"> ✓</text></text>
+        </view>
       </view>
       <view class="panel-row">
         <text class="panel-label">为谁吃</text>
@@ -206,6 +219,18 @@
           @remember="openMemory"
         />
         <text class="external-disclaimer">{{ diningStore.recommendation.disclaimer }}</text>
+
+        <view v-if="specialties.length" class="specialty">
+          <view class="specialty-head">
+            <text class="specialty-title">🍜 {{ dailyStore.city }} 的本地味道</text>
+            <text class="specialty-badge">AI 推荐 · 仅供参考</text>
+          </view>
+          <text class="specialty-sub">到了当地，这些才值得专门去吃</text>
+          <view v-for="item in specialties" :key="item.name" class="specialty-item">
+            <text class="specialty-name">{{ item.name }}</text>
+            <text class="specialty-reason">{{ item.reason }}</text>
+          </view>
+        </view>
       </view>
 
       <view v-else class="empty">
@@ -229,6 +254,8 @@ import MealPlateCard from '@/components/MealPlateCard.vue'
 import MealSubstitution from '@/components/MealSubstitution.vue'
 import RecommendationBasis from '@/components/RecommendationBasis.vue'
 import WeatherBadge from '@/components/WeatherBadge.vue'
+import { MEAL_SLOT_OPTIONS } from '@/ai/meal-log'
+import { getCitySpecialties } from '@/api/dining'
 import { useLocation, type Coords } from '@/composables/useLocation'
 import { APP_NAME, BRAND_SUBTITLE, HERO_TITLE } from '@/config/brand'
 import { ACTIVITY_LABELS, ACTIVITY_LIST, MOOD_LABELS, MOOD_LIST } from '@/constants/daily'
@@ -237,9 +264,11 @@ import { useDiningStore } from '@/stores/dining'
 import { useFavoriteStore } from '@/stores/favorite'
 import { useUserStore } from '@/stores/user'
 import { ApiError } from '@/types/api'
+import type { MealSlot } from '@/types/api'
 import type {
   ActivityLevel,
   Audience,
+  CitySpecialty,
   DiningMode,
   ExternalDiningSuggestion,
   MealItem,
@@ -254,6 +283,7 @@ const { getLocation } = useLocation()
 const badgeRef = ref<InstanceType<typeof WeatherBadge> | null>(null)
 const pageError = ref('')
 const selectorsExpanded = ref(false)
+const specialties = ref<CitySpecialty[]>([])
 const PARTY_SIZES = [2, 3, 4, 5, 6, 8]
 
 const MOOD_EMOJI: Record<Mood, string> = {
@@ -291,9 +321,19 @@ const ctaText = computed(() => {
     : '🍽 换一套完整餐'
 })
 const chosenMealNames = computed(() => {
-  const items = dailyStore.todayLog?.chosenMeal?.items
-  return items?.length ? items.map((item) => item.name).join(' · ') : ''
+  const chunks: string[] = []
+  for (const slot of MEAL_SLOT_OPTIONS) {
+    const log = dailyStore.todayLogs.find(
+      (entry) => entry.mealSlot === slot.value && entry.chosenMeal?.items?.length,
+    )
+    if (!log?.chosenMeal?.items?.length) continue
+    const names = log.chosenMeal.items.map((item) => item.name).join(' · ')
+    chunks.push(`${slot.label}：${names}`)
+  }
+  return chunks.join('；')
 })
+/** 今天已有记录的餐次（chips 上的 ✓ 角标数据源）。 */
+const recordedSlots = computed(() => new Set(dailyStore.todayLogs.map((log) => log.mealSlot)))
 const recommendedMealNames = computed(() => {
   return dailyStore.currentMeal?.items?.map((item) => item.name) || []
 })
@@ -303,6 +343,31 @@ function selectMode(mode: DiningMode): void {
   if (mode === 'cook') diningStore.clearRecommendation()
   else dailyStore.clearMealRecommendation()
   pageError.value = ''
+  if (mode === 'cook') specialties.value = []
+}
+
+function selectMealSlot(slot: MealSlot): void {
+  dailyStore.setMealSlot(slot)
+}
+
+function goDiary(): void {
+  // 日记是 tabBar 页面，必须用 switchTab 才能跳转
+  uni.switchTab({ url: '/pages/history/history' })
+}
+
+/** 从后端拉取当前城市特色菜；AI 不可用时静默为空（区块隐藏）。 */
+async function refreshSpecialties(): Promise<void> {
+  const city = dailyStore.city.trim()
+  if (!city) {
+    specialties.value = []
+    return
+  }
+  try {
+    const result = await getCitySpecialties(city)
+    specialties.value = result.items || []
+  } catch {
+    specialties.value = []
+  }
 }
 
 function selectAudience(audience: Audience): void {
@@ -321,6 +386,8 @@ function onCityInput(event: Event): void {
   const inputEvent = event as unknown as { detail?: { value?: string } }
   dailyStore.setCity(inputEvent.detail?.value || '')
   diningStore.clearRecommendation()
+  // 城市变化后旧城市的特色菜不再可信。
+  specialties.value = []
 }
 
 async function onRecommend(): Promise<void> {
@@ -360,6 +427,7 @@ async function onRecommend(): Promise<void> {
         lng: coords?.lng,
       })
       uni.showToast({ title: '外食方向已整理', icon: 'none' })
+      if (dailyStore.city.trim()) refreshSpecialties()
     } else {
       await dailyStore.fetchRecommend(coords?.lat, coords?.lng)
       uni.showToast({ title: dailyStore.offline ? '已展示上次推荐' : '完整餐已搭配', icon: 'none' })
@@ -396,7 +464,7 @@ async function chooseCurrentMeal(): Promise<void> {
 
 onShow(() => {
   if (userStore.isLoggedIn) {
-    dailyStore.fetchTodayLog().catch(() => undefined)
+    dailyStore.fetchTodayLogs().catch(() => undefined)
     favoriteStore.fetchList().catch(() => undefined)
   }
   setTimeout(() => badgeRef.value?.refreshWeather?.(), 100)
@@ -421,12 +489,12 @@ onShareTimeline(() => {
 
 <style lang="scss" scoped>
 .page { min-height: 100vh; background: $bg; padding: 22rpx 32rpx 70rpx; box-sizing: border-box; }
-.hero { display: flex; align-items: center; gap: 20rpx; padding: 32rpx 6rpx 26rpx; }
-.hero-avatar { width: 100rpx; height: 100rpx; flex: 0 0 100rpx; border-radius: 30rpx; box-shadow: $shadow-card; }
-.hero-text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3rpx; }
-.hero-title { color: $ink; font-size: 48rpx; font-weight: 800; letter-spacing: 1rpx; }
-.hero-kicker { color: $brand-deep; font-size: 23rpx; font-weight: 700; }
-.hero-sub { color: $ink-2; font-size: 21rpx; line-height: 1.4; }
+.hero { display: flex; align-items: center; gap: 24rpx; padding: 40rpx 6rpx 30rpx; }
+.hero-avatar { width: 108rpx; height: 108rpx; flex: 0 0 108rpx; border-radius: 32rpx; box-shadow: $shadow-card; }
+.hero-text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 8rpx; }
+.hero-title { color: $ink; font-size: 46rpx; font-weight: 800; letter-spacing: 2rpx; line-height: 1.15; }
+.hero-kicker { color: $brand-deep; font-size: 24rpx; font-weight: 750; letter-spacing: 1rpx; }
+.hero-sub { color: $ink-2; font-size: 22rpx; line-height: 1.5; }
 .context-badge { margin: 0 6rpx 18rpx; max-width: calc(100% - 12rpx); box-sizing: border-box; }
 .mode-switch { display: flex; gap: 12rpx; margin-bottom: 20rpx; padding: 10rpx; border: 1rpx solid $line; border-radius: 28rpx; background: rgba(255, 255, 255, .72); }
 .mode-option { min-width: 0; flex: 1; display: flex; align-items: center; gap: 12rpx; padding: 19rpx 18rpx; border-radius: 21rpx; color: $ink-2; transition: transform .18s ease, background-color .18s ease; }
@@ -436,12 +504,23 @@ onShareTimeline(() => {
 .mode-copy { min-width: 0; display: flex; flex-direction: column; gap: 3rpx; }
 .mode-title { font-size: 23rpx; font-weight: 800; }
 .mode-sub { font-size: 17rpx; white-space: nowrap; }
-.chosen-banner { display: flex; align-items: center; gap: 14rpx; margin-bottom: 20rpx; padding: 20rpx 22rpx; border: 1rpx solid $fresh-light; border-radius: $radius-md; background: $fresh-light; }
+.chosen-banner { display: flex; align-items: center; gap: 14rpx; margin-bottom: 20rpx; padding: 20rpx 22rpx; border: 1rpx solid $fresh-light; border-radius: $radius-md; background: $fresh-light; transition: transform .12s ease; }
+.chosen-banner-hover { transform: scale(.985); }
 .chosen-mark { width: 42rpx; height: 42rpx; flex: 0 0 42rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; background: $fresh; font-size: 23rpx; font-weight: 800; }
 .chosen-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4rpx; }
 .chosen-title { color: $fresh-dark; font-size: 24rpx; font-weight: 750; }
 .chosen-text { color: $fresh; font-size: 21rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .history-link { color: $fresh; font-size: 22rpx; }
+.meal-chip { padding: 9rpx 20rpx; }
+.slot-done { color: $fresh; font-weight: 800; }
+.specialty { padding: 26rpx 26rpx 12rpx; border: 1rpx solid $brand-soft; border-radius: $radius-lg; background: $brand-light; }
+.specialty-head { display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.specialty-title { color: $brand-dark; font-size: 27rpx; font-weight: 800; }
+.specialty-badge { flex: 0 0 auto; padding: 5rpx 12rpx; border-radius: 999rpx; color: $brand; background: #fff; border: 1rpx solid $brand-soft; font-size: 17rpx; font-weight: 650; }
+.specialty-sub { display: block; margin-top: 6rpx; color: $ink-3; font-size: 19rpx; }
+.specialty-item { display: flex; flex-direction: column; gap: 4rpx; margin-top: 18rpx; padding: 16rpx 18rpx; border-radius: 18rpx; background: #fff; }
+.specialty-name { color: $ink; font-size: 24rpx; font-weight: 750; }
+.specialty-reason { color: $ink-2; font-size: 20rpx; line-height: 1.5; }
 .panel { margin-bottom: 26rpx; padding: 28rpx; border-radius: $radius-lg; background: $card; box-shadow: $shadow-card; }
 .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20rpx; }
 .panel-header-label { color: $ink; font-size: 28rpx; font-weight: 750; }

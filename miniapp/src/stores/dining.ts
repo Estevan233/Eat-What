@@ -82,8 +82,13 @@ export const useDiningStore = defineStore('dining', () => {
     }
   }
 
-  async function fetchMemories(verdict?: DiningVerdict): Promise<DiningMemoryRead[]> {
-    const data = await listDiningMemories(1, 50, verdict)
+  /** 拉取外食记忆列表；query 非空时按店名/菜名/备注搜索；date 非空时按日期过滤。 */
+  async function fetchMemories(
+    verdict?: DiningVerdict,
+    query = '',
+    date?: string,
+  ): Promise<DiningMemoryRead[]> {
+    const data = await listDiningMemories(1, 50, verdict, query, date)
     memories.value = data.items
     return data.items
   }

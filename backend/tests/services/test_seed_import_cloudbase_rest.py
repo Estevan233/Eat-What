@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 
-from app.repositories.cloudbase_repository import CloudBaseRepository
 from app.repositories.cloudbase_rdb import RdbResult
+from app.repositories.cloudbase_repository import CloudBaseRepository
 from app.services import external_dining_seed, food_seed, recipe_seed
 from tests.test_cloudbase_rest_services import MemoryRdbClient
 
@@ -49,13 +49,7 @@ class NoRepresentationCandidateWriteClient(MemoryRdbClient):
 
     def update(self, table: str, values, *, filters) -> RdbResult:
         result = super().update(table, values, filters=filters)
-        if table == "external_dining_candidates":
-            return RdbResult(rows=[], status_code=result.status_code, affected=result.affected)
-        return result
-
-    def update(self, table: str, values, *, filters) -> RdbResult:
-        result = super().update(table, values, filters=filters)
-        if table == "foods":
+        if table in ("external_dining_candidates", "foods"):
             return RdbResult(
                 rows=[],
                 status_code=result.status_code,

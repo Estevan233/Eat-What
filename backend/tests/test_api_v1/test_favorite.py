@@ -125,11 +125,14 @@ def test_list_returns_favorited_foods(client, auth_token, seed_foods):
     data = res.json()["data"]
     assert data["total"] == 3
     assert len(data["items"]) == 3
-    # 每条含 Food 详情字段
+    # 每条含 favorite_id + Food 详情
     item = data["items"][0]
-    assert "name" in item
-    assert "category" in item
-    assert "cooking_method" in item
+    assert item["favorite_id"] is not None
+    assert item["food"] is not None
+    assert item["custom_name"] is None
+    assert "name" in item["food"]
+    assert "category" in item["food"]
+    assert "cooking_method" in item["food"]
 
 
 def test_list_pagination(client, auth_token, seed_foods):

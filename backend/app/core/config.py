@@ -47,6 +47,15 @@ class Settings(BaseSettings):
     # 外食候选目录默认关闭；完成来源审核并在 CloudBase 灰度验证后才打开。
     external_catalog_enabled: bool = False
 
+    # 外食本地特色菜 AI 推荐（可配置，未配置时静默降级到本地缓存目录）
+    specialty_ai_enabled: bool = False
+    specialty_ai_provider: str = "cloudbase"
+    specialty_ai_model: str = "hunyuan-turbos-latest"
+    specialty_ai_api_key: SecretStr | None = None
+    specialty_ai_timeout_seconds: float = 8.0
+    specialty_cache_ttl_seconds: int = 86400
+    specialty_cache_max_size: int = 100
+
     @field_validator("database_url", mode="before")
     @classmethod
     def use_installed_mysql_driver(cls, value: object) -> object:

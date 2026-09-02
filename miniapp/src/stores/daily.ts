@@ -6,9 +6,10 @@ import {
   chooseFood as apiChooseFood,
   chooseMeal as apiChooseMeal,
   getHistory,
-  getTodayLog,
+  getTodayLogs,
   recommend as apiRecommend,
 } from '@/api/daily'
+import { inferMealSlotByClock } from '@/ai/meal-log'
 import type { DailyLogRead, HistoryResponse } from '@/api/daily'
 import { applySubstitution as replaceMealSlot } from '@/domain/meal'
 import { ApiError } from '@/types/api'
@@ -17,8 +18,9 @@ import type {
   ActivityLevel,
   Audience,
   DiningMode,
-  MealRecommendation,
   MealIntent,
+  MealRecommendation,
+  MealSlot,
   MealSnapshot,
   MealSubstitution,
   Mood,
@@ -35,6 +37,7 @@ const DINING_MODE_KEY = 'eat_what_dining_mode'
 const AUDIENCE_KEY = 'eat_what_audience'
 const PARTY_SIZE_KEY = 'eat_what_party_size'
 const CITY_KEY = 'eat_what_city'
+const MEAL_SLOT_KEY = 'eat_what_meal_slot'
 const MEAL_CACHE_KEY = 'eat_what_meal_recommendation_v2'
 const RECENT_COOK_IDS_KEY = 'eat_what_recent_cook_ids_v1'
 const MEAL_CACHE_VERSION = 2
@@ -123,7 +126,17 @@ export const useDailyStore = defineStore('daily', () => {
   )
   const city = ref(String(uni.getStorageSync(CITY_KEY) || ''))
   const loading = ref(false)
-  const todayLog = ref<DailyLogRead | null>(null)
+  /** 今天全部日志行（三餐 + 自记），choose 后自动刷新。 */
+  const todayLogs = ref<DailyLogRead[]>([])
+  /** 当前正在搭配的餐次；默认按本地时间推断。 */
+  const storedMealSlot = uni.getStorageSync(MEAL_SLOT_KEY) as MealSlot | ''
+  const mealSlot = ref<MealSlot>(
+    storedMealSlot === 'breakfast' || storedMealSlot === 'lunch' || storedMealSlot === 'dinner'
+      ? storedMealSlot
+      : inferMealSlotByClock(),
+  )
+  /** 今天已有记录的餐次数（用于"今日已记录 N/3 餐"）。 */
+  const todayCount = computed(() => new Set(todayLogs.value.map((log) => log.mealSlot)).size)
 
   const cached = readMealCache()
   const serverRecommendation = ref<MealRecommendation | null>(cached?.recommendation || null)
@@ -254,41 +267,50 @@ export const useDailyStore = defineStore('daily', () => {
         targetRole: item.targetRole,
         replacementFoodId: item.replacement.foodId,
       })),
+      mealSlot: mealSlot.value,
     })
-    todayLog.value = data
+    // 同餐次 upsert 语义下重新拉全量，避免本地 push 产生重复行。
+    fetchTodayLogs().catch(() => undefined)
     return data
   }
 
   async function chooseFood(foodId: number): Promise<DailyLogRead> {
-    const data = await apiChooseFood(foodId)
-    todayLog.value = data
+    const data = await apiChooseFood(foodId, mealSlot.value)
+    fetchTodayLogs().catch(() => undefined)
     return data
   }
 
-  async function fetchTodayLog(): Promise<DailyLogRead | null> {
+  async function fetchTodayLogs(): Promise<DailyLogRead[]> {
     try {
-      const data = await getTodayLog()
-      todayLog.value = data
-      if (data) {
-        mood.value = data.mood as Mood
-        activityLevel.value = data.activityLevel as ActivityLevel
+      const data = await getTodayLogs()
+      todayLogs.value = data.items
+      const recommended = data.items.find((log) => log.source === 'recommendation')
+      if (recommended) {
+        mood.value = recommended.mood as Mood
+        activityLevel.value = recommended.activityLevel as ActivityLevel
         uni.setStorageSync(MOOD_KEY, mood.value)
         uni.setStorageSync(ACTIVITY_KEY, activityLevel.value)
       }
-      return data
+      return data.items
     } catch (error) {
-      if (isTransient(error)) return todayLog.value
+      if (isTransient(error)) return todayLogs.value
       throw error
     }
   }
 
-  async function fetchHistory(days = 30): Promise<HistoryResponse | null> {
+  async function fetchHistory(days = 30, query = ''): Promise<HistoryResponse | null> {
     try {
-      return await getHistory(days)
+      return await getHistory(days, query)
     } catch (error) {
       if (isTransient(error)) return null
       throw error
     }
+  }
+
+  function setMealSlot(value: MealSlot): void {
+    if (mealSlot.value === value) return
+    mealSlot.value = value
+    uni.setStorageSync(MEAL_SLOT_KEY, value)
   }
 
   function setMood(value: Mood): void {
@@ -366,7 +388,9 @@ export const useDailyStore = defineStore('daily', () => {
     stale,
     offline,
     lastRequestId,
-    todayLog,
+    todayLogs,
+    todayCount,
+    mealSlot,
     mood,
     activityLevel,
     diningMode,
@@ -381,8 +405,9 @@ export const useDailyStore = defineStore('daily', () => {
     applySubstitution,
     chooseCurrentMeal,
     chooseFood,
-    fetchTodayLog,
+    fetchTodayLogs,
     fetchHistory,
+    setMealSlot,
     setMood,
     setActivityLevel,
     setDiningMode,

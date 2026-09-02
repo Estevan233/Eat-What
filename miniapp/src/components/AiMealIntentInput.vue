@@ -15,6 +15,17 @@
       </view>
     </view>
 
+    <view v-if="!intent && !parsing" class="ai-chips">
+      <view
+        v-for="sample in SAMPLES"
+        :key="sample"
+        class="ai-chip"
+        @click="onSample(sample)"
+      >
+        <text class="ai-chip-text">{{ sample }}</text>
+      </view>
+    </view>
+
     <view v-if="intent" class="ai-tags">
       <view
         v-for="item in intent.availableIngredients"
@@ -59,6 +70,11 @@ const GOAL_LABELS: Record<MealGoal, string> = {
   weight_control: '克制能量',
   high_protein: '高蛋白',
 }
+const SAMPLES = [
+  '冰箱有番茄和鸡蛋，15 分钟',
+  '想吃高蛋白的，30 分钟内',
+  '没有猪肉，清爽一点',
+]
 
 const dailyStore = useDailyStore()
 const enabled = isMealIntentEnabled()
@@ -98,6 +114,12 @@ async function onParse(): Promise<void> {
   } finally {
     parsing.value = false
   }
+}
+
+function onSample(sample: string): void {
+  if (parsing.value) return
+  text.value = sample
+  onParse()
 }
 
 function removeAvailable(item: string): void {
@@ -217,6 +239,25 @@ function onClear(): void {
 .ai-tag-text {
   font-size: 22rpx;
   color: $ink-2;
+}
+
+.ai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+
+.ai-chip {
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  background: $brand-light;
+  border: 1rpx solid $brand-soft;
+}
+
+.ai-chip-text {
+  font-size: 22rpx;
+  color: $brand-dark;
 }
 
 .ai-summary {

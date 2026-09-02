@@ -1,25 +1,27 @@
 /**
- * 收藏 Store - 收藏状态 + 列表缓存。
+ * 收藏 Store - 收藏状态 + 统一收藏列表（普通菜谱 / 自定义收藏）。
  *
  * 设计：
  * - favoritedIds：已收藏的 food id 集合（用于 FoodCard 渲染心形图标状态）
- * - favorites：完整的菜列表（收藏页展示用，按需延迟加载）
- * - toggle 调 API 后立即同步 favoritedIds，保证 FoodCard 响应即时
+ * - items：统一收藏项列表（普通收藏 food 非空；自定义收藏 customName 非空、food 为 null）
+ * - fetchList 支持关键词 query；收藏页搜索与卡片心形状态共用同一份数据
  */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { listFavorites, toggleFavorite } from '@/api/favorite'
-import type { FavoriteFood } from '@/api/favorite'
+import { listFavorites, toggleFavorite, type FavoriteItem } from '@/api/favorite'
 
 const FAVORITED_IDS_KEY = 'eat_what_favorited_ids'
 
 export const useFavoriteStore = defineStore('favorite', () => {
-  /** 已收藏的 food id 集合。 */
+  /** 已收藏的 food id 集合（自定义收藏无 foodId，不进集合）。 */
   const favoritedIds = ref<Set<number>>(new Set())
-  const favorites = ref<FavoriteFood[]>([])
+  /** 统一收藏列表（按后端顺序返回）。 */
+  const items = ref<FavoriteItem[]>([])
   const loading = ref(false)
-  /** 是否已加载过列表（避免进页重复拉）。 */
+  /** 是否已加载过非搜索列表（避免 today/recipe 反复拉全量）。 */
   const loaded = ref(false)
+  /** 当前生效的关键词（搜索态内存缓存隔离）。 */
+  const activeQuery = ref('')
 
   // 启动时从 storage 恢复 favoritedIds（存为数组）
   const stored = uni.getStorageSync(FAVORITED_IDS_KEY)
@@ -36,6 +38,15 @@ export const useFavoriteStore = defineStore('favorite', () => {
     uni.setStorageSync(FAVORITED_IDS_KEY, JSON.stringify(Array.from(favoritedIds.value)))
   }
 
+  function syncIdsFromItems(list: FavoriteItem[]): void {
+    const next = new Set<number>()
+    for (const item of list) {
+      if (item.foodId != null) next.add(item.foodId)
+    }
+    favoritedIds.value = next
+    persistIds()
+  }
+
   /** 切换收藏状态，同步本地集合。不会拉列表。 */
   async function toggle(foodId: number): Promise<boolean> {
     const result = await toggleFavorite(foodId)
@@ -49,16 +60,27 @@ export const useFavoriteStore = defineStore('favorite', () => {
     return favorited
   }
 
-  /** 加载收藏列表（收藏页 onLoad 或 today 页 onShow 用）。 */
-  async function fetchList(force = false): Promise<FavoriteFood[]> {
-    if (loaded.value && !force) return favorites.value
+  /** 从收藏页删除后同步移除 ids（避免刷新前心形状态残留）。 */
+  function removeLocal(foodId: number | null): void {
+    if (foodId == null) return
+    favoritedIds.value.delete(foodId)
+    persistIds()
+  }
+
+  /** 加载收藏列表。query 非空时跳过缓存强制请求（搜索态）。 */
+  async function fetchList(force = false, query = ''): Promise<FavoriteItem[]> {
+    const keyword = query.trim()
+    const cachedList = !keyword && !force && loaded.value
+    if (cachedList && activeQuery.value === '') return items.value
     loading.value = true
     try {
-      const data = await listFavorites(1, 50)
-      favorites.value = data.items
-      favoritedIds.value = new Set(data.items.map((f) => f.id))
-      persistIds()
-      loaded.value = true
+      const data = await listFavorites(1, 50, keyword)
+      items.value = data.items
+      activeQuery.value = keyword
+      if (!keyword) {
+        syncIdsFromItems(data.items)
+        loaded.value = true
+      }
       return data.items
     } finally {
       loading.value = false
@@ -72,10 +94,11 @@ export const useFavoriteStore = defineStore('favorite', () => {
 
   return {
     favoritedIds,
-    favorites,
+    items,
     loading,
-    toggle,
     fetchList,
+    toggle,
+    removeLocal,
     isFavorited,
   }
 })

@@ -7,7 +7,7 @@ vi.mock('./request', () => ({
 }))
 
 import { getToday, getWeather } from './context'
-import { getTodayLog, recommend } from './daily'
+import { getTodayLogs, recommend } from './daily'
 import { recommendExternal } from './dining'
 import { listFavorites } from './favorite'
 
@@ -32,8 +32,8 @@ describe('homepage request loading contract', () => {
       audience: 'personal',
       partySize: 1,
     })
-    await getTodayLog()
-    await listFavorites()
+    await getTodayLogs()
+    await listFavorites(1, 20, '')
 
     expect(requestMock).toHaveBeenCalledTimes(6)
     requestMock.mock.calls.forEach(([options]) => {

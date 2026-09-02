@@ -31,6 +31,7 @@ from app.schemas.daily import (
     RecommendContext,
     RecommendRequest,
     RecommendResponse,
+    infer_meal_slot,
 )
 from app.schemas.meal import MealBuildResult, MealRole
 from app.schemas.today_context import TodayContext
@@ -770,6 +771,7 @@ async def recommend(
         event_date=today,
         dining_mode=req.dining_mode,
         audience=req.audience,
+        meal_slot=req.meal_slot or infer_meal_slot(),
         party_size=req.party_size,
         request_id=effective_request_id,
         check_idempotency=req.request_id is not None,

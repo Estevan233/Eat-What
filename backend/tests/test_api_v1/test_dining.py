@@ -238,3 +238,28 @@ def test_external_recommendation_recalls_liked_but_excludes_avoided_pair(client)
         for item in second.json()["data"]["suggestions"]
     }
     assert ("小陈砂锅", "菌菇豆腐煲") not in second_pairs
+
+
+def test_dining_memory_filters_by_date(client) -> None:
+    import datetime as _dt
+
+    headers = _login(client, "dining-date-filter-123456")
+    memory = client.put(
+        "/api/v1/dining/memories",
+        headers=headers,
+        json={"shop_name": "今天吃的", "dish_name": "面", "verdict": "liked"},
+    )
+    assert memory.status_code == 200
+
+    today = _dt.date.today().isoformat()
+    matched = client.get(f"/api/v1/dining/memories?date={today}", headers=headers)
+    assert matched.status_code == 200
+    assert matched.json()["data"]["total"] == 1
+
+    future = (_dt.date.today() + _dt.timedelta(days=10)).isoformat()
+    empty = client.get(f"/api/v1/dining/memories?date={future}", headers=headers)
+    assert empty.status_code == 200
+    assert empty.json()["data"]["total"] == 0
+
+    bad = client.get("/api/v1/dining/memories?date=2026-13-01", headers=headers)
+    assert bad.status_code == 422

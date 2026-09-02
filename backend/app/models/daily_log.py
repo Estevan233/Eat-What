@@ -8,7 +8,7 @@
 from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Column, UniqueConstraint
+from sqlalchemy import Column, Index
 from sqlalchemy.types import JSON
 from sqlmodel import Field, SQLModel
 
@@ -16,18 +16,28 @@ from sqlmodel import Field, SQLModel
 class DailyLog(SQLModel, table=True):
     """用户每日推荐日志。
 
-    一行 = 用户某一天的「推荐结果 + 用户实际选择」。
-    T10 推荐时写入（recommended_*），T11 用户选择后更新 chosen_food_ids。
+    三餐化后：一行 = 用户某一天某一餐的「推荐结果 + 用户实际选择」或一条手动记录。
+    - source='recommendation'：推荐/选择记录，按 (user_id, log_date, meal_slot) upsert（重选覆盖同餐次推荐）
+    - source='manual'：AI/手动自记，永远追加（一餐可多条）
+    唯一性由应用层保证（旧 (user_id, log_date) 唯一约束已在 20260902_10 迁移移除）。
     """
 
     __tablename__ = "daily_logs"
     __table_args__ = (
-        UniqueConstraint("user_id", "log_date", name="uq_daily_logs_user_date"),
+        Index("ix_daily_logs_user_date_slot_source", "user_id", "log_date", "meal_slot", "source"),
     )
 
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id", index=True)
     log_date: date = Field(index=True)
+    # 餐次：breakfast / lunch / dinner
+    meal_slot: str = Field(default="dinner", max_length=16)
+    # 记录来源：recommendation（推荐/选择）或 manual（自记）
+    source: str = Field(default="recommendation", max_length=16)
+    # 自记外食的店铺名（日记页"外食"段数据来源）
+    shop_name: str | None = Field(default=None, max_length=80)
+    # 用户备注（自记原文、补充说明等）
+    note: str | None = Field(default=None, max_length=500)
     recommendation_event_id: int | None = Field(
         default=None,
         foreign_key="recommendation_events.id",

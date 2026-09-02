@@ -200,7 +200,8 @@ def test_mvp_e2e_flow(client, authed, seeded_ids):
     # 6. GET /daily/today 显示已选
     res = client.get("/api/v1/daily/today", headers=authed)
     assert res.status_code == 200
-    assert res.json()["data"]["chosen_food_ids"] == [fid]
+    today_items = res.json()["data"]["items"]
+    assert any(item["chosen_food_ids"] == [fid] for item in today_items)
 
     # 7. 收藏 toggle：food_id → favorited
     res = client.post(f"/api/v1/favorite/{fid}", headers=authed)
@@ -220,7 +221,7 @@ def test_mvp_e2e_flow(client, authed, seeded_ids):
     assert res.status_code == 200
     fav_data = res.json()["data"]
     assert fav_data["total"] == 1
-    assert fav_data["items"][0]["id"] == fid2
+    assert fav_data["items"][0]["food_id"] == fid2
 
     # 9. 历史列表含今天的记录
     res = client.get("/api/v1/daily/history?days=30", headers=authed)

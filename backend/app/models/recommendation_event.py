@@ -42,6 +42,8 @@ class RecommendationEvent(SQLModel, table=True):
     activity_level: str = Field(default="normal", max_length=8)
     weather_tag: str | None = Field(default=None, max_length=16)
     dining_mode: str = Field(default="cook", max_length=16)
+    # 本次推荐对应的餐次（三餐化后用于定位同餐次的 DailyLog 投影）
+    meal_slot: str = Field(default="lunch", max_length=16)
     audience: str = Field(default="personal", max_length=16)
     party_size: int = Field(default=1)
     engine: str = Field(default="rules_v2", max_length=32)

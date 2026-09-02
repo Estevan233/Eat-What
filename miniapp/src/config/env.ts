@@ -43,11 +43,15 @@ export function getCloudConfig(): CloudConfig {
 /**
  * AI 用餐意图开关。
  *
- * 默认关闭：只有真实模型预检通过后才在部署环境变量中打开。关闭时首页不呈现
- * 任何 AI 入口，基础规则推荐不受影响。
+ * 默认开启（体验核心功能）：显式设置 VITE_AI_MEAL_INTENT_ENABLED='false' 可关闭。
+ * 测试环境默认关闭，避免单测触发真实模型调用；AI 不可用时代码路径全部静默降级，
+ * 基础规则推荐不受影响。
  */
+const aiIntentFlag = import.meta.env.VITE_AI_MEAL_INTENT_ENABLED
 export const AI_MEAL_INTENT_ENABLED =
-  import.meta.env.VITE_AI_MEAL_INTENT_ENABLED === 'true'
+  aiIntentFlag !== undefined && aiIntentFlag !== ''
+    ? aiIntentFlag === 'true'
+    : import.meta.env.MODE !== 'test'
 
 /**
  * 二期小程序成长计划：provider 为 hunyuan-v3，模型为 hy3-preview。

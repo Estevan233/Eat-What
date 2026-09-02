@@ -126,3 +126,19 @@ class ExternalDiningResponse(BaseModel):
     suggestions: list[ExternalDiningSuggestion]
     rotation_restarted: bool = False
     disclaimer: str
+
+
+class CitySpecialty(BaseModel):
+    """一道城市特色菜推荐。"""
+
+    name: str = Field(..., min_length=1, max_length=40)
+    reason: str = Field(..., min_length=1, max_length=120)
+
+
+class CitySpecialtiesResponse(BaseModel):
+    """城市特色菜推荐响应。"""
+
+    city: str
+    items: list[CitySpecialty]
+    source: Literal["ai", "cache", "fallback"] = "fallback"
+    degraded: bool = False

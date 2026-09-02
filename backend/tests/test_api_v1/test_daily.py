@@ -805,7 +805,7 @@ def test_today_uses_stored_meal_snapshot(
 
     today = client.get("/api/v1/daily/today", headers=auth_token)
     assert today.status_code == 200
-    assert today.json()["data"]["chosen_total_nutrition"] == original
+    assert today.json()["data"]["items"][0]["chosen_total_nutrition"] == original
 
 
 def test_today_unauthenticated_returns_401(client):
@@ -815,21 +815,24 @@ def test_today_unauthenticated_returns_401(client):
 
 
 def test_today_no_log_returns_null(client, auth_token, seed_profile_and_foods, mock_weather):
-    """今天没有推荐过 → data=null。"""
+    """今天没有记录过 → items 为空列表。"""
     res = client.get("/api/v1/daily/today", headers=auth_token)
     assert res.status_code == 200
-    assert res.json()["data"] is None
+    assert res.json()["data"] == {"items": []}
 
 
 def test_today_returns_log_after_recommend(client, auth_token, recommend_first):
-    """推荐后 GET /daily/today → 返回 DailyLogRead。"""
+    """推荐后 GET /daily/today → 返回当天日志行列表。"""
     res = client.get("/api/v1/daily/today", headers=auth_token)
     assert res.status_code == 200
-    data = res.json()["data"]
-    assert data is not None
-    assert data["recommended_food_ids"] == recommend_first
-    assert data["chosen_food_ids"] == []
-    assert data["mood"] == "neutral"
+    items = res.json()["data"]["items"]
+    assert len(items) == 1
+    entry = items[0]
+    assert entry["recommended_food_ids"] == recommend_first
+    assert entry["chosen_food_ids"] == []
+    assert entry["mood"] == "neutral"
+    assert entry["meal_slot"] in ("breakfast", "lunch", "dinner")
+    assert entry["source"] == "recommendation"
 
 
 def test_history_unauthenticated_returns_401(client):

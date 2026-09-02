@@ -38,6 +38,12 @@ export type ActivityLevel = 'light' | 'normal' | 'high'
 
 export type DiningMode = 'cook' | 'eat_out'
 
+/** 一天三餐的餐次标识 - 与后端 schemas/daily.py MealSlot 同步。 */
+export type MealSlot = 'breakfast' | 'lunch' | 'dinner'
+
+/** 日记记录来源 - 推荐确认或手动自记。 */
+export type LogSource = 'recommendation' | 'manual'
+
 export type Audience = 'personal' | 'family'
 
 /**
@@ -339,6 +345,8 @@ export interface ChooseMealRequest {
   recommendationId: number
   selectedFoodIds: number[]
   substitutions: MealChoiceSubstitution[]
+  /** 确认的餐次；缺省由服务端按本地时间推断。 */
+  mealSlot?: MealSlot
 }
 
 export interface RecipeIngredient {
@@ -423,4 +431,16 @@ export interface ExternalDiningResponse {
   suggestions: ExternalDiningSuggestion[]
   rotationRestarted: boolean
   disclaimer: string
+}
+
+export interface CitySpecialty {
+  name: string
+  reason: string
+}
+
+export interface CitySpecialtiesResponse {
+  city: string
+  items: CitySpecialty[]
+  source: 'ai' | 'cache' | 'fallback'
+  degraded: boolean
 }

@@ -309,7 +309,8 @@ def build_preference_snapshot(
 
     weights: dict[int, float] = {}
     for fav in favorites_30d:
-        if fav.created_at is None:
+        if fav.created_at is None or fav.food_id is None:
+            # food_id 为空的是自定义收藏，不参与候选菜品偏好画像
             continue
         days_ago = (as_of - fav.created_at.date()).days
         decay = _recency_decay(days_ago)

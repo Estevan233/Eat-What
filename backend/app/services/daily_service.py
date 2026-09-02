@@ -92,6 +92,7 @@ def _prepare_today_log(
     user_id: int,
     *,
     log_date: date,
+    meal_slot: str = "lunch",
     recommended_food_ids: Iterable[int] | None,
     mood: str,
     activity_level: str,
@@ -100,17 +101,28 @@ def _prepare_today_log(
     audience: str = "personal",
     party_size: int = 1,
 ) -> DailyLog:
-    """准备当天日志但不提交，供单表与事件原子写入复用。"""
+    """准备某天某餐次的推荐日志但不提交，供单表与事件原子写入复用。
+
+    三餐化：只匹配 source='recommendation' 的行（manual 自记行不参与 upsert）。
+    """
     if is_cloudbase_repository(session):
         record = session.first(
             DailyLog,
             filters=(
                 RdbFilter('user_id', 'eq', user_id),
                 RdbFilter('log_date', 'eq', log_date),
+                RdbFilter('meal_slot', 'eq', meal_slot),
+                RdbFilter('source', 'eq', 'recommendation'),
             ),
         )
     else:
-        stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
+        stmt = (
+            select(DailyLog)
+            .where(DailyLog.user_id == user_id)
+            .where(DailyLog.log_date == log_date)
+            .where(DailyLog.meal_slot == meal_slot)
+            .where(DailyLog.source == "recommendation")
+        )
         record = session.exec(stmt).first()
 
     rec_list = list(recommended_food_ids) if recommended_food_ids is not None else []
@@ -120,6 +132,8 @@ def _prepare_today_log(
         return DailyLog(
             user_id=user_id,
             log_date=log_date,
+            meal_slot=meal_slot,
+            source="recommendation",
             recommended_food_ids_json=rec_list,
             chosen_food_ids_json=[],
             mood=mood,
@@ -133,6 +147,7 @@ def _prepare_today_log(
         )
     if recommended_food_ids is not None:
         record.recommended_food_ids_json = rec_list
+    record.meal_slot = meal_slot
     record.mood = mood
     record.activity_level = activity_level
     record.weather_tag = weather_tag
@@ -160,6 +175,7 @@ def record_recommendation(
     event_date: date | None = None,
     dining_mode: str = "cook",
     audience: str = "personal",
+    meal_slot: str = "lunch",
     party_size: int = 1,
     request_id: str | None = None,
     check_idempotency: bool = True,
@@ -185,6 +201,7 @@ def record_recommendation(
         session,
         user_id,
         log_date=target_date,
+        meal_slot=meal_slot,
         recommended_food_ids=ids,
         mood=mood,
         activity_level=activity_level,
@@ -205,6 +222,7 @@ def record_recommendation(
         activity_level=activity_level,
         weather_tag=weather_tag,
         dining_mode=dining_mode,
+        meal_slot=meal_slot,
         audience=audience,
         party_size=party_size,
         engine=engine,
@@ -277,13 +295,15 @@ def _load_idempotent_recommendation(
         return None
     if event.user_id != user_id:
         raise ValidationError("推荐请求号已被占用")
-    record = get_today(session, user_id, log_date=event.event_date)
+    record = get_today(session, user_id, log_date=event.event_date, meal_slot=event.meal_slot)
     if record is None or record.recommendation_event_id != event.id:
         if is_cloudbase_repository(session):
             if record is None:
                 record = DailyLog(
                     user_id=user_id,
                     log_date=event.event_date,
+                    meal_slot=event.meal_slot,
+                    source="recommendation",
                     created_at=event.created_at,
                 )
             record.recommendation_event_id = event.id
@@ -293,6 +313,7 @@ def _load_idempotent_recommendation(
             record.activity_level = event.activity_level
             record.weather_tag = event.weather_tag
             record.dining_mode = event.dining_mode
+            record.meal_slot = event.meal_slot
             record.audience = event.audience
             record.party_size = event.party_size
             record.updated_at = datetime.utcnow()
@@ -369,7 +390,7 @@ def _load_choice_context(
     if event is None or event.primary_meal_json is None:
         raise InvalidMealChoiceError("推荐记录不存在、已失效或不属于当前用户")
 
-    record = get_today(session, user_id, log_date=event.event_date)
+    record = get_today(session, user_id, log_date=event.event_date, meal_slot=event.meal_slot)
     if record is None or record.recommendation_event_id != event.id:
         raise InvalidMealChoiceError("这不是当前可确认的推荐，请刷新后重试")
     return event, record
@@ -539,20 +560,63 @@ def get_recent_recommendation_events(
     return list(session.exec(stmt).all())
 
 
-def get_today(session: DatabaseSession, user_id: int, *, log_date: date | None = None) -> DailyLog | None:
-    """取今天的 DailyLog，不存在返回 None。T11 用。"""
+def get_today(
+    session: DatabaseSession,
+    user_id: int,
+    *,
+    log_date: date | None = None,
+    meal_slot: str | None = None,
+) -> DailyLog | None:
+    """取某天（缺省今天）某餐次的推荐日志，不存在返回 None。T11 用。
+
+    meal_slot 缺省时按 source='recommendation' 返回当天任意一条推荐记录
+    （兼容未传餐次的旧调用方）。
+    """
     if log_date is None:
         log_date = date.today()
     if is_cloudbase_repository(session):
-        return session.first(
+        filters = [
+            RdbFilter('user_id', 'eq', user_id),
+            RdbFilter('log_date', 'eq', log_date),
+            RdbFilter('source', 'eq', 'recommendation'),
+        ]
+        if meal_slot is not None:
+            filters.append(RdbFilter('meal_slot', 'eq', meal_slot))
+        return session.first(DailyLog, filters=tuple(filters))
+    stmt = (
+        select(DailyLog)
+        .where(DailyLog.user_id == user_id)
+        .where(DailyLog.log_date == log_date)
+        .where(DailyLog.source == "recommendation")
+    )
+    if meal_slot is not None:
+        stmt = stmt.where(DailyLog.meal_slot == meal_slot)
+    return session.exec(stmt).first()
+
+
+def get_day_logs(
+    session: DatabaseSession,
+    user_id: int,
+    *,
+    log_date: date,
+) -> list[DailyLog]:
+    """取某一天的全部日志行（三餐 + 自记 + 外食），按创建时间正序。"""
+    if is_cloudbase_repository(session):
+        return session.list(
             DailyLog,
             filters=(
                 RdbFilter('user_id', 'eq', user_id),
                 RdbFilter('log_date', 'eq', log_date),
             ),
+            order=(RdbOrder('created_at', 'asc'),),
         )
-    stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
-    return session.exec(stmt).first()
+    stmt = (
+        select(DailyLog)
+        .where(DailyLog.user_id == user_id)
+        .where(DailyLog.log_date == log_date)
+        .order_by(DailyLog.created_at.asc())  # type: ignore[attr-defined]
+    )
+    return list(session.exec(stmt).all())
 
 
 def update_chosen_food_ids(
@@ -561,16 +625,13 @@ def update_chosen_food_ids(
     chosen_food_ids: Iterable[int],
     *,
     log_date: date | None = None,
+    meal_slot: str | None = None,
 ) -> DailyLog | None:
     """T11 用：用户选了哪些菜，写入 chosen_food_ids。"""
     if log_date is None:
         log_date = date.today()
 
-    if is_cloudbase_repository(session):
-        record = get_today(session, user_id, log_date=log_date)
-    else:
-        stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
-        record = session.exec(stmt).first()
+    record = get_today(session, user_id, log_date=log_date, meal_slot=meal_slot)
     if record is None:
         return None
     record.chosen_food_ids_json = list(chosen_food_ids)
@@ -589,16 +650,13 @@ def append_chosen_food_id(
     food_id: int,
     *,
     log_date: date | None = None,
+    meal_slot: str | None = None,
 ) -> DailyLog | None:
     """T11 用：用户选了一道菜，追加到 chosen_food_ids（去重）。"""
     if log_date is None:
         log_date = date.today()
 
-    if is_cloudbase_repository(session):
-        record = get_today(session, user_id, log_date=log_date)
-    else:
-        stmt = select(DailyLog).where(DailyLog.user_id == user_id).where(DailyLog.log_date == log_date)
-        record = session.exec(stmt).first()
+    record = get_today(session, user_id, log_date=log_date, meal_slot=meal_slot)
     if record is None:
         return None
     chosen = list(record.chosen_food_ids_json)
@@ -612,3 +670,177 @@ def append_chosen_food_id(
     session.commit()
     session.refresh(record)
     return record
+
+
+# ---------------------------------------------------------------------------
+# 三餐化：自记（manual）CRUD / 打卡统计 / 搜索过滤
+# ---------------------------------------------------------------------------
+
+MANUAL_SNAPSHOT_KEY = "dishes"
+
+
+def build_manual_snapshot(
+    dishes: list[dict[str, Any]],
+    shop_name: str | None,
+) -> dict[str, Any]:
+    """自记记录的宽松快照结构：{"dishes": [{name, kcal?}], "shop_name"?}。
+
+    与 recommendation 快照（MealSnapshot 结构）区分：读取时按 dishes 键识别。
+    """
+    snapshot: dict[str, Any] = {"dishes": dishes}
+    if shop_name:
+        snapshot["shop_name"] = shop_name
+    return snapshot
+
+
+def create_manual_log(
+    session: DatabaseSession,
+    user_id: int,
+    *,
+    log_date: date,
+    meal_slot: str,
+    dishes: list[dict[str, Any]],
+    shop_name: str | None = None,
+    note: str | None = None,
+) -> DailyLog:
+    """写入一条自记记录（source='manual'，永远追加，一餐可多条）。"""
+    now = datetime.utcnow()
+    record = DailyLog(
+        user_id=user_id,
+        log_date=log_date,
+        meal_slot=meal_slot,
+        source="manual",
+        shop_name=(shop_name.strip() or None) if shop_name else None,
+        note=(note.strip() or None) if note else None,
+        chosen_meal_json=build_manual_snapshot(dishes, shop_name) if dishes else None,
+        recommended_food_ids_json=[],
+        chosen_food_ids_json=[],
+        created_at=now,
+        updated_at=now,
+    )
+    if is_cloudbase_repository(session):
+        return session.insert(record)
+    session.add(record)
+    session.commit()
+    session.refresh(record)
+    return record
+
+
+def get_log_by_id(session: DatabaseSession, user_id: int, log_id: int) -> DailyLog | None:
+    """按 id 取当前用户的一条日志；不存在或不属于该用户返回 None。"""
+    if is_cloudbase_repository(session):
+        return session.first(
+            DailyLog,
+            filters=(
+                RdbFilter('id', 'eq', log_id),
+                RdbFilter('user_id', 'eq', user_id),
+            ),
+        )
+    stmt = (
+        select(DailyLog)
+        .where(DailyLog.id == log_id)
+        .where(DailyLog.user_id == user_id)
+    )
+    return session.exec(stmt).first()
+
+
+def update_log(
+    session: DatabaseSession,
+    user_id: int,
+    log_id: int,
+    *,
+    meal_slot: str | None = None,
+    note: str | None = None,
+    dishes: list[dict[str, Any]] | None = None,
+    shop_name: str | None = None,
+) -> DailyLog:
+    """更新一条日志。
+
+    权限按 source 区分：recommendation 仅允许改 meal_slot/note（快照是历史事实）；
+    manual 允许改全部字段。不允许改的字段被忽略（非报错，保持前端简单）。
+    """
+    record = get_log_by_id(session, user_id, log_id)
+    if record is None:
+        raise AppError("记录不存在", "DAILY_LOG_NOT_FOUND", 404)
+    now = datetime.utcnow()
+    if meal_slot is not None:
+        record.meal_slot = meal_slot
+    if note is not None:
+        record.note = note.strip() or None
+    if record.source == "manual":
+        if dishes is not None:
+            record.chosen_meal_json = build_manual_snapshot(dishes, shop_name or record.shop_name)
+        if shop_name is not None:
+            record.shop_name = shop_name.strip() or None
+            snapshot = dict(record.chosen_meal_json or {})
+            if record.shop_name:
+                snapshot["shop_name"] = record.shop_name
+            else:
+                snapshot.pop("shop_name", None)
+            record.chosen_meal_json = snapshot or None
+    record.updated_at = now
+    if is_cloudbase_repository(session):
+        return _save_cloudbase_daily_log(session, record)
+    session.add(record)
+    session.commit()
+    session.refresh(record)
+    return record
+
+
+def delete_log(session: DatabaseSession, user_id: int, log_id: int) -> None:
+    """删除当前用户的一条日志。"""
+    if is_cloudbase_repository(session):
+        filters = (
+            RdbFilter('id', 'eq', log_id),
+            RdbFilter('user_id', 'eq', user_id),
+        )
+        if session.first(DailyLog, filters=filters) is None:
+            raise AppError("记录不存在", "DAILY_LOG_NOT_FOUND", 404)
+        session.delete(DailyLog, filters=filters)
+        return
+    record = get_log_by_id(session, user_id, log_id)
+    if record is None:
+        raise AppError("记录不存在", "DAILY_LOG_NOT_FOUND", 404)
+    session.delete(record)
+    session.commit()
+
+
+def compute_streak(
+    session: DatabaseSession,
+    user_id: int,
+    *,
+    as_of: date | None = None,
+    max_days: int = 90,
+) -> int:
+    """连续打卡天数：从 as_of（缺省今天）倒推，每天有任意日志即算打卡。
+
+    今天还没记录时从昨天开始数（打卡惯例：不打断已累计的连续天数）。
+    """
+    today = as_of or date.today()
+    logs = get_recent(session, user_id, days=max_days, as_of=today)
+    recorded = {log.log_date for log in logs}
+    streak = 0
+    cursor = today if today in recorded else today - timedelta(days=1)
+    while cursor in recorded and streak < max_days:
+        streak += 1
+        cursor -= timedelta(days=1)
+    return streak
+
+
+def filter_logs_by_query(logs: list[DailyLog], query: str) -> list[DailyLog]:
+    """按关键词过滤日志（Python 侧，个人级数据量足够）。
+
+    匹配范围：快照里的菜名、店铺名、备注。空串返回原列表。
+    """
+    keyword = query.strip().casefold()
+    if not keyword:
+        return logs
+    matched: list[DailyLog] = []
+    for log in logs:
+        haystacks = [log.shop_name or "", log.note or ""]
+        snapshot = log.chosen_meal_json
+        if snapshot:
+            haystacks.append(str(snapshot))
+        if any(keyword in text.casefold() for text in haystacks):
+            matched.append(log)
+    return matched

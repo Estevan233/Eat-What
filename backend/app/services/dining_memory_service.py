@@ -1,9 +1,8 @@
 """Persistence service for exact private shop+dish memories."""
 
 import unicodedata
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
-from sqlalchemy import func
 from sqlmodel import select
 
 from app.core.errors import NotFoundError
@@ -92,35 +91,67 @@ def list_memories(
     page: int,
     size: int,
     verdict: DiningVerdict | None = None,
+    query: str | None = None,
+    target_date: date | None = None,
 ) -> tuple[list[DiningMemory], int]:
+    """分页 + 可选 verdict/关键词/日期过滤（Python 侧过滤，个人级数据量）。"""
+    day_start, day_end = _resolve_day_window(target_date)
     if is_cloudbase_repository(session):
         filters = [RdbFilter('user_id', 'eq', user_id)]
         if verdict is not None:
             filters.append(RdbFilter('verdict', 'eq', verdict))
-        return session.list_with_total(
+        if day_start is not None and day_end is not None:
+            filters.append(RdbFilter('created_at', 'gte', day_start))
+            filters.append(RdbFilter('created_at', 'lt', day_end))
+        items = session.list(
             DiningMemory,
             filters=tuple(filters),
             order=(RdbOrder('updated_at', 'desc'),),
-            limit=size,
-            offset=(page - 1) * size,
         )
+        items = _filter_memories(items, query)
+        total = len(items)
+        offset = (page - 1) * size
+        return items[offset : offset + size], total
 
     conditions = [DiningMemory.user_id == user_id]
     if verdict is not None:
         conditions.append(DiningMemory.verdict == verdict)
+    if day_start is not None and day_end is not None:
+        conditions.append(DiningMemory.created_at >= day_start)
+        conditions.append(DiningMemory.created_at < day_end)
     statement = select(DiningMemory).where(*conditions)
-    total = session.exec(
-        select(func.count()).select_from(DiningMemory).where(*conditions)
-    ).one()
     items = list(
         session.exec(
-            statement
-            .order_by(DiningMemory.updated_at.desc())  # type: ignore[attr-defined]
-            .offset((page - 1) * size)
-            .limit(size)
+            statement.order_by(DiningMemory.updated_at.desc())  # type: ignore[attr-defined]
         ).all()
     )
-    return items, int(total)
+    items = _filter_memories(items, query)
+    total = len(items)
+    offset = (page - 1) * size
+    return items[offset : offset + size], total
+
+
+def _resolve_day_window(target_date: date | None) -> tuple[datetime | None, datetime | None]:
+    """把目标日期拆成 [start, end) 闭开区间，便于 CloudBase 的 gte/lt 过滤。"""
+    if target_date is None:
+        return None, None
+    start = datetime.combine(target_date, datetime.min.time())
+    end = start + timedelta(days=1)
+    return start, end
+
+
+def _filter_memories(items: list[DiningMemory], query: str | None) -> list[DiningMemory]:
+    """按关键词过滤（店名/菜名/备注）。空串返回原列表。"""
+    keyword = (query or "").strip().casefold()
+    if not keyword:
+        return items
+    return [
+        item
+        for item in items
+        if keyword in item.shop_name.casefold()
+        or keyword in item.dish_name.casefold()
+        or keyword in (item.note or "").casefold()
+    ]
 
 
 def delete_memory(session: DatabaseSession, user_id: int, memory_id: int) -> None:

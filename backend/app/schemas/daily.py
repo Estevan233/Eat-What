@@ -5,6 +5,7 @@
 - RecommendResponse 含 3 道菜 + 上下文（天气 + 节气）
 - FoodWithReason 在 Food.to_read_dict() 基础上加 reason / score
 """
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -18,6 +19,21 @@ ActivityLevel = Literal["light", "normal", "high"]
 DiningMode = Literal["cook", "eat_out"]
 Audience = Literal["personal", "family"]
 MealGoal = Literal["balanced", "weight_control", "high_protein"]
+MealSlot = Literal["breakfast", "lunch", "dinner"]
+LogSource = Literal["recommendation", "manual"]
+
+MEAL_SLOT_VALUES: tuple[str, ...] = ("breakfast", "lunch", "dinner")
+
+
+def infer_meal_slot(now: datetime | None = None) -> str:
+    """按当前时间推断餐次（连续区间，无空档）：<10:30 早餐、<16:00 午餐、其余晚餐。"""
+    moment = now or datetime.now()
+    minutes = moment.hour * 60 + moment.minute
+    if minutes < 10 * 60 + 30:
+        return "breakfast"
+    if minutes < 16 * 60:
+        return "lunch"
+    return "dinner"
 
 
 class MealIntent(BaseModel):
@@ -87,6 +103,10 @@ class RecommendRequest(BaseModel):
     meal_intent: MealIntent | None = Field(
         default=None,
         description="可选的结构化用餐意图；旧客户端不传时行为不变",
+    )
+    meal_slot: MealSlot | None = Field(
+        default=None,
+        description="本次推荐对应的餐次；缺省按当前时间推断",
     )
 
     @field_validator("exclude_food_ids")
@@ -191,6 +211,11 @@ class ChooseRequest(BaseModel):
     selected_food_ids: list[int] | None = None
     substitutions: list["ChoiceSubstitution"] = Field(default_factory=list)
 
+    meal_slot: MealSlot | None = Field(
+        default=None,
+        description="旧版单菜选择的目标餐次；缺省按当前时间推断",
+    )
+
     @model_validator(mode="after")
     def validate_choice_mode(self) -> "ChooseRequest":
         legacy = self.food_id is not None
@@ -205,6 +230,13 @@ class ChoiceSubstitution(BaseModel):
     replacement_food_id: int
 
 
+class ManualDish(BaseModel):
+    """自记记录里的一道菜。"""
+
+    name: str = Field(min_length=1, max_length=40)
+    kcal: float | None = Field(default=None, ge=0, le=3000)
+
+
 class DailyLogRead(BaseModel):
     """DailyLog 对外暴露的读模型。"""
 
@@ -213,11 +245,17 @@ class DailyLogRead(BaseModel):
     id: int
     user_id: int
     log_date: str
+    meal_slot: str = "dinner"
+    source: LogSource = "recommendation"
+    shop_name: str | None = None
+    note: str | None = None
     recommended_food_ids: list[int]
     chosen_food_ids: list[int]
     recommendation_id: int | None = None
     recommended_meal: MealSnapshot | None = None
     chosen_meal: MealSnapshot | None = None
+    # source='manual' 时的菜品列表（宽松结构，不走 MealSnapshot）
+    manual_dishes: list[ManualDish] | None = None
     chosen_total_nutrition: MealNutrition | None = None
     mood: str
     activity_level: str
@@ -234,6 +272,36 @@ class HistoryResponse(BaseModel):
 
     items: list[DailyLogRead]
     total: int
+    streak_days: int = 0
+
+
+class ManualLogRequest(BaseModel):
+    """POST /daily/logs/manual 请求体（前端确认后的结构化数据直接落库）。"""
+
+    log_date: str = Field(min_length=10, max_length=10, description="记录日期 ISO 格式")
+    meal_slot: MealSlot
+    dishes: list[ManualDish] = Field(default_factory=list, max_length=8)
+    shop_name: str | None = Field(default=None, max_length=80)
+    note: str | None = Field(default=None, max_length=500)
+
+    @model_validator(mode="after")
+    def validate_content(self) -> "ManualLogRequest":
+        if not self.dishes and not (self.note or "").strip():
+            raise ValueError("至少记录一道菜或填写备注")
+        return self
+
+
+class UpdateLogRequest(BaseModel):
+    """PATCH /daily/logs/{id} 请求体。
+
+    recommendation 来源仅允许改 meal_slot/note（快照不可改）；
+    manual 来源全字段可改。
+    """
+
+    meal_slot: MealSlot | None = None
+    note: str | None = Field(default=None, max_length=500)
+    dishes: list[ManualDish] | None = Field(default=None, max_length=8)
+    shop_name: str | None = Field(default=None, max_length=80)
 
 
 class FavoriteToggleResponse(BaseModel):
