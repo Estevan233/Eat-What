@@ -26,3 +26,6 @@ project.private.config.json
 
 # 本机 IDE / Agent 运行状态；保留在本地，不参与协作
 /.codebuddy/
+
+# 本机自用的一次性审核 Prompt，不参与协作
+/docs/审核 Prompt.md

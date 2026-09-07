@@ -41,16 +41,16 @@
     <!-- 日历视图 -->
     <view v-if="viewMode === 'calendar'" class="calendar">
       <view class="calendar-head">
-        <text class="calendar-nav" @click="calendarMonth = shiftMonth(calendarMonth.year, calendarMonth.month, -1)">‹</text>
+        <text class="calendar-nav" @click="calendarMonth = shiftYearMonth(calendarMonth.year, calendarMonth.month, -1)">‹</text>
         <text class="calendar-title">{{ calendarMonth.year }} 年 {{ calendarMonth.month }} 月</text>
-        <text class="calendar-nav" @click="calendarMonth = shiftMonth(calendarMonth.year, calendarMonth.month, 1)">›</text>
+        <text class="calendar-nav" @click="calendarMonth = shiftYearMonth(calendarMonth.year, calendarMonth.month, 1)">›</text>
       </view>
       <view class="calendar-weekrow">
-        <text v-for="week in WEEKDAYS" :key="`week-${week}`" class="calendar-weeklabel">{{ week }}</text>
+        <text v-for="week in WEEKDAY_LABELS" :key="`week-${week}`" class="calendar-weeklabel">{{ week }}</text>
       </view>
       <view class="calendar-grid">
         <view
-          v-for="cell in monthDays(calendarMonth.year, calendarMonth.month)"
+          v-for="cell in monthGrid(calendarMonth.year, calendarMonth.month)"
           :key="cell.iso"
           class="calendar-cell"
           :class="{ 'calendar-cell-off': !cell.inMonth, 'calendar-cell-today': cell.iso === today, 'calendar-cell-edited': cell.iso === editedDayIso }"
@@ -58,15 +58,15 @@
         >
           <text class="calendar-cell-day">{{ cell.iso.slice(-2) }}</text>
           <view
-            v-if="cell.inMonth && dominantMood(cell.iso)"
+            v-if="cell.inMonth && dayMood(cell.iso)"
             class="calendar-cell-mood"
-            :style="{ background: moodColor(dominantMood(cell.iso)) }"
+            :style="{ background: moodColor(dayMood(cell.iso)) }"
           />
           <text v-if="cell.inMonth && dayLogCount(cell.iso)" class="calendar-cell-dining">🥡</text>
         </view>
       </view>
       <view class="calendar-legend">
-        <text class="calendar-legend-text">点击任意一天跳回列表对应记录；🥡 表示当天有外食小本记录。</text>
+        <text class="calendar-legend-text">点击任意一天跳回列表对应记录；还没记过的日子会直接打开补记。🥡 表示当天有外食小本记录。</text>
       </view>
     </view>
 
@@ -102,7 +102,7 @@
 
     <!-- 列表 -->
     <view v-else-if="viewMode === 'list'" class="list">
-      <text v-if="query.trim()" class="result-hint">找到 {{ total }} 条记录</text>
+      <text v-if="query.trim()" class="result-hint">找到 {{ visibleTotal }} 条记录</text>
       <view
         v-for="(day, dayIndex) in groups"
         :id="`day-card-${day.date}`"
@@ -112,12 +112,12 @@
       >
         <view class="day-head">
           <view class="day-left">
-            <text class="day-date">{{ dayLabel(day.date) }}</text>
+            <text class="day-date">{{ dayLabel(day.date, today) }}</text>
             <text class="day-week">{{ weekdayLabel(day.date) }}</text>
           </view>
           <view class="day-tags">
             <text v-if="inStreakRun(day.date)" class="flame">🔥</text>
-            <text class="day-count">{{ day.logs.length }} 条</text>
+            <text v-if="day.logs.length" class="day-count">{{ day.logs.length }} 条</text>
           </view>
         </view>
 
@@ -126,11 +126,11 @@
             <view class="seg-head">
               <text class="seg-emoji">{{ slot.emoji }}</text>
               <text class="seg-label">{{ slot.label }}</text>
-              <text v-if="logsFor(day.date, slot.value).length" class="seg-dot">·</text>
+              <text v-if="logsForSlot(day, slot.value).length" class="seg-dot">·</text>
             </view>
-            <view v-if="logsFor(day.date, slot.value).length" class="seg-entries">
+            <view v-if="logsForSlot(day, slot.value).length" class="seg-entries">
               <view
-                v-for="log in logsFor(day.date, slot.value)"
+                v-for="log in logsForSlot(day, slot.value)"
                 :key="log.id"
                 class="entry"
                 hover-class="entry-hover"
@@ -142,17 +142,13 @@
                     <text class="dish-name">{{ dish.name }}</text>
                     <text v-if="dish.kcal" class="dish-kcal">≈{{ dish.kcal }} kcal</text>
                   </view>
-                  <view v-if="dishLines(log).length === 0" class="dish-line legacy">
-                    <text class="dish-icon">🗒️</text>
-                    <text class="dish-name">旧版记录{{ log.chosenFoodIds.length ? `：选择了 ${log.chosenFoodIds.length} 道` : '' }}</text>
-                  </view>
                 </view>
                 <view v-if="logMetaLines(log).length" class="entry-meta">
                   <text v-for="line in logMetaLines(log)" :key="line" class="meta-line">{{ line }}</text>
                 </view>
               </view>
             </view>
-            <view v-else class="fill-pill" @click="openRecord(slot.value)">
+            <view v-else class="fill-pill" @click="openRecord(slot.value, day.date)">
               ＋ 补记{{ slot.label }}
             </view>
           </template>
@@ -189,14 +185,17 @@
         <!-- 记一笔：AI 一句话自记 -->
         <template v-if="recordOpen">
           <view class="sheet-head">
-            <text class="sheet-title">{{ recordStep === 'preview' ? '确认这顿吃的' : '记一笔' }}</text>
+            <view class="sheet-head-left">
+              <text class="sheet-title">{{ recordStep === 'preview' ? '确认这顿吃的' : (isBackfill ? '补记一顿' : '记一笔') }}</text>
+              <text v-if="isBackfill" class="sheet-subtitle">记到 {{ dayLabel(recDate, today) }} · {{ weekdayLabel(recDate) }}</text>
+            </view>
             <text class="sheet-close" @click="closeRecord">✕</text>
           </view>
 
           <!-- step 1: 一句话 -->
           <view v-if="recordStep === 'sentence'" class="sheet-body">
             <view class="field">
-              <text class="field-label">今天吃了什么？一句话就行</text>
+              <text class="field-label">{{ isBackfill ? '这顿吃了什么？一句话就行' : '今天吃了什么？一句话就行' }}</text>
               <view class="sentence-wrap">
                 <textarea
                   class="sentence-input"
@@ -307,7 +306,12 @@
         <!-- 编辑一条记录 -->
         <template v-else-if="editOpen && editLog">
           <view class="sheet-head">
-            <text class="sheet-title">编辑记录</text>
+            <view class="sheet-head-left">
+              <text class="sheet-title">编辑记录</text>
+              <text v-if="editLog" class="sheet-subtitle">
+                {{ dayLabel(editLog.logDate, today) }} · {{ weekdayLabel(editLog.logDate) }}
+              </text>
+            </view>
             <text class="sheet-close" @click="closeSheets">✕</text>
           </view>
           <view class="sheet-body">
@@ -406,13 +410,13 @@ import {
 import { createManualLog, deleteLog, getHistory, updateLog, type DailyLogRead } from '@/api/daily'
 import type { ManualDishItem } from '@/api/daily'
 import { listDiningMemories, type DiningMemoryRead } from '@/api/dining'
+import { currentYearMonth, dayLabel, dominantMood, groupDiaryDays, inStreakWindow, logDishes, logsForSlot, monthGrid, shiftYearMonth, todayIso, weekdayLabel, WEEKDAY_LABELS, type DiaryDay } from '@/domain/diary'
 import { MOOD_LABELS } from '@/constants/daily'
 import { WEATHER_TAG_LABEL } from '@/constants/weather'
 import { useDailyStore } from '@/stores/daily'
 import type { MealRole, MealSlot, Mood } from '@/types/api'
 
 const HISTORY_DAYS = 90
-const WEEKDAYS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
 const roleIcon: Record<MealRole, string> = { main: '🥘', vegetable: '🥬', staple: '🍚' }
 const MOOD_EMOJI: Record<Mood, string> = {
   happy: '😄', neutral: '😌', tired: '😪', stressed: '😣', anxious: '😰',
@@ -426,35 +430,33 @@ const EXAMPLE_SENTENCES = [
 const dailyStore = useDailyStore()
 
 const items = ref<DailyLogRead[]>([])
-const total = ref(0)
 const streakDays = ref(0)
 const loading = ref(false)
 const pageError = ref('')
 const query = ref('')
 let searchTimer: ReturnType<typeof setTimeout> | undefined
 
-const today = ref(todayStr())
+const today = ref(todayIso())
 
 type CalendarMode = 'list' | 'calendar'
 const viewMode = ref<CalendarMode>('list')
-const calendarMonth = ref<{ year: number; month: number }>(currentMonth())
+const calendarMonth = ref<{ year: number; month: number }>(currentYearMonth())
 const diningMemoriesByDate = ref<Map<string, DiningMemoryRead[]>>(new Map())
 const editedDayIso = ref<string>('')
 
-interface DayGroup {
-  date: string
-  logs: DailyLogRead[]
-}
+/**
+ * 按天分组（已过滤掉无展示价值的老记录）。
+ *
+ * 外食小本有记录、但日记为空的天也保留，否则 🥡 行会跟着整张卡片一起消失。
+ */
+const groups = computed<DiaryDay[]>(() =>
+  groupDiaryDays(items.value, Array.from(diningMemoriesByDate.value.keys())),
+)
 
-const groups = computed<DayGroup[]>(() => {
-  const map = new Map<string, DailyLogRead[]>()
-  for (const log of items.value) {
-    const list = map.get(log.logDate)
-    if (list) list.push(log)
-    else map.set(log.logDate, [log])
-  }
-  return Array.from(map.entries()).map(([date, logs]) => ({ date, logs }))
-})
+/** 列表里真正能看到的条数（后端 total 含被过滤掉的老记录，不能直接拿来展示）。 */
+const visibleTotal = computed(() =>
+  groups.value.reduce((sum, day) => sum + day.logs.length, 0),
+)
 
 /** 一组展示行（与模板函数共用的小类型）。 */
 interface DishLine {
@@ -473,9 +475,8 @@ async function loadList(): Promise<void> {
     const keyword = query.value.trim()
     const response = await getHistory(HISTORY_DAYS, keyword)
     items.value = response.items
-    total.value = response.total
     streakDays.value = response.streakDays
-    today.value = todayStr()
+    today.value = todayIso()
     await loadDiningMemories()
   } catch (error) {
     pageError.value = errorMessage(error)
@@ -528,100 +529,6 @@ function inputValue(event: Event): string {
   return inputEvent.detail?.value || ''
 }
 
-function pad2(value: number): string {
-  return String(value).padStart(2, '0')
-}
-
-function todayStr(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`
-}
-
-function parseLocalDate(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
-
-function formatIso(date: Date): string {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`
-}
-
-function shiftDate(iso: string, delta: number): string {
-  const base = parseLocalDate(iso)
-  base.setDate(base.getDate() + delta)
-  return formatIso(base)
-}
-
-function dayLabel(iso: string): string {
-  const date = parseLocalDate(iso)
-  const now = parseLocalDate(today.value)
-  const isToday = formatIso(date) === today.value
-  const isYesterday = date.getTime() === now.getTime() - 24 * 60 * 60 * 1000
-  if (isToday) return '今天'
-  if (isYesterday) return '昨天'
-  const sameYear = date.getFullYear() === now.getFullYear()
-  const prefix = sameYear ? '' : `${date.getFullYear()}年`
-  return `${prefix}${date.getMonth() + 1}月${date.getDate()}日`
-}
-
-function weekdayLabel(iso: string): string {
-  return WEEKDAYS[parseLocalDate(iso).getDay()]
-}
-
-function inStreakRun(iso: string): boolean {
-  if (!streakDays.value) return false
-  let anchor = today.value
-  if (!items.value.some((log) => log.logDate === today.value)) {
-    anchor = shiftDate(today.value, -1)
-  }
-  const start = shiftDate(anchor, -(streakDays.value - 1))
-  return iso >= start && iso <= anchor
-}
-
-function currentMonth(): { year: number; month: number } {
-  const now = new Date()
-  return { year: now.getFullYear(), month: now.getMonth() + 1 }
-}
-
-function monthDays(year: number, month: number): Array<{ iso: string; inMonth: boolean }> {
-  // 返回整 6 周共 42 个日期，便于网格稳定。
-  const first = new Date(year, month - 1, 1)
-  const offset = first.getDay()
-  const start = new Date(year, month - 1, 1 - offset)
-  const days: Array<{ iso: string; inMonth: boolean }> = []
-  for (let i = 0; i < 42; i += 1) {
-    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)
-    days.push({
-      iso: formatIso(d),
-      inMonth: d.getMonth() + 1 === month && d.getFullYear() === year,
-    })
-  }
-  return days
-}
-
-function shiftMonth(year: number, month: number, offset: number): { year: number; month: number } {
-  const d = new Date(year, month - 1 + offset, 1)
-  return { year: d.getFullYear(), month: d.getMonth() + 1 }
-}
-
-function dominantMood(date: string): Mood | undefined {
-  const group = groups.value.find((g) => g.date === date)
-  if (!group) return undefined
-  const counts = new Map<string, number>()
-  for (const log of group.logs) {
-    counts.set(log.mood, (counts.get(log.mood) ?? 0) + 1)
-  }
-  let best: string | undefined
-  let bestCount = 0
-  for (const [mood, count] of counts.entries()) {
-    if (count > bestCount) {
-      best = mood
-      bestCount = count
-    }
-  }
-  return best as Mood | undefined
-}
-
 function moodColor(mood: Mood | undefined): string {
   switch (mood) {
     case 'happy':
@@ -644,8 +551,19 @@ function dayLogCount(date: string): number {
 }
 
 function jumpToDay(date: string): void {
+  // 日历可以翻到未来月份，但未来的日子不能补记，也不该有锚点可滚。
+  if (date > today.value) {
+    uni.showToast({ title: '还没到那天呢', icon: 'none' })
+    return
+  }
   editedDayIso.value = date
   viewMode.value = 'list'
+  // 这一天列表里没有卡片（还没记过，或只剩被过滤掉的老记录）：直接开补记，
+  // 否则滚动到一个不存在的锚点，点了像没反应。
+  if (!groups.value.some((day) => day.date === date)) {
+    openRecord(undefined, date)
+    return
+  }
   // 等列表重新渲染后再滚动，避免选择器尚未挂载
   setTimeout(() => {
     uni.pageScrollTo({ selector: `#day-card-${date}`, duration: 280, offsetTop: 60 })
@@ -658,29 +576,28 @@ function openDiningMemoryForDay(date: string): void {
   uni.navigateTo({ url: `/pages/dining-memory/dining-memory?date=${date}` })
 }
 
-function logsFor(date: string, slot: MealSlot): DailyLogRead[] {
-  const day = groups.value.find((group) => group.date === date)
-  if (!day) return []
-  return day.logs.filter((log) => log.mealSlot === slot)
+/** 日历色点：取这一天（过滤后）记录里出现最多的心情。 */
+function dayMood(date: string): Mood | undefined {
+  return dominantMood(groups.value.find((group) => group.date === date)?.logs ?? [])
+}
+
+/** 这一天是否落在后端算出的连续打卡区间里。 */
+function inStreakRun(iso: string): boolean {
+  return inStreakWindow(
+    iso,
+    today.value,
+    streakDays.value,
+    items.value.some((log) => log.logDate === today.value),
+  )
 }
 
 function dishLines(log: DailyLogRead): DishLine[] {
-  if (log.source === 'manual') {
-    return (log.manualDishes ?? []).map((dish, index) => ({
-      key: `${log.id}-m-${index}`,
-      icon: '🍴',
-      name: dish.name,
-      kcal: dish.kcal,
-    }))
-  }
-  if (log.chosenMeal?.items?.length) {
-    return log.chosenMeal.items.map((item, index) => ({
-      key: `${log.id}-r-${index}`,
-      icon: roleIcon[item.mealRole] ?? '🥘',
-      name: item.name,
-    }))
-  }
-  return []
+  return logDishes(log).map((dish, index) => ({
+    key: `${log.id}-${index}`,
+    icon: log.source === 'manual' ? '🍴' : roleIcon[dish.mealRole ?? 'main'] ?? '🥘',
+    name: dish.name,
+    kcal: dish.kcal,
+  }))
 }
 
 function formatNumber(value: number): string {
@@ -733,6 +650,11 @@ const recShop = ref('')
 const recNote = ref('')
 const recDegraded = ref(false)
 const recSaving = ref(false)
+/** 弹层要写入的目标日期。补记历史某天时由 openRecord 传入，默认今天。 */
+const recDate = ref(todayIso())
+
+/** 弹层当前是不是「补记」模式（目标日期不是今天）。 */
+const isBackfill = computed(() => recDate.value !== today.value)
 
 const canSaveRecord = computed(() => {
   return recDishes.value.some((dish) => dish.name.trim()) || Boolean(recNote.value.trim())
@@ -742,12 +664,14 @@ function blankDishRows(): DishRow[] {
   return []
 }
 
-function openRecord(slot?: MealSlot): void {
+function openRecord(slot?: MealSlot, date?: string): void {
   recordOpen.value = true
   editOpen.value = false
   recordStep.value = 'sentence'
   parsingBusy.value = false
   recSlot.value = slot ?? inferMealSlotByClock()
+  // 补记历史某天时由卡片传入 day.date；底部「记一笔」无日期上下文，落今天。
+  recDate.value = date ?? todayIso()
   sentenceText.value = ''
   recDishes.value = blankDishRows()
   recShop.value = ''
@@ -861,7 +785,7 @@ async function saveRecord(): Promise<void> {
   recSaving.value = true
   try {
     const shop = recShop.value.trim()
-    const saveDate = todayStr()
+    const saveDate = recDate.value
     const created = await createManualLog({
       logDate: saveDate,
       mealSlot: recSlot.value,
@@ -871,11 +795,15 @@ async function saveRecord(): Promise<void> {
     })
     haptic()
     uni.showToast({ title: '已记入日记', icon: 'success' })
-    const isManualToday = created.logDate === saveDate
+    // 只有写到今天才需要刷新「今天」的 store，补记历史日期时不必刷。
+    const isManualToday = created.logDate === today.value
     closeRecord()
     await loadList()
     if (isManualToday) {
       dailyStore.fetchTodayLogs().catch(() => undefined)
+    } else {
+      // 补记落在过去某天：列表按日期倒序，不滚过去用户会以为没记上。
+      jumpToDay(created.logDate)
     }
     if (shop) suggestDiningMemory(shop, recDishes.value)
   } catch (error) {
@@ -1230,10 +1158,6 @@ onShareTimeline(() => {
   align-items: center;
   gap: 10rpx;
 }
-.dish-line.legacy {
-  color: $ink-3;
-  font-size: 22rpx;
-}
 .dish-icon {
   flex: 0 0 auto;
   font-size: 22rpx;
@@ -1420,6 +1344,15 @@ onShareTimeline(() => {
   align-items: center;
   justify-content: space-between;
   padding: 18rpx 32rpx 10rpx;
+}
+.sheet-head-left {
+  display: flex;
+  flex-direction: column;
+}
+.sheet-subtitle {
+  margin-top: 4rpx;
+  color: $ink-2;
+  font-size: 24rpx;
 }
 .sheet-title {
   color: $ink;
