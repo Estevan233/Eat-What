@@ -40,6 +40,7 @@
 ## 阶段化路线
 - Phase 0 测量 ✅ 2026-09-30 完成（MCP runQuery 只读直查，结论见 research/phase0-measurement.md）：full_reuse 79.7%、换一批重叠 63.6%、catalog 开关实测 false、315 候选待命。
 - Phase 1 规则改进（无合规风险）：首选打开 catalog 开关（EnvParams EXTERNAL_CATALOG_ENABLED=true，updateConfig 无需重建），个人池 ~36 → ~195+；开关打开后复测同一组指标；实现会话级强排除；质量带/曝光窗口按新池基线再调。"换一批"的 7 天窗口定强约束或降权，由开关打开后的复测数据决定。
+  - 2026-09-30 开关已打开并验证生效（版本 034；当日 catalog key 占 84.6%；6 次实测 18/18 key 不重复）。复测待积累数据后进行。
 - Phase 2 Jev 离线评估：离线预计算两两近重复边表；AC5 对比扩为四组——原算法 / 纯规则改进 / 扩容后纯规则 / 规则＋Jev；中文验证集通过前不接入生产数据。
 - Phase 3 附近店铺：拆为独立任务，腾讯位置服务核验通过后启动，不拖累 Phase 0–2。
 

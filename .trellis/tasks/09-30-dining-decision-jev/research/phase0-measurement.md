@@ -56,6 +56,14 @@
 3. **会话级强排除**（AC3）：在打开开关后按新池数据决定"换一批"的 7 天窗口语义。
 4. 质量带（EXTERNAL_QUALITY_BAND=5）与窗口长度待新池基线确定后再调。
 
+## 开关上线验证（2026-09-30 16:21 起）
+
+- CloudRun eat-what-api 版本 034（config-only 重新发布，镜像未变），Status=normal；EnvParams 已含 EXTERNAL_CATALOG_ENABLED。
+- `GET /__tcb_probe__` 404 为平台探针打到 FastAPI 的正常响应（无此路由但端口存活），非部署失败。
+- 功能实测（guest 账号直连线上 API，6 次请求）：18/18 个 key 全部不重复，16 个 catalog 新菜（batch1-7/b-review），仅 2 个 legacy rule key。
+- 当日外食事件 key 形态（13 事件 39 槽位）：catalog 33（84.6%）/ rule-legacy 6 / memory 0。
+- 复测安排：正常使用数日后再跑"曝光复用/换一批"两组 SQL，与本文基线（full_reuse 79.7% / 换一批重叠 63.6%）对比，决定 7 天窗口语义与质量带。
+
 ## 查询审计
 
 - MySQL 8.0.30-cynos；只读网关不支持 WITH，全部改写为派生表。
