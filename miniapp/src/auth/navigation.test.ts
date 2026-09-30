@@ -5,7 +5,6 @@ import { resolvePostLoginNavigation } from './navigation'
 describe('post-login navigation', () => {
   it.each([
     '/pages/today/today',
-    '/pages/profile/profile',
     '/pages/constitution/constitution',
     '/pages/history/history',
     '/pages/mine/mine',

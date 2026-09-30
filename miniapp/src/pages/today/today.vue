@@ -399,7 +399,7 @@ async function onRecommend(): Promise<void> {
   }
   if (dailyStore.diningMode === 'cook' && !userStore.hasProfile) {
     uni.showToast({ title: '请先填写健康档案', icon: 'none' })
-    uni.switchTab({ url: '/pages/profile/profile' })
+    uni.navigateTo({ url: '/pages/profile/profile' })
     return
   }
 

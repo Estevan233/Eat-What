@@ -6,7 +6,6 @@ export type PostLoginNavigation = {
 const DEFAULT_TAB = '/pages/today/today'
 const TAB_BAR_ROUTES = new Set([
   DEFAULT_TAB,
-  '/pages/profile/profile',
   '/pages/constitution/constitution',
   '/pages/history/history',
   '/pages/mine/mine',
