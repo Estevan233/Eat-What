@@ -25,6 +25,8 @@
 - 候选来源仍为规则目录＋catalog＋私人记忆，Jev 不新增候选。
 
 ## 现状证据
+- 2026-09-30 Phase 0 实测（详见 research/phase0-measurement.md）：外食 251 事件，full_batch_reuse 79.7%（整批 3 个键全部 7 天内已曝光），换一批 63.6% 有重叠，批内餐型重复 8.0%——根因假设证实：池太小，7 天窗口必然耗尽。
+- 2026-09-30 catalog 开关核验完成：线上 external_catalog_enabled 实际为 false。证据：753 个曝光键 0 个 catalog_key 形态；catalog 315 个 approved+active 中 258 个 legacy_key 为空；主力用户 distinct 键=57 恰好等于本地池。catalog 已审核候选 315 个（individual 195 / shared 105 / either 15）待命。
 - external_dining.py:31 外食曝光窗口为 7 天；:32 探索质量带为 5 分；:497 探索仅在最高分质量带内；:708 候选库有开关和回退。
 - 规则候选库共 57 个（external_dining.py:52-318），shared 约 21 个、individual 约 36 个；每批输出 3 个（external_dining.py:599）。
 - 根因假设（待 Phase 0 验证）：个人池约 36 个 vs 每批 3 个 × 7 天窗口，曝光消耗速率超过池规模，bounded reuse（external_dining.py:618-621）频繁触发是"重复性高"的主因；语义去重解决不了池耗尽。
@@ -36,8 +38,8 @@
 - 本任务补充旧 AI 任务的后端评估方向，不自动推翻其前端意图方案或修改旧任务状态。
 
 ## 阶段化路线
-- Phase 0 测量（纯数据，零风险）：用 CloudBase RecommendationEvent 量化现状——曝光命中率、rotation_restarted 占比、换一批重复率、同菜系相邻率；核验线上 external_catalog_enabled 实际值。产出决定 Phase 1 调参方向与"换一批"排除语义。
-- Phase 1 规则改进（无合规风险）：catalog 扩容并开开关；按 Phase 0 数据调整曝光窗口/质量带；实现会话级强排除。"换一批"的 7 天窗口定强约束或降权，由 Phase 0 数据决定。
+- Phase 0 测量 ✅ 2026-09-30 完成（MCP runQuery 只读直查，结论见 research/phase0-measurement.md）：full_reuse 79.7%、换一批重叠 63.6%、catalog 开关实测 false、315 候选待命。
+- Phase 1 规则改进（无合规风险）：首选打开 catalog 开关（EnvParams EXTERNAL_CATALOG_ENABLED=true，updateConfig 无需重建），个人池 ~36 → ~195+；开关打开后复测同一组指标；实现会话级强排除；质量带/曝光窗口按新池基线再调。"换一批"的 7 天窗口定强约束或降权，由开关打开后的复测数据决定。
 - Phase 2 Jev 离线评估：离线预计算两两近重复边表；AC5 对比扩为四组——原算法 / 纯规则改进 / 扩容后纯规则 / 规则＋Jev；中文验证集通过前不接入生产数据。
 - Phase 3 附近店铺：拆为独立任务，腾讯位置服务核验通过后启动，不拖累 Phase 0–2。
 
@@ -56,5 +58,5 @@
 
 ## 待决策
 - Jev 供应形态：TypeSafe API（数据出境、early access 风险）vs Nimble 自托管（中文或更稳、需部署维护），待 Phase 0 期间完成中文验证集测试后定。
-- "换一批"的 7 天窗口语义（强排除 vs 降权），待 Phase 0 测量结果定。
+- "换一批"的 7 天窗口语义（强排除 vs 降权），待 catalog 开关打开后的复测数据定。
 - 附近店铺独立任务的启动时机（Phase 3），待腾讯位置服务核验结论。

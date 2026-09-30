@@ -17,7 +17,7 @@ import hashlib
 import json
 import statistics
 import uuid
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
 from datetime import date, datetime, timedelta
 from itertools import pairwise
 from typing import Any
@@ -161,27 +161,49 @@ def _dist(values: list[float]) -> dict[str, float | None]:
     }
 
 
+def _parse_date(value: Any) -> date | None:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value[:10])
+        except ValueError:
+            return None
+    return None
+
+
 def _exposure_reuse(by_user: UserEvents) -> dict[str, Any]:
-    """相对同用户此前 7 天已曝光 key 集的复用程度。"""
+    """相对同用户此前 7 天（含当日更早请求）已曝光 key 集的复用程度。
+
+    与线上引擎语义对齐：external_dining.py 的曝光窗口按 event_date
+    取 [d-6, d]，同请求之前的当日事件计入。
+    """
     reuse_ratios: list[float] = []
     any_reuse = 0
     full_reuse = 0
     with_prior = 0
     for user_events in by_user.values():
-        prior: set[str] = set()
+        window: deque[tuple[date, set[str]]] = deque()
         for event in user_events:
             keys = external_keys(event)
-            if not keys:
+            day = _parse_date(event.get("event_date"))
+            if not keys or day is None:
                 continue
+            cutoff = day - timedelta(days=EXTERNAL_HISTORY_DAYS - 1)
+            while window and window[0][0] < cutoff:
+                window.popleft()
+            prior = set().union(*(seen for _, seen in window)) if window else set()
             if prior:
                 with_prior += 1
                 overlap = len(set(keys) & prior)
                 reuse_ratios.append(overlap / len(keys))
                 any_reuse += bool(overlap)
                 full_reuse += overlap == len(keys)
-            prior.update(keys)
+            window.append((day, set(keys)))
     return {
-        "basis": f"相对同用户此前 {EXTERNAL_HISTORY_DAYS} 天已曝光 key 集",
+        "basis": f"相对同用户此前 {EXTERNAL_HISTORY_DAYS} 天（含当日更早请求）已曝光 key 集",
         "events_with_prior": with_prior,
         "any_key_reuse_pct": _pct(any_reuse, with_prior),
         "full_batch_reuse_pct": _pct(full_reuse, with_prior),
