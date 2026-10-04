@@ -101,3 +101,24 @@ def test_catalog_adapter_returns_none_when_all_rows_are_non_meal(monkeypatch) ->
     monkeypatch.setattr(external_dining, "is_cloudbase_repository", lambda _: True)
     assert external_dining._load_catalog_rule_candidates(repository) is None
 
+
+def test_display_category_falls_back_for_family_token() -> None:
+    """category 被误写成 meal_family 令牌时回退中文分类词表。"""
+    assert (
+        external_dining._display_category("soup_meal", "light_soup_set", "soup_meal")
+        == "清汤套餐"
+    )
+    assert (
+        external_dining._display_category("single_dish", "stir_fry", "single_dish")
+        == "小炒"
+    )
+
+
+def test_display_category_keeps_chinese_category() -> None:
+    assert external_dining._display_category("noodle_meal", "noodle_soup", "汤面") == "汤面"
+    # 无映射组合时原样返回，不猜测
+    assert (
+        external_dining._display_category("unknown_family", "x", "招牌套餐")
+        == "招牌套餐"
+    )
+

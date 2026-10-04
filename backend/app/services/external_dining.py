@@ -32,6 +32,52 @@ EXTERNAL_HISTORY_DAYS = 7
 EXTERNAL_QUALITY_BAND = 5
 # 单道菜和小吃甜点只是配菜/点心，不能当作"今天吃什么"的完整一餐方向。
 NON_MEAL_FAMILIES = frozenset({"single_dish", "snack_dessert"})
+# 中文分类受控词表：catalog 批量导入时部分行 category 被误写成 meal_family 令牌，
+# 引擎按 (meal_family, sub_family) 兜底为中文分类；数据修正见 scripts/fix_catalog_categories.py。
+CATEGORY_BY_FAMILY_SUB: dict[tuple[str, str], str] = {
+    ("dumpling_bun", "dumpling"): "饺子",
+    ("dumpling_bun", "steamed_bun"): "包子",
+    ("dumpling_bun", "wonton"): "馄饨",
+    ("dumpling_bun", "dim_sum"): "粤式点心",
+    ("grain_congee", "congee"): "粥品",
+    ("hotpot_grill", "hotpot"): "火锅",
+    ("hotpot_grill", "grilled_share"): "烤物合餐",
+    ("noodle_meal", "noodle_soup"): "汤面",
+    ("noodle_meal", "dry_noodle"): "拌面",
+    ("noodle_meal", "rice_noodle_soup"): "汤粉",
+    ("noodle_meal", "stir_fried_noodle"): "炒面",
+    ("rice_meal", "rice_bowl"): "盖饭",
+    ("rice_meal", "braised_rice"): "焖饭",
+    ("rice_meal", "fried_rice"): "炒饭",
+    ("rice_meal", "curry_rice"): "咖喱饭",
+    ("rice_meal", "claypot_rice"): "煲仔饭",
+    ("set_meal", "balanced_plate"): "均衡套餐",
+    ("set_meal", "roast_set"): "烤物套餐",
+    ("shared_dishes", "regional_share"): "地方合菜",
+    ("shared_dishes", "homestyle_share"): "家常合菜",
+    ("single_dish", "stewed_dish"): "炖菜",
+    ("single_dish", "stir_fry"): "小炒",
+    ("single_dish", "steamed_dish"): "蒸菜",
+    ("single_dish", "cold_dish"): "凉拌菜",
+    ("snack_dessert", "snack"): "小吃点心",
+    ("soup_meal", "stew_soup_set"): "炖汤套餐",
+    ("soup_meal", "light_soup_set"): "清汤套餐",
+    ("soup_meal", "soup_rice"): "汤饭",
+    ("wrap_light_meal", "wrap"): "卷饼",
+    ("wrap_light_meal", "salad_set"): "轻食沙拉",
+    ("wrap_light_meal", "sandwich"): "三明治",
+}
+_CATEGORY_TOKEN = frozenset(CATEGORY_BY_FAMILY_SUB) | {
+    pair[0] for pair in CATEGORY_BY_FAMILY_SUB
+}
+
+
+def _display_category(meal_family: str, sub_family: str, category: str) -> str:
+    """category 被误写成英文令牌时回退到中文分类词表，正常中文分类原样返回。"""
+    mapped = CATEGORY_BY_FAMILY_SUB.get((meal_family, sub_family))
+    if mapped is not None and (category in _CATEGORY_TOKEN or category.isascii()):
+        return mapped
+    return category
 
 
 @dataclass(frozen=True)
@@ -48,6 +94,7 @@ class RuleCandidate:
     meal_format: str = "individual_meal"
     serving_style: Literal["individual", "shared"] = "individual"
     meal_family: str = ""
+    sub_family: str = ""
     catalog_key: str | None = None
     legacy_key: str | None = None
 
@@ -382,14 +429,17 @@ def _rule_suggestion(
     city_label: str,
 ) -> ExternalDiningSuggestion:
     digest = sha1(f"{candidate.category}:{candidate.dish_name}".encode()).hexdigest()[:10]
-    keywords = [part for part in (city_label, candidate.dish_name, candidate.category) if part != "未设置城市"]
+    category = _display_category(
+        candidate.meal_family, candidate.sub_family, candidate.category
+    )
+    keywords = [part for part in (city_label, candidate.dish_name, category) if part != "未设置城市"]
     tips = ["优先查看近期评价和实际分量", "备注少油少盐、酱汁分装，饮料默认无糖"]
     if request.audience == "family":
         tips.insert(0, f"按 {request.party_size} 人份下单，先确定共享菜再补主食")
     return ExternalDiningSuggestion(
         key=candidate.legacy_key or candidate.catalog_key or f"rule-{digest}",
         dish_name=candidate.dish_name,
-        category=candidate.category,
+        category=category,
         meal_format=candidate.meal_format,
         serving_style=candidate.serving_style,
         energy_kcal_min_per_person=candidate.energy_min,
@@ -706,6 +756,7 @@ def _load_catalog_rule_candidates(
                     else cast(Literal["individual", "shared"], row.serving_style)
                 ),
                 meal_family=row.meal_family,
+                sub_family=row.sub_family,
                 catalog_key=row.catalog_key,
                 legacy_key=row.legacy_key,
             )
