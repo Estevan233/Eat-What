@@ -37,7 +37,11 @@ class WeatherData(BaseModel):
 
 
 class WeatherRequest(BaseModel):
-    """POST /context/weather 请求体。"""
+    """POST /context/weather 请求体。
 
-    lat: float = Field(..., ge=-90, le=90, description="纬度 WGS84")
-    lng: float = Field(..., ge=-180, le=180, description="经度 WGS84")
+    前端统一上报 gcj02（与 map 组件/选点一致）；服务端按 0.01°（约 1km）城市网格取整，
+    gcj02/wgs84 差异（通常 <1km）不影响城市级天气匹配。
+    """
+
+    lat: float = Field(..., ge=-90, le=90, description="纬度 gcj02")
+    lng: float = Field(..., ge=-180, le=180, description="经度 gcj02")

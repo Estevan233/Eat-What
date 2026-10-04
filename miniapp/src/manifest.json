@@ -41,10 +41,10 @@
     "usingComponents": true,
     "permission": {
       "scope.userLocation": {
-        "desc": "你的位置信息将用于获取当地天气，给出更贴合的饮食推荐"
+        "desc": "你的位置信息将用于天气与附近店铺推荐"
       }
     },
-    "requiredPrivateInfos": ["getLocation"],
+    "requiredPrivateInfos": ["getLocation", "chooseLocation"],
     "lazyCodeLoading": "requiredComponents"
   },
   "vueVersion": "3",

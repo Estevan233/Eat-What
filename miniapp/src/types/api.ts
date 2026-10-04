@@ -206,6 +206,37 @@ export interface WeatherRequest {
 }
 
 /**
+ * 附近店铺 - POST /nearby/shops 返回 data 中的 shops 项。
+ * lat/lng 为 gcj02（与 map 组件、wx.chooseLocation 一致）。
+ */
+export interface NearbyShop {
+  name: string
+  address: string
+  category: string
+  lat: number
+  lng: number
+  distanceM: number
+}
+
+/** POST /nearby/shops 请求体。 */
+export interface NearbyShopsRequest {
+  lat: number
+  lng: number
+  keyword?: string
+  radiusM?: number
+}
+
+/** POST /nearby/shops 返回的 data。providerAvailable=false 时 shops 为空。 */
+export interface NearbyShopsResponse {
+  providerAvailable: boolean
+  source?: string
+  isStale?: boolean
+  anchorName?: string
+  shops: NearbyShop[]
+  fetchedAt: string
+}
+
+/**
  * 单条带理由的推荐结果 - POST /daily/recommend 响应中的 food 项。
  * 字段经 request.ts 的 snakeToCamel 转换。
  */

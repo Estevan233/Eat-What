@@ -8,6 +8,7 @@ from app.api.v1.daily import router as daily_router
 from app.api.v1.dining import router as dining_router
 from app.api.v1.favorite import router as favorite_router
 from app.api.v1.food import router as food_router
+from app.api.v1.nearby import router as nearby_router
 from app.api.v1.profile import router as profile_router
 
 api_router = APIRouter(prefix="/v1")
@@ -19,5 +20,6 @@ api_router.include_router(context_router)
 api_router.include_router(daily_router)
 api_router.include_router(dining_router)
 api_router.include_router(favorite_router)
+api_router.include_router(nearby_router)
 
 __all__ = ["api_router"]

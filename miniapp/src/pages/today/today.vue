@@ -220,6 +220,29 @@
         />
         <text class="external-disclaimer">{{ diningStore.recommendation.disclaimer }}</text>
 
+        <view class="nearby">
+          <button class="nearby-entry" :disabled="nearbyState === 'loading'" @click="onPickNearby">
+            {{ nearbyState === 'loading' ? '正在搜索附近…' : '📍 看看附近有什么' }}
+          </button>
+          <view v-if="nearbyState === 'error'" class="nearby-error">
+            <text>{{ nearbyError }}</text>
+          </view>
+          <view v-else-if="nearbyShops.length" class="nearby-list">
+            <view class="nearby-head">
+              <text class="nearby-title">{{ nearbyAnchorName || '选点附近' }} · 附近 {{ nearbyShops.length }} 家</text>
+              <text v-if="nearbyStale" class="nearby-badge">缓存结果</text>
+            </view>
+            <view v-for="(shop, index) in nearbyShops" :key="`${shop.name}-${index}`" class="nearby-item">
+              <view class="nearby-item-main">
+                <text class="nearby-name">{{ shop.name }}</text>
+                <text class="nearby-addr">{{ shop.address }}</text>
+              </view>
+              <text class="nearby-dist">{{ formatDistance(shop.distanceM) }}</text>
+            </view>
+            <text class="nearby-disclaimer">地图结果，不代表全部餐厅；无可靠菜单时只给点单方向，到店前请自行确认营业状态。</text>
+          </view>
+        </view>
+
         <view v-if="specialties.length" class="specialty">
           <view class="specialty-head">
             <text class="specialty-title">🍜 {{ dailyStore.city }} 的本地味道</text>
@@ -256,6 +279,7 @@ import RecommendationBasis from '@/components/RecommendationBasis.vue'
 import WeatherBadge from '@/components/WeatherBadge.vue'
 import { MEAL_SLOT_OPTIONS } from '@/ai/meal-log'
 import { getCitySpecialties } from '@/api/dining'
+import { searchNearbyShops } from '@/api/nearby'
 import { useLocation, type Coords } from '@/composables/useLocation'
 import { APP_NAME, BRAND_SUBTITLE, HERO_TITLE } from '@/config/brand'
 import { ACTIVITY_LABELS, ACTIVITY_LIST, MOOD_LABELS, MOOD_LIST } from '@/constants/daily'
@@ -273,17 +297,26 @@ import type {
   ExternalDiningSuggestion,
   MealItem,
   Mood,
+  NearbyShop,
 } from '@/types/api'
 
 const dailyStore = useDailyStore()
 const diningStore = useDiningStore()
 const favoriteStore = useFavoriteStore()
 const userStore = useUserStore()
-const { getLocation } = useLocation()
+const { getLocation, requestPermission } = useLocation()
 const badgeRef = ref<InstanceType<typeof WeatherBadge> | null>(null)
 const pageError = ref('')
 const selectorsExpanded = ref(false)
 const specialties = ref<CitySpecialty[]>([])
+// 附近店铺：选点仅当次锚点（PRD R6），结果只存在页面态，不落库。
+type NearbyState = 'idle' | 'loading' | 'done' | 'error'
+const nearbyState = ref<NearbyState>('idle')
+const nearbyShops = ref<NearbyShop[]>([])
+const nearbyAnchorName = ref('')
+const nearbyStale = ref(false)
+const nearbyError = ref('')
+let nearbyLastCoords: Coords | null = null
 const PARTY_SIZES = [2, 3, 4, 5, 6, 8]
 
 const MOOD_EMOJI: Record<Mood, string> = {
@@ -343,7 +376,8 @@ function selectMode(mode: DiningMode): void {
   if (mode === 'cook') diningStore.clearRecommendation()
   else dailyStore.clearMealRecommendation()
   pageError.value = ''
-  if (mode === 'cook') specialties.value = []
+  specialties.value = []
+  resetNearby()
 }
 
 function selectMealSlot(slot: MealSlot): void {
@@ -370,16 +404,87 @@ async function refreshSpecialties(): Promise<void> {
   }
 }
 
+function formatDistance(m: number): string {
+  return m >= 1000 ? `${(m / 1000).toFixed(1)}km` : `${m}m`
+}
+
+function resetNearby(): void {
+  nearbyState.value = 'idle'
+  nearbyShops.value = []
+  nearbyAnchorName.value = ''
+  nearbyStale.value = false
+  nearbyError.value = ''
+  nearbyLastCoords = null
+}
+
+/**
+ * 地图选点 → 附近店铺。wx.chooseLocation 返回 gcj02，与服务端/map 组件一致。
+ * 降级（PRD R2）：用户取消静默；未授权/失败给明确提示；上游不可用展示错误块。
+ */
+function onPickNearby(): void {
+  if (nearbyState.value === 'loading') return
+  uni.chooseLocation({
+    success: async (res) => {
+      const coords: Coords = { lat: res.latitude, lng: res.longitude }
+      // 同会话同锚点复用，不重复请求（服务端网格缓存之外的客户端兜底）。
+      if (
+        nearbyLastCoords
+        && nearbyLastCoords.lat === coords.lat
+        && nearbyLastCoords.lng === coords.lng
+        && nearbyShops.value.length
+      ) {
+        return
+      }
+      nearbyState.value = 'loading'
+      nearbyError.value = ''
+      try {
+        const data = await searchNearbyShops({ lat: coords.lat, lng: coords.lng })
+        if (!data.providerAvailable) {
+          nearbyState.value = 'error'
+          nearbyError.value = '附近店铺暂不可用，稍后再试试'
+          return
+        }
+        nearbyLastCoords = coords
+        nearbyAnchorName.value = res.name || ''
+        nearbyStale.value = Boolean(data.isStale)
+        nearbyShops.value = data.shops
+        nearbyState.value = 'done'
+      } catch {
+        nearbyState.value = 'error'
+        nearbyError.value = '附近店铺搜索失败，稍后再试试'
+      }
+    },
+    fail: (err) => {
+      const msg = err.errMsg || ''
+      // 调试期先把原始错误打出来，避免静默失败"点了没反应"无法定位
+      console.error('[nearby] chooseLocation fail:', msg)
+      if (msg.includes('cancel')) return
+      if (msg.includes('privacy')) {
+        uni.showToast({ title: '请到小程序后台完善《用户隐私保护指引》的位置信息声明', icon: 'none', duration: 5000 })
+        return
+      }
+      if (msg.includes('deny') || msg.includes('auth') || msg.includes('permission')) {
+        uni.showToast({ title: '需要位置授权才能选点', icon: 'none' })
+        requestPermission()
+        return
+      }
+      uni.showToast({ title: `选点失败：${msg}`, icon: 'none', duration: 5000 })
+    },
+  })
+}
+
 function selectAudience(audience: Audience): void {
   dailyStore.setAudience(audience)
   diningStore.clearRecommendation()
   pageError.value = ''
+  resetNearby()
 }
 
 function selectPartySize(size: number): void {
   dailyStore.setPartySize(size)
   diningStore.clearRecommendation()
   pageError.value = ''
+  resetNearby()
 }
 
 function onCityInput(event: Event): void {
@@ -388,6 +493,7 @@ function onCityInput(event: Event): void {
   diningStore.clearRecommendation()
   // 城市变化后旧城市的特色菜不再可信。
   specialties.value = []
+  resetNearby()
 }
 
 async function onRecommend(): Promise<void> {
@@ -426,6 +532,8 @@ async function onRecommend(): Promise<void> {
         lat: coords?.lat,
         lng: coords?.lng,
       })
+      // 新一批方向生成后，旧的选点结果不再对应当前推荐。
+      resetNearby()
       uni.showToast({ title: '外食方向已整理', icon: 'none' })
       if (dailyStore.city.trim()) refreshSpecialties()
     } else {
@@ -558,6 +666,22 @@ onShareTimeline(() => {
 .external-place { color: $ink-3; font-size: 20rpx; }
 .memory-link { flex: 0 0 auto; color: $brand; font-size: 21rpx; }
 .external-disclaimer { padding: 0 10rpx; color: $ink-3; font-size: 18rpx; line-height: 1.55; text-align: center; }
+.nearby { display: flex; flex-direction: column; gap: 14rpx; }
+.nearby-entry { height: 84rpx; line-height: 84rpx; border-radius: 999rpx; color: $brand; background: #fff; border: 1rpx solid $line; font-size: 25rpx; }
+.nearby-entry::after { border: none; }
+.nearby-entry[disabled] { color: $ink-3; opacity: .7; }
+.nearby-error { padding: 18rpx 22rpx; border-radius: 20rpx; color: $ink-3; background: #fff; border: 1rpx dashed $line; font-size: 22rpx; text-align: center; }
+.nearby-list { display: flex; flex-direction: column; gap: 12rpx; padding: 20rpx; border-radius: 24rpx; background: #fff; border: 1rpx solid $line; }
+.nearby-head { display: flex; align-items: center; justify-content: space-between; gap: 16rpx; padding: 0 4rpx 6rpx; }
+.nearby-title { color: $ink; font-size: 25rpx; font-weight: 700; }
+.nearby-badge { flex: 0 0 auto; padding: 2rpx 14rpx; border-radius: 999rpx; color: $warning-dark; background: $warning-light; font-size: 18rpx; }
+.nearby-item { display: flex; align-items: center; justify-content: space-between; gap: 18rpx; padding: 14rpx 4rpx; border-top: 1rpx solid $line; }
+.nearby-item:first-of-type { border-top: none; }
+.nearby-item-main { display: flex; flex-direction: column; gap: 4rpx; min-width: 0; }
+.nearby-name { color: $ink; font-size: 24rpx; font-weight: 600; }
+.nearby-addr { color: $ink-3; font-size: 20rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nearby-dist { flex: 0 0 auto; color: $ink-2; font-size: 21rpx; }
+.nearby-disclaimer { padding: 8rpx 4rpx 0; color: $ink-3; font-size: 18rpx; line-height: 1.55; }
 .substitutions { display: flex; flex-direction: column; gap: 12rpx; padding: 24rpx; border-radius: 28rpx; background: rgba(255, 255, 255, .72); border: 1rpx solid $line; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20rpx; padding: 0 4rpx 8rpx; }
 .section-title { color: $ink; font-size: 28rpx; font-weight: 750; }

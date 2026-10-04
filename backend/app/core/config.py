@@ -56,6 +56,14 @@ class Settings(BaseSettings):
     specialty_cache_ttl_seconds: int = 86400
     specialty_cache_max_size: int = 100
 
+    # 附近店铺（腾讯位置服务 WebService 代理）。KEY 只存服务端；个人配额 200 次/日，
+    # 未开启或配额耗尽时静默降级（PRD R2/R7）。
+    tencent_lbs_enabled: bool = False
+    tencent_lbs_api_key: SecretStr | None = None
+    tencent_lbs_timeout_seconds: float = 4.0
+    tencent_lbs_cache_ttl_seconds: int = 900
+    tencent_lbs_stale_cache_seconds: int = 43200
+
     @field_validator("database_url", mode="before")
     @classmethod
     def use_installed_mysql_driver(cls, value: object) -> object:

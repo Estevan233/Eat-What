@@ -3,6 +3,8 @@
  *
  * 学习点：
  * - 微信小程序 wx.getLocation 需用户已授权 scope.userLocation
+ * - 坐标系统一 gcj02：map 组件、wx.chooseLocation、腾讯 WebService 均为 gcj02，
+ *   wgs84/gcj02 混用会让定位点在地图上偏移数百米（10-01 附近店铺任务修正）
  * - 拒绝授权时 wx.getLocation fail 回调带 errMsg 含 "auth deny"
  * - 用 ref 暴露 permissionDenied 状态，UI 给重新授权引导
  * - 重新授权需调 uni.openSetting 引导用户打开开关
@@ -27,7 +29,7 @@ export function useLocation() {
     errMsg.value = ''
     return new Promise<Coords>((resolve, reject) => {
       uni.getLocation({
-        type: 'wgs84',
+        type: 'gcj02',
         success: (res) => {
           permissionDenied.value = false
           // 微信返回 latitude/longitude（驼峰）
