@@ -30,6 +30,8 @@ log = structlog.get_logger()
 EXTERNAL_ENGINE = "external_rules_v2"
 EXTERNAL_HISTORY_DAYS = 7
 EXTERNAL_QUALITY_BAND = 5
+# 单道菜和小吃甜点只是配菜/点心，不能当作"今天吃什么"的完整一餐方向。
+NON_MEAL_FAMILIES = frozenset({"single_dish", "snack_dessert"})
 
 
 @dataclass(frozen=True)
@@ -45,6 +47,7 @@ class RuleCandidate:
     high_protein: bool = False
     meal_format: str = "individual_meal"
     serving_style: Literal["individual", "shared"] = "individual"
+    meal_family: str = ""
     catalog_key: str | None = None
     legacy_key: str | None = None
 
@@ -680,8 +683,12 @@ def _load_catalog_rule_candidates(
         return None
 
     adapted: list[RuleCandidate] = []
+    non_meal_excluded = 0
     for row in rows:
         if row.energy_kcal_min_per_person is None or row.energy_kcal_max_per_person is None:
+            continue
+        if row.meal_family in NON_MEAL_FAMILIES:
+            non_meal_excluded += 1
             continue
         adapted.append(
             RuleCandidate(
@@ -698,9 +705,15 @@ def _load_catalog_rule_candidates(
                     if row.serving_style == "either"
                     else cast(Literal["individual", "shared"], row.serving_style)
                 ),
+                meal_family=row.meal_family,
                 catalog_key=row.catalog_key,
                 legacy_key=row.legacy_key,
             )
+        )
+    if non_meal_excluded:
+        log.info(
+            "external_catalog_non_meal_candidates_excluded",
+            count=non_meal_excluded,
         )
     return tuple(adapted) or None
 

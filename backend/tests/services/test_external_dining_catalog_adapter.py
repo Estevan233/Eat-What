@@ -18,15 +18,22 @@ class FakeCatalogRepository:
         return self.rows
 
 
-def _row(*, status: str = "approved", active: bool = True) -> ExternalDiningCandidate:
+def _row(
+    *,
+    status: str = "approved",
+    active: bool = True,
+    meal_family: str = "noodle_meal",
+    catalog_key: str = "external:test-noodle:v1",
+    serving_style: str = "individual",
+) -> ExternalDiningCandidate:
     return ExternalDiningCandidate(
-        catalog_key="external:test-noodle:v1",
+        catalog_key=catalog_key,
         legacy_key="rule-legacy-noodle",
         dish_name="番茄鸡蛋面",
         category="汤面",
-        meal_family="noodle_meal",
+        meal_family=meal_family,
         sub_family="noodle_soup",
-        serving_style="individual",
+        serving_style=serving_style,
         source_url="https://example.org/noodle",
         source_type="restaurant_menu",
         source_checked_at="2026-08-31T10:00:00+08:00",
@@ -63,4 +70,34 @@ def test_catalog_flag_off_keeps_legacy_rules(monkeypatch) -> None:
         lambda: SimpleNamespace(external_catalog_enabled=False),
     )
     assert external_dining._rule_candidates_for_request(object()) == external_dining.RULE_CANDIDATES
+
+
+def test_catalog_adapter_excludes_non_meal_families(monkeypatch) -> None:
+    """单道菜/小吃甜点不是完整一餐，不能作为"今天吃什么"的方向。"""
+    repository = FakeCatalogRepository(
+        [
+            _row(),
+            _row(meal_family="single_dish", catalog_key="external:test-tofu:v1"),
+            _row(meal_family="snack_dessert", catalog_key="external:test-pastry:v1"),
+            _row(
+                meal_family="single_dish",
+                catalog_key="external:test-snack-side:v1",
+                serving_style="shared",
+            ),
+        ]
+    )
+    monkeypatch.setattr(external_dining, "is_cloudbase_repository", lambda _: True)
+    candidates = external_dining._load_catalog_rule_candidates(repository)
+    assert candidates is not None
+    assert [item.catalog_key for item in candidates] == ["external:test-noodle:v1"]
+    assert candidates[0].meal_family == "noodle_meal"
+
+
+def test_catalog_adapter_returns_none_when_all_rows_are_non_meal(monkeypatch) -> None:
+    """非餐候选全部排除后回退到内置规则库，推荐仍可用。"""
+    repository = FakeCatalogRepository(
+        [_row(meal_family="single_dish", catalog_key="external:test-tofu:v1")]
+    )
+    monkeypatch.setattr(external_dining, "is_cloudbase_repository", lambda _: True)
+    assert external_dining._load_catalog_rule_candidates(repository) is None
 

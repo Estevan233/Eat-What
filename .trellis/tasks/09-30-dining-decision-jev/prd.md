@@ -41,6 +41,7 @@
 - Phase 0 测量 ✅ 2026-09-30 完成（MCP runQuery 只读直查，结论见 research/phase0-measurement.md）：full_reuse 79.7%、换一批重叠 63.6%、catalog 开关实测 false、315 候选待命。
 - Phase 1 规则改进（无合规风险）：首选打开 catalog 开关（EnvParams EXTERNAL_CATALOG_ENABLED=true，updateConfig 无需重建），个人池 ~36 → ~195+；开关打开后复测同一组指标；实现会话级强排除；质量带/曝光窗口按新池基线再调。"换一批"的 7 天窗口定强约束或降权，由开关打开后的复测数据决定。
   - 2026-09-30 开关已打开并验证生效（版本 034；当日 catalog key 占 84.6%；6 次实测 18/18 key 不重复）。复测待积累数据后进行。
+  - 2026-10-04 线上反馈与修复：推荐混入豆腐/菜花/洋芋擦擦等单道菜与小吃。生产证据（10-01~10-04 的 60 批曝光）：315 个 approved 候选中 `meal_family='single_dish'` 59 个 + `'snack_dessert'` 18 个（24%），全部 `staple_type='none'` 或纯点心，能量多为 150–420 kcal，约 1/6 曝光位被非完整餐占用（如 batch7-yangyu-caca 洋芋擦擦、batch7-dry-fried-cauliflower 干煸菜花、batch3-tea-tofu 茶豆腐、batch1-xinjiang-naan 烤馕）。根因：引擎加载 catalog 时忽略 `meal_family`，无"是否完整一餐"过滤。修复：`external_dining.py` 增加 `NON_MEAL_FAMILIES={'single_dish','snack_dessert'}` 加载期排除（排除数写日志，全部排除时回退内置规则库），候选数据保留在库中供未来"加一道菜"场景。修复后个体正餐池 ~159、共享正餐池 ~79（原 36/21），多样性不受损。另发现 1 个疑似误标：`冻豆腐`（soup_meal / light_soup_set / 320kcal）——留作 Phase 2 Jev 离线"完整正餐判定"审计样本。改动仅 backend，无需小程序提审；commit 留存本地分支待确认后合并。
 - Phase 2 Jev 离线评估：离线预计算两两近重复边表；AC5 对比扩为四组——原算法 / 纯规则改进 / 扩容后纯规则 / 规则＋Jev；中文验证集通过前不接入生产数据。
 - Phase 3 附近店铺：拆为独立任务，腾讯位置服务核验通过后启动，不拖累 Phase 0–2。
 
@@ -60,4 +61,4 @@
 ## 待决策
 - Jev 供应形态：TypeSafe API（数据出境、early access 风险）vs Nimble 自托管（中文或更稳、需部署维护），待 Phase 0 期间完成中文验证集测试后定。
 - "换一批"的 7 天窗口语义（强排除 vs 降权），待 catalog 开关打开后的复测数据定。
-- 附近店铺独立任务的启动时机（Phase 3），待腾讯位置服务核验结论。
+- 附近店铺独立任务 2026-10-01 已启动：.trellis/tasks/10-01-nearby-shops-map（核验完成，PRD 已建；wx.chooseLocation 审核中）。
